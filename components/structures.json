@@ -1,0 +1,88 @@
+[
+  {
+    "id": "truss_simple",
+    "name": "Simple 2D Truss",
+    "type": "structures",
+    "description": "Basic 2D truss structure with 3 nodes and 3 members (triangle)",
+    "parameters": {
+      "member_count": {"type": "number", "unit": "", "default": 3, "min": 1, "max": 100},
+      "node_count": {"type": "number", "unit": "", "default": 3, "min": 2, "max": 100},
+      "member_area_m2": {"type": "number", "unit": "m²", "default": 1e-4, "min": 1e-8, "max": 1},
+      "young_modulus_GPa": {"type": "number", "unit": "GPa", "default": 200, "min": 1, "max": 1000},
+      "yield_stress_MPa": {"type": "number", "unit": "MPa", "default": 250, "min": 1, "max": 5000}
+    },
+    "symbol": "truss.svg",
+    "model_3d_path": "",
+    "related_functions": ["structures.truss_analysis.Truss"]
+  },
+  {
+    "id": "beam_cantilever",
+    "name": "Cantilever Beam",
+    "type": "structures",
+    "description": "Cantilever beam with end load - bending stress and deflection analysis",
+    "parameters": {
+      "length_m": {"type": "number", "unit": "m", "default": 1, "min": 0.01, "max": 100},
+      "force_N": {"type": "number", "unit": "N", "default": 100, "min": 0.001, "max": 1e6},
+      "width_m": {"type": "number", "unit": "m", "default": 0.05, "min": 0.001, "max": 10},
+      "height_m": {"type": "number", "unit": "m", "default": 0.1, "min": 0.001, "max": 10},
+      "young_modulus_GPa": {"type": "number", "unit": "GPa", "default": 200, "min": 1, "max": 1000}
+    },
+    "symbol": "beam.svg",
+    "model_3d_path": "",
+    "related_functions": ["structures.beam_analysis.beam_deflection_cantilever", "structures.beam_analysis.bending_stress"]
+  },
+  {
+    "id": "beam_simple_support",
+    "name": "Simply Supported Beam",
+    "type": "structures",
+    "description": "Simply supported beam with center load - deflection analysis",
+    "parameters": {
+      "length_m": {"type": "number", "unit": "m", "default": 2, "min": 0.01, "max": 100},
+      "force_N": {"type": "number", "unit": "N", "default": 200, "min": 0.001, "max": 1e6},
+      "moment_of_inertia_m4": {"type": "number", "unit": "m⁴", "default": 1e-6, "min": 1e-12, "max": 1}
+    },
+    "symbol": "beam.svg",
+    "model_3d_path": "",
+    "related_functions": ["structures.beam_analysis.beam_deflection_simple_support"]
+  },
+  {
+    "id": "column_buckling",
+    "name": "Euler Column (Buckling)",
+    "type": "structures",
+    "description": "Buckling analysis for slender columns under compression using Euler's formula",
+    "parameters": {
+      "effective_length_m": {"type": "number", "unit": "m", "default": 2, "min": 0.01, "max": 100},
+      "moment_of_inertia_m4": {"type": "number", "unit": "m⁴", "default": 1e-6, "min": 1e-12, "max": 1},
+      "young_modulus_GPa": {"type": "number", "unit": "GPa", "default": 200, "min": 1, "max": 1000}
+    },
+    "symbol": "column.svg",
+    "model_3d_path": "",
+    "related_functions": ["structures.beam_analysis.euler_buckling_load"]
+  },
+  {
+    "id": "section_rect",
+    "name": "Rectangular Section",
+    "type": "structures",
+    "description": "Calculate moment of inertia for rectangular cross-section",
+    "parameters": {
+      "width_m": {"type": "number", "unit": "m", "default": 0.05, "min": 0.001, "max": 10},
+      "height_m": {"type": "number", "unit": "m", "default": 0.1, "min": 0.001, "max": 10}
+    },
+    "symbol": "section.svg",
+    "model_3d_path": "",
+    "related_functions": ["structures.beam_analysis.rect_moment_of_inertia"]
+  },
+  {
+    "id": "section_circle",
+    "name": "Circular Section",
+    "type": "structures",
+    "description": "Calculate moment of inertia for circular and pipe cross-sections",
+    "parameters": {
+      "outer_diameter_m": {"type": "number", "unit": "m", "default": 0.05, "min": 0.001, "max": 10},
+      "inner_diameter_m": {"type": "number", "unit": "m", "default": 0, "min": 0, "max": 9.99}
+    },
+    "symbol": "section.svg",
+    "model_3d_path": "",
+    "related_functions": ["structures.beam_analysis.circle_moment_of_inertia", "structures.beam_analysis.pipe_moment_of_inertia"]
+  }
+]

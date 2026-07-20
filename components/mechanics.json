@@ -1,0 +1,128 @@
+[
+  {
+    "id": "lever",
+    "name": "Lever",
+    "type": "mechanics",
+    "description": "Rigid bar that rotates around a fulcrum to amplify force",
+    "parameters": {
+      "effort_arm_m": {"type": "number", "unit": "m", "default": 1.0, "min": 0.01, "max": 10},
+      "load_arm_m": {"type": "number", "unit": "m", "default": 0.5, "min": 0.01, "max": 10},
+      "class": {"type": "string", "default": "first", "options": ["first", "second", "third"]}
+    },
+    "symbol": "lever.svg",
+    "model_3d_path": "",
+    "related_functions": ["levers.mechanical_advantage", "levers.lever_force"]
+  },
+  {
+    "id": "wheel",
+    "name": "Wheel",
+    "type": "mechanics",
+    "description": "Circular component that rotates around an axle to enable motion",
+    "parameters": {
+      "radius_m": {"type": "number", "unit": "m", "default": 0.3, "min": 0.01, "max": 2},
+      "mass_kg": {"type": "number", "unit": "kg", "default": 5, "min": 0.1, "max": 500},
+      "moment_of_inertia": {"type": "number", "unit": "kg·m²", "default": 0.45, "min": 0.001, "max": 1000}
+    },
+    "symbol": "wheel.svg",
+    "model_3d_path": "",
+    "related_functions": ["gears.rotational_speed", "gears.torque"]
+  },
+  {
+    "id": "spring",
+    "name": "Spring",
+    "type": "mechanics",
+    "description": "Elastic component that stores mechanical energy when deformed",
+    "parameters": {
+      "spring_constant_nm": {"type": "number", "unit": "N/m", "default": 100, "min": 0.1, "max": 100000},
+      "max_compression_m": {"type": "number", "unit": "m", "default": 0.1, "min": 0.001, "max": 10},
+      "rest_length_m": {"type": "number", "unit": "m", "default": 0.5, "min": 0.01, "max": 10}
+    },
+    "symbol": "spring.svg",
+    "model_3d_path": "",
+    "related_functions": ["springs.spring_force", "springs.spring_potential_energy"]
+  },
+  {
+    "id": "pulley",
+    "name": "Pulley",
+    "type": "mechanics",
+    "description": "Wheel on an axle designed to support movement of a cable or belt",
+    "parameters": {
+      "radius_m": {"type": "number", "unit": "m", "default": 0.1, "min": 0.01, "max": 1},
+      "mass_kg": {"type": "number", "unit": "kg", "default": 0.5, "min": 0.01, "max": 50},
+      "mechanical_advantage": {"type": "number", "unit": "", "default": 1, "min": 1, "max": 10}
+    },
+    "symbol": "pulley.svg",
+    "model_3d_path": "",
+    "related_functions": []
+  },
+  {
+    "id": "axle",
+    "name": "Axle / Shaft",
+    "type": "mechanics",
+    "description": "Central rotating shaft that transmits torque to wheels or gears",
+    "parameters": {
+      "length_m": {"type": "number", "unit": "m", "default": 1, "min": 0.05, "max": 5},
+      "diameter_m": {"type": "number", "unit": "m", "default": 0.02, "min": 0.001, "max": 0.5},
+      "material": {"type": "string", "default": "steel", "options": ["steel", "aluminum", "titanium"]}
+    },
+    "symbol": "axle.svg",
+    "model_3d_path": "",
+    "related_functions": ["gears.torque"]
+  },
+  {
+    "id": "gear",
+    "name": "Gear (Spur)",
+    "type": "mechanics",
+    "description": "Toothed wheel that meshes with another gear to transmit torque and change speed",
+    "parameters": {
+      "teeth_count": {"type": "number", "unit": "", "default": 20, "min": 5, "max": 200},
+      "pitch_diameter_m": {"type": "number", "unit": "m", "default": 0.1, "min": 0.01, "max": 1},
+      "module_mm": {"type": "number", "unit": "mm", "default": 5, "min": 1, "max": 50}
+    },
+    "symbol": "gear.svg",
+    "model_3d_path": "",
+    "related_functions": ["gears.gear_ratio", "gears.rotational_speed", "gears.torque"]
+  },
+  {
+    "id": "bearing",
+    "name": "Bearing (Ball)",
+    "type": "mechanics",
+    "description": "Component that reduces friction between rotating parts",
+    "parameters": {
+      "inner_diameter_m": {"type": "number", "unit": "m", "default": 0.01, "min": 0.001, "max": 1},
+      "outer_diameter_m": {"type": "number", "unit": "m", "default": 0.03, "min": 0.002, "max": 1.5},
+      "friction_coefficient": {"type": "number", "unit": "", "default": 0.0015, "min": 0.0001, "max": 0.1}
+    },
+    "symbol": "bearing.svg",
+    "model_3d_path": "",
+    "related_functions": ["friction.friction_force"]
+  },
+  {
+    "id": "pendulum",
+    "name": "Pendulum",
+    "type": "mechanics",
+    "description": "Weight suspended from a pivot that swings freely under gravity",
+    "parameters": {
+      "length_m": {"type": "number", "unit": "m", "default": 1, "min": 0.05, "max": 10},
+      "mass_kg": {"type": "number", "unit": "kg", "default": 1, "min": 0.01, "max": 100},
+      "initial_angle_deg": {"type": "number", "unit": "°", "default": 15, "min": 0, "max": 90}
+    },
+    "symbol": "pendulum.svg",
+    "model_3d_path": "",
+    "related_functions": ["kinematics.final_velocity", "energy.potential_energy", "energy.kinetic_energy"]
+  },
+  {
+    "id": "inclined_plane",
+    "name": "Inclined Plane / Ramp",
+    "type": "mechanics",
+    "description": "Flat surface tilted at an angle used to reduce the force needed to lift objects",
+    "parameters": {
+      "angle_deg": {"type": "number", "unit": "°", "default": 30, "min": 0, "max": 90},
+      "length_m": {"type": "number", "unit": "m", "default": 2, "min": 0.1, "max": 100},
+      "friction_coefficient": {"type": "number", "unit": "", "default": 0.2, "min": 0, "max": 1}
+    },
+    "symbol": "inclined_plane.svg",
+    "model_3d_path": "",
+    "related_functions": ["dynamics.friction_force", "energy.potential_energy"]
+  }
+]

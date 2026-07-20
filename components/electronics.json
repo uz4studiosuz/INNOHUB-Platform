@@ -1,0 +1,154 @@
+[
+  {
+    "id": "resistor",
+    "name": "Resistor",
+    "type": "electronics",
+    "description": "Passive component that limits current flow in a circuit",
+    "parameters": {
+      "resistance_ohms": {"type": "number", "unit": "Ω", "default": 1000, "min": 0.1, "max": 10000000},
+      "power_rating_watts": {"type": "number", "unit": "W", "default": 0.25, "min": 0.01, "max": 100},
+      "tolerance_percent": {"type": "number", "unit": "%", "default": 5, "min": 0.1, "max": 20}
+    },
+    "symbol": "resistor.svg",
+    "model_3d_path": "",
+    "related_functions": ["ohms_law.calculate_voltage", "ohms_law.calculate_current", "ohms_law.calculate_resistance"]
+  },
+  {
+    "id": "capacitor",
+    "name": "Capacitor",
+    "type": "electronics",
+    "description": "Passive component that stores electrical energy in an electric field",
+    "parameters": {
+      "capacitance_farads": {"type": "number", "unit": "F", "default": 1e-6, "min": 1e-12, "max": 1},
+      "voltage_rating": {"type": "number", "unit": "V", "default": 16, "min": 1, "max": 1000}
+    },
+    "symbol": "capacitor.svg",
+    "model_3d_path": "",
+    "related_functions": ["reactive_components.capacitive_reactance"]
+  },
+  {
+    "id": "inductor",
+    "name": "Inductor",
+    "type": "electronics",
+    "description": "Passive component that stores energy in a magnetic field",
+    "parameters": {
+      "inductance_henrys": {"type": "number", "unit": "H", "default": 0.01, "min": 1e-6, "max": 10},
+      "current_rating": {"type": "number", "unit": "A", "default": 1, "min": 0.01, "max": 100}
+    },
+    "symbol": "inductor.svg",
+    "model_3d_path": "",
+    "related_functions": ["reactive_components.inductive_reactance"]
+  },
+  {
+    "id": "led",
+    "name": "LED (Light Emitting Diode)",
+    "type": "electronics",
+    "description": "Semiconductor light source that emits light when current flows through it",
+    "parameters": {
+      "forward_voltage": {"type": "number", "unit": "V", "default": 2.2, "min": 1.2, "max": 4.5},
+      "forward_current": {"type": "number", "unit": "A", "default": 0.02, "min": 0.001, "max": 0.05},
+      "color": {"type": "string", "default": "red", "options": ["red", "green", "blue", "yellow", "white"]}
+    },
+    "symbol": "led.svg",
+    "model_3d_path": "",
+    "related_functions": ["semiconductors.led_resistor_value"]
+  },
+  {
+    "id": "diode",
+    "name": "Diode",
+    "type": "electronics",
+    "description": "Semiconductor device that allows current to flow in one direction only",
+    "parameters": {
+      "forward_voltage_drop": {"type": "number", "unit": "V", "default": 0.7, "min": 0.2, "max": 1.5},
+      "reverse_breakdown_voltage": {"type": "number", "unit": "V", "default": 100, "min": 10, "max": 2000},
+      "max_current": {"type": "number", "unit": "A", "default": 1, "min": 0.01, "max": 100}
+    },
+    "symbol": "diode.svg",
+    "model_3d_path": "",
+    "related_functions": ["semiconductors.diode_forward_voltage_drop"]
+  },
+  {
+    "id": "bjt_transistor",
+    "name": "BJT Transistor (NPN)",
+    "type": "electronics",
+    "description": "Bipolar junction transistor used for amplification and switching",
+    "parameters": {
+      "beta_gain": {"type": "number", "unit": "", "default": 100, "min": 10, "max": 1000},
+      "max_collector_current": {"type": "number", "unit": "A", "default": 0.5, "min": 0.01, "max": 50},
+      "max_voltage_ce": {"type": "number", "unit": "V", "default": 40, "min": 5, "max": 500}
+    },
+    "symbol": "bjt_npn.svg",
+    "model_3d_path": "",
+    "related_functions": ["semiconductors.transistor_beta_gain"]
+  },
+  {
+    "id": "battery",
+    "name": "Battery (DC Source)",
+    "type": "electronics",
+    "description": "Direct current voltage source for powering circuits",
+    "parameters": {
+      "voltage": {"type": "number", "unit": "V", "default": 9, "min": 1.2, "max": 48},
+      "capacity_ah": {"type": "number", "unit": "Ah", "default": 1, "min": 0.1, "max": 200},
+      "internal_resistance": {"type": "number", "unit": "Ω", "default": 0.5, "min": 0.01, "max": 10}
+    },
+    "symbol": "battery.svg",
+    "model_3d_path": "",
+    "related_functions": ["ohms_law.calculate_voltage"]
+  },
+  {
+    "id": "switch",
+    "name": "Switch (SPST)",
+    "type": "electronics",
+    "description": "Single-pole single-throw switch to open or close a circuit",
+    "parameters": {
+      "state": {"type": "string", "default": "open", "options": ["open", "closed"]},
+      "max_voltage": {"type": "number", "unit": "V", "default": 250, "min": 5, "max": 1000},
+      "max_current": {"type": "number", "unit": "A", "default": 10, "min": 0.1, "max": 100}
+    },
+    "symbol": "switch.svg",
+    "model_3d_path": "",
+    "related_functions": []
+  },
+  {
+    "id": "potentiometer",
+    "name": "Potentiometer (Variable Resistor)",
+    "type": "electronics",
+    "description": "Adjustable resistor with three terminals",
+    "parameters": {
+      "max_resistance": {"type": "number", "unit": "Ω", "default": 10000, "min": 10, "max": 1000000},
+      "wiper_position": {"type": "number", "unit": "%", "default": 50, "min": 0, "max": 100},
+      "power_rating": {"type": "number", "unit": "W", "default": 0.5, "min": 0.1, "max": 10}
+    },
+    "symbol": "potentiometer.svg",
+    "model_3d_path": "",
+    "related_functions": ["ohms_law.calculate_resistance"]
+  },
+  {
+    "id": "transformer",
+    "name": "Transformer",
+    "type": "electronics",
+    "description": "Passive component that transfers electrical energy between circuits through electromagnetic induction",
+    "parameters": {
+      "primary_turns": {"type": "number", "unit": "", "default": 100, "min": 1, "max": 10000},
+      "secondary_turns": {"type": "number", "unit": "", "default": 50, "min": 1, "max": 10000},
+      "primary_voltage": {"type": "number", "unit": "V", "default": 230, "min": 1, "max": 10000}
+    },
+    "symbol": "transformer.svg",
+    "model_3d_path": "",
+    "related_functions": []
+  },
+  {
+    "id": "temperature_sensor",
+    "name": "Temperature Sensor (LM35)",
+    "type": "electronics",
+    "description": "Analog temperature sensor with linear voltage output",
+    "parameters": {
+      "output_scale": {"type": "number", "unit": "mV/°C", "default": 10, "min": 1, "max": 100},
+      "range_min_c": {"type": "number", "unit": "°C", "default": -55, "min": -273, "max": 0},
+      "range_max_c": {"type": "number", "unit": "°C", "default": 150, "min": 1, "max": 1500}
+    },
+    "symbol": "sensor.svg",
+    "model_3d_path": "",
+    "related_functions": []
+  }
+]

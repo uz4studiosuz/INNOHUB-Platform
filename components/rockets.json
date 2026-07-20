@@ -1,0 +1,110 @@
+[
+  {
+    "id": "engine_a8_3",
+    "name": "Estes A8-3 (Model Rocket Engine)",
+    "type": "rocketry",
+    "description": "Small model rocket engine, 9.6 N·s total impulse, 8.0 N peak thrust, 3s delay",
+    "parameters": {
+      "total_impulse_Ns": {"type": "number", "unit": "N·s", "default": 9.6, "min": 0.1, "max": 1000},
+      "peak_thrust_N": {"type": "number", "unit": "N", "default": 8.0, "min": 0.1, "max": 500},
+      "burn_time_s": {"type": "number", "unit": "s", "default": 0.5, "min": 0.1, "max": 10},
+      "propellant_mass_g": {"type": "number", "unit": "g", "default": 6.0, "min": 0.5, "max": 500},
+      "isp_s": {"type": "number", "unit": "s", "default": 80, "min": 20, "max": 300}
+    },
+    "symbol": "engine.svg",
+    "model_3d_path": "",
+    "related_functions": []
+  },
+  {
+    "id": "engine_c6_5",
+    "name": "Estes C6-5 (Model Rocket Engine)",
+    "type": "rocketry",
+    "description": "Medium model rocket engine, 16.8 N·s total impulse, 14.0 N peak thrust, 5s delay",
+    "parameters": {
+      "total_impulse_Ns": {"type": "number", "unit": "N·s", "default": 16.8, "min": 0.1, "max": 1000},
+      "peak_thrust_N": {"type": "number", "unit": "N", "default": 14.0, "min": 0.1, "max": 500},
+      "burn_time_s": {"type": "number", "unit": "s", "default": 0.8, "min": 0.1, "max": 10},
+      "propellant_mass_g": {"type": "number", "unit": "g", "default": 12.0, "min": 0.5, "max": 500},
+      "isp_s": {"type": "number", "unit": "s", "default": 110, "min": 20, "max": 300}
+    },
+    "symbol": "engine.svg",
+    "model_3d_path": "",
+    "related_functions": []
+  },
+  {
+    "id": "engine_d12_7",
+    "name": "Estes D12-7 (Model Rocket Engine)",
+    "type": "rocketry",
+    "description": "Large model rocket engine, 34.2 N·s total impulse, 30.0 N peak thrust, 7s delay",
+    "parameters": {
+      "total_impulse_Ns": {"type": "number", "unit": "N·s", "default": 34.2, "min": 0.1, "max": 1000},
+      "peak_thrust_N": {"type": "number", "unit": "N", "default": 30.0, "min": 0.1, "max": 500},
+      "burn_time_s": {"type": "number", "unit": "s", "default": 1.6, "min": 0.1, "max": 10},
+      "propellant_mass_g": {"type": "number", "unit": "g", "default": 22.0, "min": 0.5, "max": 500},
+      "isp_s": {"type": "number", "unit": "s", "default": 130, "min": 20, "max": 300}
+    },
+    "symbol": "engine.svg",
+    "model_3d_path": "",
+    "related_functions": []
+  },
+  {
+    "id": "body_tube_bt50",
+    "name": "Body Tube BT-50 (24mm)",
+    "type": "rocketry",
+    "description": "Standard model rocket body tube, 24mm outer diameter",
+    "parameters": {
+      "diameter_mm": {"type": "number", "unit": "mm", "default": 24, "min": 10, "max": 200},
+      "length_mm": {"type": "number", "unit": "mm", "default": 300, "min": 50, "max": 2000},
+      "wall_thickness_mm": {"type": "number", "unit": "mm", "default": 1.5, "min": 0.5, "max": 10},
+      "mass_g": {"type": "number", "unit": "g", "default": 25, "min": 5, "max": 500}
+    },
+    "symbol": "body_tube.svg",
+    "model_3d_path": "",
+    "related_functions": []
+  },
+  {
+    "id": "fin_set_standard",
+    "name": "Standard Fin Set (3 fins)",
+    "type": "rocketry",
+    "description": "Three rectangular fins for model rocket stability",
+    "parameters": {
+      "fin_count": {"type": "number", "unit": "", "default": 3, "min": 2, "max": 6},
+      "root_chord_mm": {"type": "number", "unit": "mm", "default": 40, "min": 10, "max": 200},
+      "tip_chord_mm": {"type": "number", "unit": "mm", "default": 20, "min": 5, "max": 150},
+      "span_mm": {"type": "number", "unit": "mm", "default": 30, "min": 5, "max": 100},
+      "thickness_mm": {"type": "number", "unit": "mm", "default": 3, "min": 1, "max": 10},
+      "mass_g": {"type": "number", "unit": "g", "default": 5, "min": 1, "max": 50}
+    },
+    "symbol": "fin_set.svg",
+    "model_3d_path": "",
+    "related_functions": []
+  },
+  {
+    "id": "nose_cone_ogive",
+    "name": "Ogive Nose Cone (24mm)",
+    "type": "rocketry",
+    "description": "Ogive-shaped nose cone for reduced aerodynamic drag",
+    "parameters": {
+      "diameter_mm": {"type": "number", "unit": "mm", "default": 24, "min": 10, "max": 200},
+      "length_mm": {"type": "number", "unit": "mm", "default": 75, "min": 20, "max": 500},
+      "mass_g": {"type": "number", "unit": "g", "default": 8, "min": 1, "max": 100}
+    },
+    "symbol": "nose_cone.svg",
+    "model_3d_path": "",
+    "related_functions": []
+  },
+  {
+    "id": "parachute_12in",
+    "name": "Parachute 12 inch (Recovery)",
+    "type": "rocketry",
+    "description": "12 inch diameter parachute for gentle rocket recovery",
+    "parameters": {
+      "diameter_inch": {"type": "number", "unit": "in", "default": 12, "min": 6, "max": 48},
+      "mass_g": {"type": "number", "unit": "g", "default": 3, "min": 1, "max": 50},
+      "cd": {"type": "number", "unit": "", "default": 0.75, "min": 0.1, "max": 2}
+    },
+    "symbol": "parachute.svg",
+    "model_3d_path": "",
+    "related_functions": []
+  }
+]

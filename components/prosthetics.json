@@ -1,0 +1,87 @@
+[
+  {
+    "id": "servo_mg996r",
+    "name": "Servo Motor MG996R",
+    "type": "prosthetics",
+    "description": "High-torque servo motor for prosthetic joint actuation, 10 kg·cm torque",
+    "parameters": {
+      "torque_kgcm": {"type": "number", "unit": "kg·cm", "default": 10, "min": 1, "max": 50},
+      "speed_s_60deg": {"type": "number", "unit": "s/60°", "default": 0.17, "min": 0.05, "max": 1},
+      "mass_g": {"type": "number", "unit": "g", "default": 55, "min": 5, "max": 500},
+      "voltage_V": {"type": "number", "unit": "V", "default": 6, "min": 4, "max": 12}
+    },
+    "symbol": "servo.svg",
+    "model_3d_path": "",
+    "related_functions": ["prosthetic_model.actuator_required_torque"]
+  },
+  {
+    "id": "joint_hinge",
+    "name": "Hinge Joint (Passive)",
+    "type": "prosthetics",
+    "description": "Passive hinge joint with adjustable friction for elbow/knee prosthetics",
+    "parameters": {
+      "max_angle_deg": {"type": "number", "unit": "°", "default": 135, "min": 30, "max": 180},
+      "friction_torque_Nm": {"type": "number", "unit": "N·m", "default": 0.5, "min": 0, "max": 10},
+      "mass_g": {"type": "number", "unit": "g", "default": 30, "min": 5, "max": 200}
+    },
+    "symbol": "joint.svg",
+    "model_3d_path": "",
+    "related_functions": ["prosthetic_model.joint_torque"]
+  },
+  {
+    "id": "material_aluminum",
+    "name": "Aluminum 6061 (Structural)",
+    "type": "prosthetics",
+    "description": "Lightweight aluminum alloy, E=68.9 GPa, density=2700 kg/m³, yield=276 MPa",
+    "parameters": {
+      "E_modulus_GPa": {"type": "number", "unit": "GPa", "default": 68.9, "min": 1, "max": 1000},
+      "density_kgm3": {"type": "number", "unit": "kg/m³", "default": 2700, "min": 100, "max": 20000},
+      "yield_stress_MPa": {"type": "number", "unit": "MPa", "default": 276, "min": 1, "max": 5000}
+    },
+    "symbol": "material.svg",
+    "model_3d_path": "",
+    "related_functions": ["prosthetic_model.youngs_modulus_from_name"]
+  },
+  {
+    "id": "material_carbon_fiber",
+    "name": "Carbon Fiber (Structural)",
+    "type": "prosthetics",
+    "description": "High-strength carbon fiber composite, E=230 GPa, density=1600 kg/m³, yield=3500 MPa",
+    "parameters": {
+      "E_modulus_GPa": {"type": "number", "unit": "GPa", "default": 230, "min": 1, "max": 1000},
+      "density_kgm3": {"type": "number", "unit": "kg/m³", "default": 1600, "min": 100, "max": 20000},
+      "yield_stress_MPa": {"type": "number", "unit": "MPa", "default": 3500, "min": 1, "max": 5000}
+    },
+    "symbol": "material.svg",
+    "model_3d_path": "",
+    "related_functions": ["prosthetic_model.youngs_modulus_from_name"]
+  },
+  {
+    "id": "force_sensor_fsr402",
+    "name": "Force Sensor FSR402",
+    "type": "prosthetics",
+    "description": "Thin force sensing resistor, 0.2N to 20N range, for grip force measurement",
+    "parameters": {
+      "force_range_min_N": {"type": "number", "unit": "N", "default": 0.2, "min": 0.01, "max": 10},
+      "force_range_max_N": {"type": "number", "unit": "N", "default": 20, "min": 1, "max": 500},
+      "resistance_no_load_kohm": {"type": "number", "unit": "kΩ", "default": 100, "min": 1, "max": 10000}
+    },
+    "symbol": "sensor.svg",
+    "model_3d_path": "",
+    "related_functions": []
+  },
+  {
+    "id": "battery_lipo_2s",
+    "name": "LiPo Battery 2S (7.4V)",
+    "type": "prosthetics",
+    "description": "Rechargeable LiPo battery for powering prosthetic actuators",
+    "parameters": {
+      "voltage_V": {"type": "number", "unit": "V", "default": 7.4, "min": 3.7, "max": 48},
+      "capacity_mAh": {"type": "number", "unit": "mAh", "default": 2000, "min": 100, "max": 50000},
+      "mass_g": {"type": "number", "unit": "g", "default": 100, "min": 10, "max": 2000}
+    },
+    "symbol": "battery.svg",
+    "model_3d_path": "",
+    "related_functions": ["prosthetic_model.battery_life"]
+  }
+]

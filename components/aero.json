@@ -1,0 +1,166 @@
+[
+  {
+    "id": "wing_airfoil",
+    "name": "Wing / Airfoil",
+    "type": "aerodynamics",
+    "description": "Streamlined surface that generates lift when moving through air",
+    "parameters": {
+      "wing_area_m2": {"type": "number", "unit": "m²", "default": 1.5, "min": 0.01, "max": 100},
+      "lift_coefficient_cl": {"type": "number", "unit": "", "default": 0.5, "min": 0, "max": 2.5},
+      "drag_coefficient_cd": {"type": "number", "unit": "", "default": 0.05, "min": 0.001, "max": 1},
+      "aspect_ratio": {"type": "number", "unit": "", "default": 8, "min": 1, "max": 30},
+      "angle_of_attack_deg": {"type": "number", "unit": "°", "default": 5, "min": -10, "max": 20}
+    },
+    "symbol": "wing.svg",
+    "model_3d_path": "",
+    "related_functions": ["lift_drag.lift_force", "lift_drag.drag_force"]
+  },
+  {
+    "id": "propeller",
+    "name": "Propeller",
+    "type": "aerodynamics",
+    "description": "Rotating blades that produce thrust by accelerating air backwards",
+    "parameters": {
+      "diameter_m": {"type": "number", "unit": "m", "default": 0.3, "min": 0.02, "max": 5},
+      "blade_count": {"type": "number", "unit": "", "default": 2, "min": 2, "max": 6},
+      "pitch_deg": {"type": "number", "unit": "°", "default": 25, "min": 5, "max": 60},
+      "max_rpm": {"type": "number", "unit": "RPM", "default": 5000, "min": 100, "max": 50000}
+    },
+    "symbol": "propeller.svg",
+    "model_3d_path": "",
+    "related_functions": ["lift_drag.drag_force"]
+  },
+  {
+    "id": "fuselage",
+    "name": "Fuselage / Body",
+    "type": "aerodynamics",
+    "description": "Main body of an aircraft that holds crew, passengers, and cargo",
+    "parameters": {
+      "length_m": {"type": "number", "unit": "m", "default": 1.2, "min": 0.1, "max": 100},
+      "diameter_m": {"type": "number", "unit": "m", "default": 0.15, "min": 0.01, "max": 10},
+      "cross_section_area_m2": {"type": "number", "unit": "m²", "default": 0.05, "min": 0.001, "max": 50},
+      "drag_coefficient_cd": {"type": "number", "unit": "", "default": 0.3, "min": 0.01, "max": 1}
+    },
+    "symbol": "fuselage.svg",
+    "model_3d_path": "",
+    "related_functions": ["lift_drag.drag_force"]
+  },
+  {
+    "id": "tail_wing",
+    "name": "Tail Wing / Stabilizer",
+    "type": "aerodynamics",
+    "description": "Smaller wing at the rear of an aircraft that provides stability and control",
+    "parameters": {
+      "area_m2": {"type": "number", "unit": "m²", "default": 0.3, "min": 0.01, "max": 30},
+      "lift_coefficient_cl": {"type": "number", "unit": "", "default": 0.2, "min": -0.5, "max": 1.5},
+      "distance_from_cg_m": {"type": "number", "unit": "m", "default": 0.8, "min": 0.01, "max": 50}
+    },
+    "symbol": "tail_wing.svg",
+    "model_3d_path": "",
+    "related_functions": ["lift_drag.lift_force", "stability.stability_margin"]
+  },
+  {
+    "id": "electric_motor",
+    "name": "Electric Motor (DC Brushless)",
+    "type": "aerodynamics",
+    "description": "Electric motor used to drive propellers in drones and small aircraft",
+    "parameters": {
+      "kv_rating": {"type": "number", "unit": "RPM/V", "default": 1000, "min": 100, "max": 10000},
+      "max_power_watts": {"type": "number", "unit": "W", "default": 150, "min": 5, "max": 50000},
+      "max_current_a": {"type": "number", "unit": "A", "default": 20, "min": 1, "max": 500},
+      "internal_resistance_ohms": {"type": "number", "unit": "Ω", "default": 0.1, "min": 0.001, "max": 10}
+    },
+    "symbol": "motor.svg",
+    "model_3d_path": "",
+    "related_functions": ["ohms_law.calculate_power"]
+  },
+  {
+    "id": "landing_gear",
+    "name": "Landing Gear",
+    "type": "aerodynamics",
+    "description": "Wheels and struts that support an aircraft during takeoff and landing",
+    "parameters": {
+      "wheel_count": {"type": "number", "unit": "", "default": 3, "min": 1, "max": 10},
+      "wheel_radius_m": {"type": "number", "unit": "m", "default": 0.05, "min": 0.01, "max": 1},
+      "mass_kg": {"type": "number", "unit": "kg", "default": 0.5, "min": 0.01, "max": 1000}
+    },
+    "symbol": "landing_gear.svg",
+    "model_3d_path": "",
+    "related_functions": []
+  },
+  {
+    "id": "airfoil_naca0012",
+    "name": "NACA 0012 (Simmetrik profil)",
+    "type": "aerodynamics",
+    "description": "Simmetrik havo profili, dum qismlari va akrobatik samolyotlar uchun mos. Cl/alfa qiyaligi 0.11, Cd_min 0.006",
+    "parameters": {
+      "cl_alpha_slope": {"type": "number", "unit": "1/°", "default": 0.11, "min": 0.05, "max": 0.2},
+      "cd_min": {"type": "number", "unit": "", "default": 0.006, "min": 0.001, "max": 0.05},
+      "cl_max": {"type": "number", "unit": "", "default": 1.2, "min": 0.5, "max": 2.0},
+      "stall_angle_deg": {"type": "number", "unit": "°", "default": 16, "min": 8, "max": 25}
+    },
+    "symbol": "airfoil.svg",
+    "model_3d_path": "",
+    "related_functions": ["lift_drag.lift_force", "lift_drag.drag_force"]
+  },
+  {
+    "id": "airfoil_naca2412",
+    "name": "NACA 2412 (Yarim-simmetrik profil)",
+    "type": "aerodynamics",
+    "description": "Kamberli havo profili, umumiy aviatsiyada keng qo'llaniladi (Cessna 172). Cl/alfa qiyaligi 0.105, Cd_min 0.007",
+    "parameters": {
+      "cl_alpha_slope": {"type": "number", "unit": "1/°", "default": 0.105, "min": 0.05, "max": 0.2},
+      "cd_min": {"type": "number", "unit": "", "default": 0.007, "min": 0.001, "max": 0.05},
+      "cl_max": {"type": "number", "unit": "", "default": 1.4, "min": 0.5, "max": 2.0},
+      "stall_angle_deg": {"type": "number", "unit": "°", "default": 15, "min": 8, "max": 25}
+    },
+    "symbol": "airfoil.svg",
+    "model_3d_path": "",
+    "related_functions": ["lift_drag.lift_force", "lift_drag.drag_force"]
+  },
+  {
+    "id": "airfoil_clark_y",
+    "name": "Clark Y (Yassi tubli profil)",
+    "type": "aerodynamics",
+    "description": "Yassi tubli havo profili, yuqori ko'tarish kuchi, RC modellar va eski samolyotlarda ishlatiladi. Cl/alfa qiyaligi 0.1, Cd_min 0.008",
+    "parameters": {
+      "cl_alpha_slope": {"type": "number", "unit": "1/°", "default": 0.1, "min": 0.05, "max": 0.2},
+      "cd_min": {"type": "number", "unit": "", "default": 0.008, "min": 0.001, "max": 0.05},
+      "cl_max": {"type": "number", "unit": "", "default": 1.5, "min": 0.5, "max": 2.0},
+      "stall_angle_deg": {"type": "number", "unit": "°", "default": 14, "min": 8, "max": 25}
+    },
+    "symbol": "airfoil.svg",
+    "model_3d_path": "",
+    "related_functions": ["lift_drag.lift_force", "lift_drag.drag_force"]
+  },
+  {
+    "id": "airfoil_naca4412",
+    "name": "NACA 4412 (Yuqori kamberli profil)",
+    "type": "aerodynamics",
+    "description": "Yuqori kamberli havo profili, katta ko'tarish kuchi talab qilinadigan ilovalar uchun. Cl/alfa qiyaligi 0.108, Cd_min 0.008",
+    "parameters": {
+      "cl_alpha_slope": {"type": "number", "unit": "1/°", "default": 0.108, "min": 0.05, "max": 0.2},
+      "cd_min": {"type": "number", "unit": "", "default": 0.008, "min": 0.001, "max": 0.05},
+      "cl_max": {"type": "number", "unit": "", "default": 1.6, "min": 0.5, "max": 2.0},
+      "stall_angle_deg": {"type": "number", "unit": "°", "default": 13, "min": 8, "max": 25}
+    },
+    "symbol": "airfoil.svg",
+    "model_3d_path": "",
+    "related_functions": ["lift_drag.lift_force", "lift_drag.drag_force"]
+  },
+  {
+    "id": "airfoil_naca23012",
+    "name": "NACA 23012 (Yuk tashish profili)",
+    "type": "aerodynamics",
+    "description": "Yuk samolyotlari uchun optimallashtirilgan profil, yuqori Cl va past Cd. Cl/alfa qiyaligi 0.106, Cd_min 0.005",
+    "parameters": {
+      "cl_alpha_slope": {"type": "number", "unit": "1/°", "default": 0.106, "min": 0.05, "max": 0.2},
+      "cd_min": {"type": "number", "unit": "", "default": 0.005, "min": 0.001, "max": 0.05},
+      "cl_max": {"type": "number", "unit": "", "default": 1.5, "min": 0.5, "max": 2.0},
+      "stall_angle_deg": {"type": "number", "unit": "°", "default": 15, "min": 8, "max": 25}
+    },
+    "symbol": "airfoil.svg",
+    "model_3d_path": "",
+    "related_functions": ["lift_drag.lift_force", "lift_drag.drag_force"]
+  }
+]

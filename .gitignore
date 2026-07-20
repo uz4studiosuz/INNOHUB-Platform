@@ -1,0 +1,57 @@
+# ============================================================
+# INNOHUB-Platform — root .gitignore
+# ============================================================
+
+# ---------- Node / Next.js ----------
+node_modules/
+.next/
+out/
+build/
+dist/
+.turbo/
+*.tsbuildinfo
+next-env.d.ts
+.vercel/
+
+# ---------- Python ----------
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+env/
+*.egg-info/
+
+# ---------- Compiled binaries ----------
+*.exe
+*.out
+*.o
+*.obj
+*.dll
+*.so
+*.dylib
+
+# ---------- Environment / secrets ----------
+.env
+.env.*
+!.env.example
+*.pem
+
+# ---------- Logs ----------
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# ---------- Editor / OS ----------
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+# ---------- Coverage ----------
+/coverage

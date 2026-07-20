@@ -1,0 +1,102 @@
+[
+  {
+    "id": "atmega328p",
+    "name": "ATmega328P (Arduino Uno)",
+    "type": "microelectronics",
+    "description": "8-bit AVR microcontroller, 32KB flash, 2KB SRAM, 1KB EEPROM, 16MHz",
+    "parameters": {
+      "flash_kb": {"type": "number", "unit": "KB", "default": 32, "min": 1, "max": 4096},
+      "sram_kb": {"type": "number", "unit": "KB", "default": 2, "min": 0.128, "max": 1024},
+      "clock_mhz": {"type": "number", "unit": "MHz", "default": 16, "min": 1, "max": 600},
+      "voltage_V": {"type": "number", "unit": "V", "default": 5, "min": 1.8, "max": 5.5},
+      "digital_io": {"type": "number", "unit": "pins", "default": 23, "min": 1, "max": 200},
+      "adc_channels": {"type": "number", "unit": "", "default": 8, "min": 0, "max": 100}
+    },
+    "symbol": "microcontroller.svg",
+    "model_3d_path": "",
+    "related_functions": []
+  },
+  {
+    "id": "esp32",
+    "name": "ESP32 (WiFi+Bluetooth)",
+    "type": "microelectronics",
+    "description": "Dual-core 32-bit Xtensa LX6 MCU, 520KB SRAM, WiFi, BLE, 240MHz",
+    "parameters": {
+      "core_count": {"type": "number", "unit": "cores", "default": 2, "min": 1, "max": 8},
+      "clock_mhz": {"type": "number", "unit": "MHz", "default": 240, "min": 1, "max": 600},
+      "sram_kb": {"type": "number", "unit": "KB", "default": 520, "min": 8, "max": 16384},
+      "flash_mb": {"type": "number", "unit": "MB", "default": 16, "min": 1, "max": 256},
+      "voltage_V": {"type": "number", "unit": "V", "default": 3.3, "min": 2.3, "max": 5.5},
+      "wifi_standard": {"type": "string", "unit": "", "default": "802.11 b/g/n", "options": ["802.11 b/g/n", "802.11 a/b/g/n/ac"]}
+    },
+    "symbol": "microcontroller.svg",
+    "model_3d_path": "",
+    "related_functions": []
+  },
+  {
+    "id": "raspberry_pi_pico",
+    "name": "Raspberry Pi Pico (RP2040)",
+    "type": "microelectronics",
+    "description": "Dual-core Cortex-M0+, 264KB SRAM, 2MB flash, 30 GPIO, 133MHz",
+    "parameters": {
+      "core_count": {"type": "number", "unit": "cores", "default": 2, "min": 1, "max": 8},
+      "clock_mhz": {"type": "number", "unit": "MHz", "default": 133, "min": 1, "max": 600},
+      "sram_kb": {"type": "number", "unit": "KB", "default": 264, "min": 8, "max": 16384},
+      "flash_mb": {"type": "number", "unit": "MB", "default": 2, "min": 0.5, "max": 256},
+      "voltage_V": {"type": "number", "unit": "V", "default": 3.3, "min": 1.8, "max": 5.5},
+      "gpio_pins": {"type": "number", "unit": "pins", "default": 30, "min": 1, "max": 200}
+    },
+    "symbol": "microcontroller.svg",
+    "model_3d_path": "",
+    "related_functions": []
+  },
+  {
+    "id": "74hc595",
+    "name": "74HC595 Shift Register",
+    "type": "microelectronics",
+    "description": "8-bit serial-in, parallel-out shift register with output latches",
+    "parameters": {
+      "bits": {"type": "number", "unit": "bits", "default": 8, "min": 8, "max": 8},
+      "voltage_V": {"type": "number", "unit": "V", "default": 5, "min": 2, "max": 6},
+      "max_clock_mhz": {"type": "number", "unit": "MHz", "default": 100, "min": 1, "max": 200},
+      "output_current_ma": {"type": "number", "unit": "mA", "default": 35, "min": 1, "max": 100}
+    },
+    "symbol": "ic.svg",
+    "model_3d_path": "",
+    "related_functions": []
+  },
+  {
+    "id": "lm358",
+    "name": "LM358 Op-Amp",
+    "type": "microelectronics",
+    "description": "Dual low-power operational amplifier, 1MHz GBW, 100dB gain",
+    "parameters": {
+      "supply_voltage_min_V": {"type": "number", "unit": "V", "default": 3, "min": 1, "max": 36},
+      "supply_voltage_max_V": {"type": "number", "unit": "V", "default": 32, "min": 1, "max": 36},
+      "gain_bandwidth_mhz": {"type": "number", "unit": "MHz", "default": 1, "min": 0.1, "max": 100},
+      "slew_rate_V_us": {"type": "number", "unit": "V/µs", "default": 0.6, "min": 0.01, "max": 1000},
+      "channels": {"type": "number", "unit": "", "default": 2, "min": 1, "max": 4}
+    },
+    "symbol": "opamp.svg",
+    "model_3d_path": "",
+    "related_functions": []
+  },
+  {
+    "id": "arduino_uno_r3",
+    "name": "Arduino Uno R3 Board",
+    "type": "microelectronics",
+    "description": "Complete Arduino Uno development board with ATmega328P, 14 DIO, 6 analog inputs",
+    "parameters": {
+      "digital_io": {"type": "number", "unit": "pins", "default": 14, "min": 1, "max": 100},
+      "analog_inputs": {"type": "number", "unit": "pins", "default": 6, "min": 0, "max": 50},
+      "pwm_pins": {"type": "number", "unit": "pins", "default": 6, "min": 0, "max": 50},
+      "voltage_V": {"type": "number", "unit": "V", "default": 5, "min": 3.3, "max": 12},
+      "clock_mhz": {"type": "number", "unit": "MHz", "default": 16, "min": 1, "max": 600},
+      "flash_kb": {"type": "number", "unit": "KB", "default": 32, "min": 1, "max": 4096},
+      "sram_kb": {"type": "number", "unit": "KB", "default": 2, "min": 0.128, "max": 1024}
+    },
+    "symbol": "board.svg",
+    "model_3d_path": "",
+    "related_functions": []
+  }
+]

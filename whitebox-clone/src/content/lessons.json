@@ -1,0 +1,59 @@
+[
+  {
+    "id": "stem_lesson_1",
+    "title": "Avtomobil Shassisi va G'ildiraklar",
+    "description": "Ushbu darsda siz model avtomobilning shassisi (korpusi) hamda uning harakatlanishi uchun g'ildiraklar o'rnatish qoidalarini o'rganasiz.",
+    "steps": [
+      {
+        "title": "Shassi (Chassis) joylashtirish",
+        "description": "Chap tomondagi asboblar panelidan **Chassis** elementini tanlang va uni chizmachilik maydonining markaziga sudrab joylashtiring. Uni tanlagan holda o'ng paneldagi **Properties** orqali o'lchamlarini o'zgartirishingiz mumkin.",
+        "validationRules": [
+          {
+            "id": "has_chassis",
+            "description": "Kamida bitta shassi (chassis) elementi bo'lishi kerak",
+            "type": "element_count",
+            "targetType": "chassis",
+            "count": 1
+          },
+          {
+            "id": "chassis_width",
+            "description": "Shassi kengligi kamida 150 bo'lishi kerak (Properties orqali sozlang)",
+            "type": "property_value",
+            "targetType": "chassis",
+            "propertyName": "width",
+            "min": 150,
+            "max": 300
+          }
+        ]
+      },
+      {
+        "title": "G'ildiraklar (Wheels) qo'shish",
+        "description": "Avtomobil harakatlanishi uchun endi unga g'ildirak elementlarini ulashingiz kerak. Ish stoliga kamida **2 ta Wheel** elementini qo'shing va ularni shassining pastki qismiga joylashtiring.",
+        "validationRules": [
+          {
+            "id": "has_chassis",
+            "description": "Shassi (chassis) elementi saqlanib qolishi kerak",
+            "type": "element_count",
+            "targetType": "chassis",
+            "count": 1
+          },
+          {
+            "id": "has_two_wheels",
+            "description": "Kamida ikkita g'ildirak (wheel) elementi bo'lishi lozim",
+            "type": "element_count",
+            "targetType": "wheel",
+            "count": 2
+          },
+          {
+            "id": "wheels_under_chassis",
+            "description": "G'ildiraklar shassining tag qismida (y o'qi bo'yicha pastroqda, y > 220) joylashsin",
+            "type": "property_value",
+            "targetType": "wheel",
+            "propertyName": "y",
+            "min": 220
+          }
+        ]
+      }
+    ]
+  }
+]
