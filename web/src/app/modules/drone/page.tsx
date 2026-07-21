@@ -4,37 +4,11 @@ import { useCallback, useState } from "react";
 
 type DroneResult = {
   hover_rpm: number;
-  thrust_N: number;
+  single_motor_thrust_N: number;
   weight_N: number;
   tw_ratio: number;
   max_vertical_accel_ms2: number;
-  battery_life_min: number;
 };
-
-function analyzeDrone(
-  mass: number, armLen: number, kt: number, maxRpm: number,
-  propDia: number, ct: number, battCapacity_mAh: number,
-  hoverCurrent_A: number,
-): DroneResult {
-  const weight = mass * 9.81;
-  const hoverRpm = Math.sqrt(weight / (4 * kt));
-  const thrust = kt * maxRpm * maxRpm;
-  const totalThrust = 4 * thrust;
-  const tw = totalThrust / weight;
-  const maxAccel = (totalThrust - weight) / mass;
-  const n = hoverRpm / 60;
-  const hoverThrust = ct * 1.225 * n * n * Math.pow(propDia, 4);
-  const battLife = hoverCurrent_A > 0 ? battCapacity_mAh / (hoverCurrent_A * 1000) * 60 : 0;
-
-  return {
-    hover_rpm: hoverRpm,
-    thrust_N: thrust,
-    weight_N: weight,
-    tw_ratio: tw,
-    max_vertical_accel_ms2: maxAccel,
-    battery_life_min: battLife,
-  };
-}
 
 export default function DronePage() {
   const [mass, setMass] = useState(1.5);
@@ -45,11 +19,37 @@ export default function DronePage() {
   const [battCap, setBattCap] = useState(2200);
   const [hoverA, setHoverA] = useState(10);
   const [result, setResult] = useState<DroneResult | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleAnalyze = useCallback(() => {
-    const res = analyzeDrone(mass, armLen, kt, maxRpm, propDia, 0.1, battCap, hoverA);
-    setResult(res);
-  }, [mass, armLen, kt, maxRpm, propDia, battCap, hoverA]);
+  const battLifeMin = hoverA > 0 ? (battCap / (hoverA * 1000)) * 60 : 0;
+
+  const handleAnalyze = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch("/api/simulate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          module: "drone",
+          params: {
+            mass, armLength: armLen, thrustCoeff: kt, maxRpm, propDiameter: propDia,
+          },
+        }),
+      });
+      const data = await response.json();
+      if (data.error) {
+        setError(data.error);
+        return;
+      }
+      setResult(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Xatolik yuz berdi");
+    } finally {
+      setLoading(false);
+    }
+  }, [mass, armLen, kt, maxRpm, propDia]);
 
   return (
     <div className="flex flex-col min-h-screen p-6 gap-6">
@@ -88,11 +88,21 @@ export default function DronePage() {
             <span className="text-sm text-gray-600">Batareya sig&apos;imi: {battCap} mAh</span>
             <input type="range" min={500} max={10000} step={100} value={battCap} onChange={e => setBattCap(Number(e.target.value))} />
           </label>
+          <label className="flex flex-col gap-1">
+            <span className="text-sm text-gray-600">Hover oqimi: {hoverA} A</span>
+            <input type="range" min={1} max={40} step={1} value={hoverA} onChange={e => setHoverA(Number(e.target.value))} />
+          </label>
 
-          <button onClick={handleAnalyze} className="mt-2 rounded-xl bg-amber-600 px-6 py-3 text-white font-semibold hover:bg-amber-700 transition-colors shadow-md">
-            ▶ Hisoblash
+          <button onClick={handleAnalyze} disabled={loading} className="mt-2 rounded-xl bg-amber-600 px-6 py-3 text-white font-semibold hover:bg-amber-700 disabled:opacity-50 transition-colors shadow-md">
+            {loading ? "Hisoblanmoqda..." : "▶ Hisoblash"}
           </button>
         </div>
+
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-600 min-w-[320px]">
+            ❌ Xatolik: {error}
+          </div>
+        )}
 
         {result && (
           <div className="flex flex-col gap-4 flex-1 min-w-[320px]">
@@ -104,7 +114,7 @@ export default function DronePage() {
               </div>
               <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
                 <div className="text-xs text-blue-600">Tortish kuchi</div>
-                <div className="text-lg font-bold">{result.thrust_N.toFixed(2)} N</div>
+                <div className="text-lg font-bold">{result.single_motor_thrust_N.toFixed(2)} N</div>
               </div>
               <div className="bg-red-50 rounded-lg p-3 border border-red-200">
                 <div className="text-xs text-red-600">Weight</div>
@@ -120,7 +130,7 @@ export default function DronePage() {
               </div>
               <div className="bg-cyan-50 rounded-lg p-3 border border-cyan-200">
                 <div className="text-xs text-cyan-600">Batareya muddati</div>
-                <div className="text-lg font-bold">{result.battery_life_min.toFixed(1)} min</div>
+                <div className="text-lg font-bold">{battLifeMin.toFixed(1)} min</div>
               </div>
             </div>
           </div>

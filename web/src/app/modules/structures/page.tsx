@@ -1,6 +1,35 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import dynamic from "next/dynamic";
+
+const TrussBuilder = dynamic(() => import("../../../components/structures-lab/engineering/TrussBuilder"), {
+  ssr: false,
+  loading: () => <div className="flex-1 flex items-center justify-center bg-[#0f1e3d] text-gray-400">Truss quruvchisi yuklanmoqda...</div>,
+});
+
+export default function StructuresPage() {
+  const [tab, setTab] = useState<"truss" | "beam">("truss");
+
+  return (
+    <div className="flex-1 bg-[#080b11] flex flex-col min-h-0">
+      <div className="flex gap-1 px-6 pt-4">
+        {(["truss", "beam"] as const).map((t) => (
+          <button
+            key={t}
+            onClick={() => setTab(t)}
+            className={`px-4 py-2 rounded-t-lg text-sm font-bold cursor-pointer transition-colors ${
+              tab === t ? "bg-[#0f1e3d] text-white" : "bg-transparent text-gray-500 hover:text-gray-300"
+            }`}
+          >
+            {t === "truss" ? "🌉 Truss Builder" : "📐 Beam / Column Calculator"}
+          </button>
+        ))}
+      </div>
+      {tab === "truss" ? <TrussBuilder /> : <BeamColumnCalculator />}
+    </div>
+  );
+}
 
 type AnalysisType = "beam" | "column" | "section";
 
@@ -21,7 +50,7 @@ type SectionResult = {
   I_circle_m4: number;
 };
 
-export default function StructuresPage() {
+function BeamColumnCalculator() {
   const [mode, setMode] = useState<AnalysisType>("beam");
   const [force, setForce] = useState(100);
   const [length, setLength] = useState(1);
@@ -62,15 +91,16 @@ export default function StructuresPage() {
       } else if (mode === "section") {
         setSectionResult(data);
       }
-    } catch (err: any) {
-      setError(err.message || "Xatolik yuz berdi");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Xatolik yuz berdi");
     } finally {
       setLoading(false);
     }
   }, [mode, force, length, width, height, Emod]);
 
   return (
-    <div className="flex flex-col gap-6 max-w-6xl mx-auto py-2">
+    <div className="flex-1 bg-[#080b11] overflow-y-auto">
+    <div className="flex flex-col gap-6 max-w-6xl mx-auto py-2 p-8">
       <div className="flex flex-col gap-1">
         <span className="text-xs font-bold text-violet-500 tracking-wider uppercase">Qurilish & Mexanika Laboratoriyasi</span>
         <h1 className="text-3xl font-extrabold text-white">Tuzilmalar (Structures) Tahlili</h1>
@@ -289,6 +319,7 @@ export default function StructuresPage() {
           )}
         </div>
       </div>
+    </div>
     </div>
   );
 }

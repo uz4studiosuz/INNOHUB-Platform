@@ -11,38 +11,6 @@ type RoverResult = {
   trajectory: { t: number; x: number; v: number; a: number }[];
 };
 
-function simulateRover(
-  mass: number, wheelR: number, torque: number, gear: number, eff: number,
-  crr: number, mu: number, cd: number, area: number, incline: number,
-  dt: number, maxTime: number,
-): RoverResult {
-  const g = 9.81;
-  const F_t = torque * gear * eff / wheelR;
-  const traj: { t: number; x: number; v: number; a: number }[] = [];
-  let x = 0, v = 0;
-
-  const nSteps = Math.ceil(maxTime / dt);
-  for (let step = 0; step < nSteps; step++) {
-    const F_rr = crr * mass * g * Math.cos(incline * Math.PI / 180);
-    const F_gr = mass * g * Math.sin(incline * Math.PI / 180);
-    const F_d = 0.5 * 1.225 * v * v * cd * area;
-    const F_net = F_t - F_rr - F_gr - F_d;
-    const a = F_net / mass;
-    v += a * dt;
-    if (v < 0) v = 0;
-    x += v * dt;
-    if (step % Math.max(1, Math.floor(nSteps / 50)) === 0) {
-      traj.push({ t: step * dt, x, v, a });
-    }
-  }
-
-  return {
-    final_distance_m: x, final_velocity_ms: v,
-    max_grade_deg: Math.atan(mu) * 180 / Math.PI,
-    tractive_force_N: F_t, top_speed_ms: v, trajectory: traj,
-  };
-}
-
 export default function RoverPage() {
   const [mass, setMass] = useState(10);
   const [torque, setTorque] = useState(0.5);
@@ -50,10 +18,37 @@ export default function RoverPage() {
   const [incline, setIncline] = useState(0);
   const [crr, setCrr] = useState(0.02);
   const [result, setResult] = useState<RoverResult | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleRun = useCallback(() => {
-    const res = simulateRover(mass, 0.1, torque, gear, 0.85, crr, 0.6, 0.3, 0.05, incline, 0.1, 30);
-    setResult(res);
+  const handleRun = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch("/api/simulate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          module: "rover",
+          params: {
+            mass, wheelRadius: 0.1, motorTorque: torque, gearRatio: gear,
+            efficiency: 0.85, rollingResistance: crr, frictionCoeff: 0.6,
+            dragCoeff: 0.3, frontalArea: 0.05, inclineDeg: incline,
+            dt: 0.1, maxTime: 30,
+          },
+        }),
+      });
+      const data = await response.json();
+      if (data.error) {
+        setError(data.error);
+        return;
+      }
+      setResult(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Xatolik yuz berdi");
+    } finally {
+      setLoading(false);
+    }
   }, [mass, torque, gear, incline, crr]);
 
   return (
@@ -89,10 +84,16 @@ export default function RoverPage() {
             <input type="range" min={0.005} max={0.2} step={0.005} value={crr} onChange={e => setCrr(Number(e.target.value))} />
           </label>
 
-          <button onClick={handleRun} className="mt-2 rounded-xl bg-orange-600 px-6 py-3 text-white font-semibold hover:bg-orange-700 transition-colors shadow-md">
-            ▶ Ishga tushirish
+          <button onClick={handleRun} disabled={loading} className="mt-2 rounded-xl bg-orange-600 px-6 py-3 text-white font-semibold hover:bg-orange-700 disabled:opacity-50 transition-colors shadow-md">
+            {loading ? "Ishga tushirilmoqda..." : "▶ Ishga tushirish"}
           </button>
         </div>
+
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-600 min-w-[320px]">
+            ❌ Xatolik: {error}
+          </div>
+        )}
 
         {result && (
           <div className="flex flex-col gap-4 flex-1 min-w-[320px]">

@@ -1,74 +1,207 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 type LabTab = "mechanics" | "electricity" | "waves" | "thermo";
 
-type MechanicsCalc = {
+type FieldSpec = {
+  key: string;
   label: string;
-  compute: (v: number, a2: number) => number;
+  default: number;
+  step?: number;
+  unit?: string;
 };
 
-type ElectricityCalc = {
+type ExperimentSpec = {
+  key: string;
   label: string;
-  compute: (v: number, a2: number) => number;
+  fields: FieldSpec[];
 };
 
-type WavesCalc = {
-  label: string;
-  compute: (v: number, a2: number) => number;
+const LAB_EXPERIMENTS: Record<LabTab, ExperimentSpec[]> = {
+  mechanics: [
+    { key: "projectile", label: "Snaryad harakati", fields: [
+      { key: "v0", label: "Boshlang'ich tezlik", default: 20, unit: "m/s" },
+      { key: "angleDeg", label: "Otish burchagi", default: 45, unit: "°" },
+    ]},
+    { key: "collision", label: "To'qnashuv (elastik)", fields: [
+      { key: "m1", label: "1-jism massasi", default: 1, unit: "kg" },
+      { key: "v1", label: "1-jism tezligi", default: 5, unit: "m/s" },
+      { key: "m2", label: "2-jism massasi", default: 1, unit: "kg" },
+      { key: "v2", label: "2-jism tezligi", default: 0, unit: "m/s" },
+    ]},
+    { key: "spring_oscillator", label: "Prujina tebranishi", fields: [
+      { key: "mass", label: "Massa", default: 1, unit: "kg" },
+      { key: "k", label: "Prujina qattiqligi", default: 50, unit: "N/m" },
+      { key: "amplitude", label: "Amplituda", default: 0.1, step: 0.01, unit: "m" },
+    ]},
+    { key: "pendulum", label: "Mayatnik davri", fields: [
+      { key: "length", label: "Uzunlik", default: 1, step: 0.1, unit: "m" },
+    ]},
+    { key: "centripetal", label: "Markazga intilma kuch", fields: [
+      { key: "mass", label: "Massa", default: 1, unit: "kg" },
+      { key: "velocity", label: "Tezlik", default: 5, unit: "m/s" },
+      { key: "radius", label: "Radius", default: 1, unit: "m" },
+    ]},
+    { key: "energy", label: "Kinetik / Potensial energiya", fields: [
+      { key: "mass", label: "Massa", default: 1, unit: "kg" },
+      { key: "velocity", label: "Tezlik", default: 5, unit: "m/s" },
+      { key: "height", label: "Balandlik", default: 2, unit: "m" },
+    ]},
+  ],
+  electricity: [
+    { key: "ohms_law", label: "Om qonuni (I = V/R)", fields: [
+      { key: "voltage", label: "Kuchlanish", default: 9, unit: "V" },
+      { key: "resistance", label: "Qarshilik", default: 100, unit: "Ω" },
+    ]},
+    { key: "induction", label: "Elektromagnit induksiya", fields: [
+      { key: "turns", label: "O'ramlar soni", default: 100 },
+      { key: "deltaFlux", label: "Oqim o'zgarishi", default: 0.001, step: 0.0001, unit: "Wb" },
+      { key: "deltaTime", label: "Vaqt o'zgarishi", default: 0.1, step: 0.01, unit: "s" },
+    ]},
+    { key: "rc_circuit", label: "RC zanjiri", fields: [
+      { key: "resistance", label: "Qarshilik", default: 1000, unit: "Ω" },
+      { key: "capacitance", label: "Sig'im", default: 0.000001, step: 0.0000001, unit: "F" },
+      { key: "voltage", label: "Kuchlanish", default: 5, unit: "V" },
+      { key: "time", label: "Vaqt", default: 0.001, step: 0.0001, unit: "s" },
+    ]},
+  ],
+  waves: [
+    { key: "wave_properties", label: "To'lqin tezligi", fields: [
+      { key: "frequency", label: "Chastota", default: 50, unit: "Hz" },
+      { key: "wavelength", label: "To'lqin uzunligi", default: 2, step: 0.1, unit: "m" },
+    ]},
+    { key: "pendulum", label: "Mayatnik davri", fields: [
+      { key: "length", label: "Uzunlik", default: 1, step: 0.1, unit: "m" },
+    ]},
+    { key: "spring_mass", label: "Prujina-massa tizimi", fields: [
+      { key: "mass", label: "Massa", default: 1, unit: "kg" },
+      { key: "k", label: "Prujina qattiqligi", default: 50, unit: "N/m" },
+    ]},
+    { key: "doppler", label: "Dopler effekti", fields: [
+      { key: "sourceFreq", label: "Manba chastotasi", default: 440, unit: "Hz" },
+      { key: "sourceSpeed", label: "Manba tezligi", default: 30, unit: "m/s" },
+    ]},
+  ],
+  thermo: [
+    { key: "heat_energy", label: "Issiqlik energiyasi", fields: [
+      { key: "mass", label: "Massa", default: 1, unit: "kg" },
+      { key: "specificHeat", label: "Solishtirma issiqlik", default: 4186, unit: "J/kg·K" },
+      { key: "tempChange", label: "Harorat o'zgarishi", default: 10, unit: "K" },
+    ]},
+    { key: "ideal_gas", label: "Ideal gaz bosimi", fields: [
+      { key: "volume", label: "Hajm", default: 0.024, step: 0.001, unit: "m³" },
+      { key: "moles", label: "Mol miqdori", default: 1, unit: "mol" },
+      { key: "temp", label: "Harorat", default: 300, unit: "K" },
+    ]},
+    { key: "heat_engine", label: "Issiqlik dvigateli / Karno", fields: [
+      { key: "workOutput", label: "Chiqish ishi", default: 400, unit: "J" },
+      { key: "heatInput", label: "Kiruvchi issiqlik", default: 1000, unit: "J" },
+      { key: "hotTemp", label: "Issiq manba harorati", default: 500, unit: "K" },
+      { key: "coldTemp", label: "Sovuq manba harorati", default: 300, unit: "K" },
+    ]},
+  ],
 };
 
-type ThermoCalc = {
-  label: string;
-  compute: (v: number, a2: number) => number;
+const RESULT_LABELS: Record<string, string> = {
+  speed_ms: "Tezlik (m/s)",
+  range: "Masofa (m)",
+  max_height: "Maks. balandlik (m)",
+  time_of_flight: "Parvoz vaqti (s)",
+  v1f: "1-jism yakuniy tezligi (m/s)",
+  v2f: "2-jism yakuniy tezligi (m/s)",
+  ke_before: "Boshlang'ich kinetik energiya (J)",
+  ke_after: "Yakuniy kinetik energiya (J)",
+  ke_loss: "Yo'qotilgan energiya (J)",
+  period_s: "Davr (s)",
+  frequency_hz: "Chastota (Hz)",
+  omega_rad_s: "Burchak chastotasi (rad/s)",
+  angular_frequency_rad_s: "Burchak chastotasi (rad/s)",
+  max_velocity_ms: "Maks. tezlik (m/s)",
+  max_acceleration_ms2: "Maks. tezlanish (m/s²)",
+  max_force_N: "Maks. kuch (N)",
+  total_energy_J: "Umumiy energiya (J)",
+  force_N: "Kuch (N)",
+  kinetic_energy_J: "Kinetik energiya (J)",
+  potential_energy_J: "Potensial energiya (J)",
+  current_A: "Tok kuchi (A)",
+  voltage_V: "Kuchlanish (V)",
+  resistance_ohm: "Qarshilik (Ω)",
+  emf_V: "EYuK (V)",
+  tau_s: "Vaqt doimiysi (s)",
+  capacitor_voltage_V: "Kondensator kuchlanishi (V)",
+  wavelength_m: "To'lqin uzunligi (m)",
+  observed_freq_hz: "Kuzatilgan chastota (Hz)",
+  heat_J: "Issiqlik (J)",
+  pressure_Pa: "Bosim (Pa)",
+  volume_m3: "Hajm (m³)",
+  efficiency: "Samaradorlik",
+  carnot_max_efficiency: "Karno maks. samaradorligi",
 };
 
-const MECHANICS_CALCS: MechanicsCalc[] = [
-  { label: "Proyektiliya masofasi (v₀=?, burchak=?)", compute: (v, angle) => v * v * Math.sin(2 * angle * Math.PI / 180) / 9.81 },
-  { label: "Kinetik energiya (m=?, v=?)", compute: (m, v) => 0.5 * m * v * v },
-  { label: "Potensial energiya (m=?, h=?)", compute: (m, h) => m * 9.81 * h },
-  { label: "Markazga intilma kuch (m=?, v=?, r=1)", compute: (m, v) => m * v * v },
-];
+function formatResultKey(key: string): string {
+  return RESULT_LABELS[key] ?? key;
+}
 
-const ELECTRICITY_CALCS: ElectricityCalc[] = [
-  { label: "Ohm qonuni I (V=?, R=?)", compute: (v, r) => v / r },
-  { label: "Quvvat (V=?, I=?)", compute: (v, i) => v * i },
-  { label: "RC vaqt doimiysi (R=?, C=1e-6)", compute: (r, _) => r * 1e-6 },
-  { label: "Kondensator zaryadi (V=5, R=?, t=1e-3)", compute: (r, _) => 5 * (1 - Math.exp(-0.001 / (r * 1e-6))) },
-];
-
-const WAVES_CALCS: WavesCalc[] = [
-  { label: "To'lqin tezligi (f=?, λ=?)", compute: (f, lam) => f * lam },
-  { label: "Mayatnik davri (L=?, g=9.81)", compute: (L, _) => 2 * Math.PI * Math.sqrt(L / 9.81) },
-  { label: "Prujina chastotasi (k=?, m=1)", compute: (k, _) => Math.sqrt(k) / (2 * Math.PI) },
-  { label: "Tovush intensivligi (P=1, r=?)", compute: (_, r) => 1 / (4 * Math.PI * r * r) },
-];
-
-const THERMO_CALCS: ThermoCalc[] = [
-  { label: "Issiqlik energiyasi (m=1, c=4186, ΔT=?)", compute: (_, dT) => 1 * 4186 * dT },
-  { label: "Ideal gaz P (n=1, T=300, V=?)", compute: (_, V) => 1 * 8.314 * 300 / V },
-  { label: "Karno samaradorligi (Th=?, Tc=300)", compute: (Th, _) => 1 - 300 / Th },
-  { label: "Issiqlik o'tkazuvchanlik (k=1, A=1, ΔT=10, d=?)", compute: (_, d) => 1 * 1 * 10 / d },
-];
+function formatResultValue(value: number): string {
+  if (Math.abs(value) !== 0 && (Math.abs(value) < 0.001 || Math.abs(value) > 100000)) {
+    return value.toExponential(3);
+  }
+  return value.toFixed(4);
+}
 
 export default function PhysicsLabPage() {
   const [tab, setTab] = useState<LabTab>("mechanics");
-  const [val1, setVal1] = useState(10);
-  const [val2, setVal2] = useState(45);
-  const [calcIndex, setCalcIndex] = useState(0);
-  const [result, setResult] = useState<number | null>(null);
+  const [expIndex, setExpIndex] = useState(0);
+  const [values, setValues] = useState<Record<string, number>>(() => {
+    const defaults: Record<string, number> = {};
+    LAB_EXPERIMENTS.mechanics[0].fields.forEach(f => { defaults[f.key] = f.default; });
+    return defaults;
+  });
+  const [result, setResult] = useState<Record<string, unknown> | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const calcs = tab === "mechanics" ? MECHANICS_CALCS
-    : tab === "electricity" ? ELECTRICITY_CALCS
-    : tab === "waves" ? WAVES_CALCS
-    : THERMO_CALCS;
+  const experiments = LAB_EXPERIMENTS[tab];
+  const experiment = experiments[expIndex] ?? experiments[0];
 
-  const handleCompute = useCallback(() => {
-    const c = calcs[calcIndex];
-    if (!c) return;
-    setResult(c.compute(val1, val2));
-  }, [tab, calcIndex, val1, val2, calcs]);
+  const resetForExperiment = useCallback((exp: ExperimentSpec) => {
+    const defaults: Record<string, number> = {};
+    exp.fields.forEach(f => { defaults[f.key] = f.default; });
+    setValues(defaults);
+    setResult(null);
+    setError(null);
+  }, []);
+
+  const resultEntries = useMemo(() => {
+    if (!result) return [];
+    return Object.entries(result).filter(([, v]) => typeof v === "number");
+  }, [result]);
+
+  const handleCompute = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch("/api/simulate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          module: "physics_lab",
+          params: { lab: tab, experiment: experiment.key, ...values },
+        }),
+      });
+      const data = await response.json();
+      if (data.error) {
+        setError(data.error);
+        return;
+      }
+      setResult(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Xatolik yuz berdi");
+    } finally {
+      setLoading(false);
+    }
+  }, [tab, experiment, values]);
 
   return (
     <div className="flex flex-col min-h-screen p-6 gap-6">
@@ -83,7 +216,7 @@ export default function PhysicsLabPage() {
 
           <div className="flex gap-2 flex-wrap">
             {(["mechanics", "electricity", "waves", "thermo"] as const).map(t => (
-              <button key={t} onClick={() => { setTab(t); setCalcIndex(0); setResult(null); }}
+              <button key={t} onClick={() => { setTab(t); setExpIndex(0); resetForExperiment(LAB_EXPERIMENTS[t][0]); }}
                 className={`px-3 py-1 rounded text-sm font-medium ${tab === t ? "bg-lime-600 text-white" : "bg-gray-200 text-gray-700"}`}>
                 {t === "mechanics" ? "Mexanika" : t === "electricity" ? "Elektr" : t === "waves" ? "To'lqinlar" : "Termo"}
               </button>
@@ -91,37 +224,48 @@ export default function PhysicsLabPage() {
           </div>
 
           <label className="flex flex-col gap-1">
-            <span className="text-sm text-gray-600">Formula</span>
-            <select value={calcIndex} onChange={e => { setCalcIndex(Number(e.target.value)); setResult(null); }}
+            <span className="text-sm text-gray-600">Tajriba</span>
+            <select value={expIndex} onChange={e => { const i = Number(e.target.value); setExpIndex(i); resetForExperiment(experiments[i]); }}
               className="border border-gray-300 rounded px-2 py-1 text-sm">
-              {calcs.map((c, i) => <option key={i} value={i}>{c.label}</option>)}
+              {experiments.map((exp, i) => <option key={exp.key} value={i}>{exp.label}</option>)}
             </select>
           </label>
 
-          <label className="flex flex-col gap-1">
-            <span className="text-sm text-gray-600">1-parametr: {val1}</span>
-            <input type="range" min={1} max={500} step={1} value={val1} onChange={e => setVal1(Number(e.target.value))} />
-          </label>
-          <label className="flex flex-col gap-1">
-            <span className="text-sm text-gray-600">2-parametr: {val2}</span>
-            <input type="range" min={1} max={500} step={1} value={val2} onChange={e => setVal2(Number(e.target.value))} />
-          </label>
+          {experiment.fields.map(f => (
+            <label key={f.key} className="flex flex-col gap-1">
+              <span className="text-sm text-gray-600">{f.label}{f.unit ? ` (${f.unit})` : ""}</span>
+              <input
+                type="number"
+                step={f.step ?? 1}
+                value={values[f.key] ?? f.default}
+                onChange={e => setValues(v => ({ ...v, [f.key]: Number(e.target.value) }))}
+                className="border border-gray-300 rounded px-2 py-1 text-sm"
+              />
+            </label>
+          ))}
 
-          <button onClick={handleCompute} className="mt-2 rounded-xl bg-lime-600 px-6 py-3 text-white font-semibold hover:bg-lime-700 transition-colors shadow-md">
-            ▶ Hisoblash
+          <button onClick={handleCompute} disabled={loading} className="mt-2 rounded-xl bg-lime-600 px-6 py-3 text-white font-semibold hover:bg-lime-700 disabled:opacity-50 transition-colors shadow-md">
+            {loading ? "Hisoblanmoqda..." : "▶ Hisoblash"}
           </button>
         </div>
 
-        <div className="flex-1 min-w-[320px]">
-          {result !== null && (
+        <div className="flex-1 min-w-[320px] flex flex-col gap-4">
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-600">
+              ❌ Xatolik: {error}
+            </div>
+          )}
+
+          {resultEntries.length > 0 && (
             <div className="bg-lime-50 rounded-xl p-6 border border-lime-200">
-              <h2 className="font-semibold text-lg mb-2">Natija</h2>
-              <div className="text-3xl font-bold text-lime-700">{result.toFixed(4)}</div>
-              <div className="text-sm text-gray-500 mt-2">
-                {tab === "mechanics" && "Mexanik kattalik"}
-                {tab === "electricity" && "Elektr kattalik"}
-                {tab === "waves" && "To'lqin/tebranish kattalik"}
-                {tab === "thermo" && "Termodinamik kattalik"}
+              <h2 className="font-semibold text-lg mb-4">Natijalar</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {resultEntries.map(([key, value]) => (
+                  <div key={key} className="bg-white rounded-lg p-3 border border-lime-100">
+                    <div className="text-xs text-lime-700">{formatResultKey(key)}</div>
+                    <div className="text-lg font-bold text-lime-900">{formatResultValue(value as number)}</div>
+                  </div>
+                ))}
               </div>
             </div>
           )}

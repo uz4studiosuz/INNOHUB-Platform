@@ -12,32 +12,14 @@ const MATERIALS = [
 
 type ProstheticResult = {
   joint_torque_Nm: number;
-  actuator_torque_Nm: number;
-  stress_MPa: number;
+  actuator_required_torque_Nm: number;
+  mechanical_advantage: number;
+  stress_Pa: number;
   safety_factor: number;
   grip_force_N: number;
-  battery_life_h: number;
+  battery_life_hours: number;
+  material: string;
 };
-
-function calculate(
-  limbMass: number, limbLen: number, angle: number, loadN: number,
-  momentArm: number, area_m2: number, matId: string,
-  actuatorN: number, linkRatio: number, battAh: number, battA: number,
-): ProstheticResult {
-  const mat = MATERIALS.find(m => m.id === matId) ?? MATERIALS[0];
-  const jointT = limbMass * 9.81 * limbLen * Math.cos(angle * Math.PI / 180);
-  const actT = loadN * momentArm;
-  const stress = loadN / area_m2;
-  const sf = mat.yield * 1e6 / stress;
-  const grip = actuatorN * linkRatio;
-  const battLife = battA > 0 ? battAh / battA : Infinity;
-
-  return {
-    joint_torque_Nm: jointT, actuator_torque_Nm: actT,
-    stress_MPa: stress / 1e6, safety_factor: sf,
-    grip_force_N: grip, battery_life_h: battLife,
-  };
-}
 
 export default function ProstheticsPage() {
   const [limbMass, setLimbMass] = useState(2);
@@ -52,10 +34,37 @@ export default function ProstheticsPage() {
   const [battAh, setBattAh] = useState(2);
   const [battA, setBattA] = useState(0.5);
   const [result, setResult] = useState<ProstheticResult | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleCalc = useCallback(() => {
-    const res = calculate(limbMass, limbLen, angle, loadN, momentArm, area, matId, actuatorN, linkRatio, battAh, battA);
-    setResult(res);
+  const handleCalc = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch("/api/simulate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          module: "prosthetic",
+          params: {
+            limbMass, limbLength: limbLen, angleDeg: angle, loadForce: loadN,
+            momentArm, crossSectionArea: area, material: matId,
+            actuatorForce: actuatorN, linkageRatio: linkRatio,
+            batteryCapacityAh: battAh, currentDrawA: battA,
+          },
+        }),
+      });
+      const data = await response.json();
+      if (data.error) {
+        setError(data.error);
+        return;
+      }
+      setResult(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Xatolik yuz berdi");
+    } finally {
+      setLoading(false);
+    }
   }, [limbMass, limbLen, angle, loadN, momentArm, area, matId, actuatorN, linkRatio, battAh, battA]);
 
   return (
@@ -86,6 +95,14 @@ export default function ProstheticsPage() {
             <span className="text-sm text-gray-600">Yuk kuchi: {loadN} N</span>
             <input type="range" min={5} max={500} step={5} value={loadN} onChange={e => setLoadN(Number(e.target.value))} />
           </label>
+          <label className="flex flex-col gap-1">
+            <span className="text-sm text-gray-600">Moment yelkasi: {(momentArm * 1000).toFixed(0)} mm</span>
+            <input type="range" min={0.01} max={0.2} step={0.005} value={momentArm} onChange={e => setMomentArm(Number(e.target.value))} />
+          </label>
+          <label className="flex flex-col gap-1">
+            <span className="text-sm text-gray-600">Kesim yuzasi: {(area * 1e6).toFixed(1)} mm²</span>
+            <input type="range" min={0.00002} max={0.001} step={0.00001} value={area} onChange={e => setArea(Number(e.target.value))} />
+          </label>
 
           <label className="flex flex-col gap-1">
             <span className="text-sm text-gray-600">Material</span>
@@ -94,10 +111,33 @@ export default function ProstheticsPage() {
             </select>
           </label>
 
-          <button onClick={handleCalc} className="mt-2 rounded-xl bg-teal-600 px-6 py-3 text-white font-semibold hover:bg-teal-700 transition-colors shadow-md">
-            ▶ Hisoblash
+          <label className="flex flex-col gap-1">
+            <span className="text-sm text-gray-600">Aktuator kuchi: {actuatorN} N</span>
+            <input type="range" min={10} max={500} step={10} value={actuatorN} onChange={e => setActuatorN(Number(e.target.value))} />
+          </label>
+          <label className="flex flex-col gap-1">
+            <span className="text-sm text-gray-600">Bog&apos;lanish nisbati: {linkRatio.toFixed(2)}</span>
+            <input type="range" min={0.1} max={1} step={0.05} value={linkRatio} onChange={e => setLinkRatio(Number(e.target.value))} />
+          </label>
+          <label className="flex flex-col gap-1">
+            <span className="text-sm text-gray-600">Batareya sig&apos;imi: {battAh.toFixed(1)} Ah</span>
+            <input type="range" min={0.5} max={10} step={0.5} value={battAh} onChange={e => setBattAh(Number(e.target.value))} />
+          </label>
+          <label className="flex flex-col gap-1">
+            <span className="text-sm text-gray-600">Tok iste&apos;moli: {battA.toFixed(2)} A</span>
+            <input type="range" min={0.1} max={5} step={0.1} value={battA} onChange={e => setBattA(Number(e.target.value))} />
+          </label>
+
+          <button onClick={handleCalc} disabled={loading} className="mt-2 rounded-xl bg-teal-600 px-6 py-3 text-white font-semibold hover:bg-teal-700 disabled:opacity-50 transition-colors shadow-md">
+            {loading ? "Hisoblanmoqda..." : "▶ Hisoblash"}
           </button>
         </div>
+
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-600 min-w-[320px]">
+            ❌ Xatolik: {error}
+          </div>
+        )}
 
         {result && (
           <div className="flex flex-col gap-4 flex-1 min-w-[320px]">
@@ -109,11 +149,11 @@ export default function ProstheticsPage() {
               </div>
               <div className="bg-orange-50 rounded-lg p-3 border border-orange-200">
                 <div className="text-xs text-orange-600">Aktualtor momenti</div>
-                <div className="text-lg font-bold">{result.actuator_torque_Nm.toFixed(3)} N·m</div>
+                <div className="text-lg font-bold">{result.actuator_required_torque_Nm.toFixed(3)} N·m</div>
               </div>
               <div className="bg-red-50 rounded-lg p-3 border border-red-200">
                 <div className="text-xs text-red-600">Zo&apos;riqish</div>
-                <div className="text-lg font-bold">{result.stress_MPa.toFixed(2)} MPa</div>
+                <div className="text-lg font-bold">{(result.stress_Pa / 1e6).toFixed(2)} MPa</div>
               </div>
               <div className="bg-green-50 rounded-lg p-3 border border-green-200">
                 <div className="text-xs text-green-600">Xavfsizlik koeff.</div>
@@ -125,7 +165,7 @@ export default function ProstheticsPage() {
               </div>
               <div className="bg-purple-50 rounded-lg p-3 border border-purple-200">
                 <div className="text-xs text-purple-600">Batareya muddati</div>
-                <div className="text-lg font-bold">{result.battery_life_h.toFixed(1)} soat</div>
+                <div className="text-lg font-bold">{result.battery_life_hours.toFixed(1)} soat</div>
               </div>
             </div>
           </div>

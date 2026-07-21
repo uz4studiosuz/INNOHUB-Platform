@@ -107,9 +107,8 @@ class Truss:
         support_count = sum(2 if s == 'pin' else 1 for s in self.supports.values())
         n_unknowns = n_members + support_count
 
-        import numpy as np
-        A = np.zeros((2 * n_nodes, n_unknowns))
-        b = np.zeros(2 * n_nodes)
+        A = [[0.0] * n_unknowns for _ in range(2 * n_nodes)]
+        b = [0.0] * (2 * n_nodes)
 
         # Fill member force contributions
         col = 0
@@ -117,11 +116,11 @@ class Truss:
             dx, dy = member.direction_vector(self.nodes)
             i, j = member.node_i, member.node_j
             # At node i: force pushes away from member (compression negative)
-            A[2 * i, col] = dx
-            A[2 * i + 1, col] = dy
+            A[2 * i][col] = dx
+            A[2 * i + 1][col] = dy
             # At node j: force pulls toward member (tension positive)
-            A[2 * j, col] = -dx
-            A[2 * j + 1, col] = -dy
+            A[2 * j][col] = -dx
+            A[2 * j + 1][col] = -dy
             col += 1
 
         # Fill support reaction contributions
@@ -130,18 +129,18 @@ class Truss:
         for node_idx, sup_type in self.supports.items():
             if sup_type == 'pin':
                 sup_map[(node_idx, 'x')] = reaction_col
-                A[2 * node_idx, reaction_col] = 1
+                A[2 * node_idx][reaction_col] = 1
                 reaction_col += 1
                 sup_map[(node_idx, 'y')] = reaction_col
-                A[2 * node_idx + 1, reaction_col] = 1
+                A[2 * node_idx + 1][reaction_col] = 1
                 reaction_col += 1
             elif sup_type == 'roller_h':
                 sup_map[(node_idx, 'y')] = reaction_col
-                A[2 * node_idx + 1, reaction_col] = 1
+                A[2 * node_idx + 1][reaction_col] = 1
                 reaction_col += 1
             elif sup_type == 'roller_v':
                 sup_map[(node_idx, 'x')] = reaction_col
-                A[2 * node_idx, reaction_col] = 1
+                A[2 * node_idx][reaction_col] = 1
                 reaction_col += 1
 
         # Fill load vector (negated, moved to RHS)
@@ -149,15 +148,53 @@ class Truss:
             b[2 * node_idx] = -fx
             b[2 * node_idx + 1] = -fy
 
-        # Remove rows corresponding to unsupported, unloaded nodes
-        # Solve using least squares if overdetermined
-        try:
-            x, residuals, rank, s = np.linalg.lstsq(A, b, rcond=None)
-        except np.linalg.LinAlgError:
-            raise ValueError("Truss solution failed - check supports and geometry")
+        x = _least_squares_solve(A, b)
 
         # Extract member forces
         for mi in range(n_members):
             self.members[mi].force = x[mi]
 
         return [m.force for m in self.members]
+
+
+def _gaussian_solve(a, b):
+    """Solve a square linear system Ax = b via Gaussian elimination with
+    partial pivoting. Pure Python (no numpy) so it has no compiled
+    dependency to load.
+    """
+    n = len(a)
+    aug = [row[:] + [b[i]] for i, row in enumerate(a)]
+
+    for col in range(n):
+        pivot_row = max(range(col, n), key=lambda r: abs(aug[r][col]))
+        if abs(aug[pivot_row][col]) < 1e-9:
+            raise ValueError("Truss solution failed - check supports and geometry")
+        aug[col], aug[pivot_row] = aug[pivot_row], aug[col]
+
+        pivot = aug[col][col]
+        aug[col] = [v / pivot for v in aug[col]]
+
+        for r in range(n):
+            if r != col:
+                factor = aug[r][col]
+                if factor != 0:
+                    aug[r] = [aug[r][k] - factor * aug[col][k] for k in range(n + 1)]
+
+    return [aug[i][n] for i in range(n)]
+
+
+def _least_squares_solve(a, b):
+    """Solve Ax = b, falling back to the normal-equations least-squares
+    solution (A^T A x = A^T b) when the system is not square (e.g. an
+    over- or under-supported truss).
+    """
+    n_rows = len(a)
+    n_cols = len(a[0]) if n_rows else 0
+
+    if n_rows == n_cols:
+        return _gaussian_solve(a, b)
+
+    ata = [[sum(a[k][i] * a[k][j] for k in range(n_rows)) for j in range(n_cols)]
+           for i in range(n_cols)]
+    atb = [sum(a[k][i] * b[k] for k in range(n_rows)) for i in range(n_cols)]
+    return _gaussian_solve(ata, atb)

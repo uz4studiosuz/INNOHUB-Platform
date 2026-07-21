@@ -65,6 +65,21 @@ export default function RootLayout({
               <Link href="/modules/structures" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-[rgba(255,255,255,0.04)] text-gray-300 hover:text-white transition-all text-sm font-medium">
                 🏗️ Tuzilmalar (Structures)
               </Link>
+              <Link href="/modules/drone" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-[rgba(255,255,255,0.04)] text-gray-300 hover:text-white transition-all text-sm font-medium">
+                🚁 Dron (Drone)
+              </Link>
+              <Link href="/modules/rover" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-[rgba(255,255,255,0.04)] text-gray-300 hover:text-white transition-all text-sm font-medium">
+                🔴 Rover (Mars)
+              </Link>
+              <Link href="/modules/prosthetics" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-[rgba(255,255,255,0.04)] text-gray-300 hover:text-white transition-all text-sm font-medium">
+                🦾 Protez (Prosthetics)
+              </Link>
+              <Link href="/modules/physics-lab" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-[rgba(255,255,255,0.04)] text-gray-300 hover:text-white transition-all text-sm font-medium">
+                🔬 Fizika laboratoriyasi
+              </Link>
+              <Link href="/modules/microelectronics" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-[rgba(255,255,255,0.04)] text-gray-300 hover:text-white transition-all text-sm font-medium">
+                💾 Mikroelektronika
+              </Link>
             </nav>
 
             {/* Sidebar Footer */}

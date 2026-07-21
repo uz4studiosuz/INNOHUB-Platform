@@ -1,0 +1,167 @@
+"use client";
+
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Stage, Layer, Rect, Circle, Line, Text, Group } from "react-konva";
+import type { KonvaEventObject } from "konva/lib/Node";
+import { TrussNode, TrussMemberDraft, BuilderMode, SolvedMember } from "./types";
+
+const GRID_SIZE = 30;
+
+function snap(v: number): number {
+  return Math.round(v / GRID_SIZE) * GRID_SIZE;
+}
+
+function supportGlyph(support: TrussNode["support"], x: number, y: number) {
+  if (support === "none") return null;
+  if (support === "pin") {
+    return <RegularTriangle x={x} y={y + 10} size={16} fill="#475569" />;
+  }
+  // rollers: triangle + small circles underneath
+  return (
+    <Group>
+      <RegularTriangle x={x} y={y + 10} size={16} fill="#94a3b8" />
+      <Circle x={x - 6} y={y + 22} radius={3} fill="#94a3b8" />
+      <Circle x={x + 6} y={y + 22} radius={3} fill="#94a3b8" />
+    </Group>
+  );
+}
+
+function RegularTriangle({ x, y, size, fill }: { x: number; y: number; size: number; fill: string }) {
+  const points = [x, y, x - size / 2, y + size, x + size / 2, y + size];
+  return <Line points={points} closed fill={fill} />;
+}
+
+function LoadArrow({ x, y, fx, fy }: { x: number; y: number; fx: number; fy: number }) {
+  if (fx === 0 && fy === 0) return null;
+  // Screen y grows downward; a negative fy (downward load) draws an arrow pointing down.
+  const scale = 0.03;
+  const dx = fx * scale;
+  const dy = -fy * scale;
+  const endX = x + dx;
+  const endY = y + dy;
+  return (
+    <Group>
+      <Line points={[x, y, endX, endY]} stroke="#dc2626" strokeWidth={2} />
+      <RegularTriangle x={endX} y={endY - 6} size={10} fill="#dc2626" />
+    </Group>
+  );
+}
+
+interface TrussCanvasProps {
+  nodes: TrussNode[];
+  members: TrussMemberDraft[];
+  mode: BuilderMode;
+  memberFirstNode: string | null;
+  solved: Map<string, SolvedMember> | null;
+  onAddNode: (x: number, y: number) => void;
+  onNodeClick: (id: string) => void;
+  onNodeDrag: (id: string, x: number, y: number) => void;
+  onMemberClick: (id: string) => void;
+}
+
+export default function TrussCanvas({
+  nodes,
+  members,
+  mode,
+  memberFirstNode,
+  solved,
+  onAddNode,
+  onNodeClick,
+  onNodeDrag,
+  onMemberClick,
+}: TrussCanvasProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [dimensions, setDimensions] = useState({ width: 800, height: 500 });
+
+  useEffect(() => {
+    function resize() {
+      if (containerRef.current) {
+        setDimensions({ width: containerRef.current.offsetWidth, height: containerRef.current.offsetHeight });
+      }
+    }
+    resize();
+    window.addEventListener("resize", resize);
+    return () => window.removeEventListener("resize", resize);
+  }, []);
+
+  const handleStageClick = useCallback(
+    (e: KonvaEventObject<MouseEvent>) => {
+      const stage = e.target.getStage();
+      if (e.target === stage && mode === "node" && stage) {
+        const pos = stage.getPointerPosition();
+        if (pos) onAddNode(snap(pos.x), snap(pos.y));
+      }
+    },
+    [mode, onAddNode]
+  );
+
+  const nodeMap = new Map(nodes.map((n) => [n.id, n]));
+  const gridLines = [];
+  for (let x = 0; x <= dimensions.width; x += GRID_SIZE) {
+    gridLines.push(<Line key={`gx${x}`} points={[x, 0, x, dimensions.height]} stroke="#1e2a44" strokeWidth={0.5} />);
+  }
+  for (let y = 0; y <= dimensions.height; y += GRID_SIZE) {
+    gridLines.push(<Line key={`gy${y}`} points={[0, y, dimensions.width, y]} stroke="#1e2a44" strokeWidth={0.5} />);
+  }
+
+  return (
+    <div ref={containerRef} className="flex-1 relative" style={{ background: "#0f1e3d" }}>
+      <Stage width={dimensions.width} height={dimensions.height} onClick={handleStageClick}>
+        <Layer>
+          <Rect x={0} y={0} width={dimensions.width} height={dimensions.height} fill="#0f1e3d" />
+          {gridLines}
+        </Layer>
+
+        <Layer>
+          {members.map((m) => {
+            const a = nodeMap.get(m.nodeA);
+            const b = nodeMap.get(m.nodeB);
+            if (!a || !b) return null;
+            const res = solved?.get(m.id);
+            const color = res ? (res.safetyFactor < 1 ? "#ff0000" : res.inTension ? "#3b82f6" : "#ef4444") : "#94a3b8";
+            const midX = (a.x + b.x) / 2;
+            const midY = (a.y + b.y) / 2;
+            return (
+              <Group key={m.id} onClick={() => mode === "delete" && onMemberClick(m.id)}>
+                <Line points={[a.x, a.y, b.x, b.y]} stroke={color} strokeWidth={res && res.safetyFactor < 1 ? 5 : 3} />
+                {res && (
+                  <Text
+                    x={midX - 16}
+                    y={midY - 8}
+                    text={res.safetyFactor < 1 ? "FAIL" : res.safetyFactor.toFixed(1)}
+                    fontSize={9}
+                    fill="#e2e8f0"
+                    fontStyle="bold"
+                  />
+                )}
+              </Group>
+            );
+          })}
+        </Layer>
+
+        <Layer>
+          {memberFirstNode && nodeMap.get(memberFirstNode) && (
+            <Circle x={nodeMap.get(memberFirstNode)!.x} y={nodeMap.get(memberFirstNode)!.y} radius={12} stroke="#facc15" strokeWidth={2} />
+          )}
+          {nodes.map((n) => (
+            <Group key={n.id}>
+              <LoadArrow x={n.x} y={n.y} fx={n.loadFx} fy={n.loadFy} />
+              {supportGlyph(n.support, n.x, n.y)}
+              <Circle
+                x={n.x}
+                y={n.y}
+                radius={7}
+                fill="#e2e8f0"
+                stroke="#0f1e3d"
+                strokeWidth={2}
+                draggable={mode === "node"}
+                onClick={() => onNodeClick(n.id)}
+                onDragEnd={(e) => onNodeDrag(n.id, snap(e.target.x()), snap(e.target.y()))}
+              />
+            </Group>
+          ))}
+        </Layer>
+      </Stage>
+    </div>
+  );
+}
