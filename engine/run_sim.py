@@ -85,8 +85,11 @@ def run_circuit(params):
     # Resistor 2: Row 2 Left to Row 3 Left
     bb.add_resistor(r2_val, 2, 2, 3, 2)
     
-    # LED: Row 3 Left to GND (Row 1 Col 9 / Row 3 Col 9)
-    bb.add_led(led_v, led_i, 3, 3, 3, 9)
+    # LED: Row 3 Left back to the battery's negative rail (Row 1 Col 9), closing the loop.
+    # Each row's "right" strip is its own isolated node (real breadboard rows aren't
+    # bridged automatically), so returning to (3, 9) would leave the LED dangling on a
+    # dead-end node instead of completing the series circuit.
+    bb.add_led(led_v, led_i, 3, 3, 1, 9)
     
     # Solve circuit
     try:

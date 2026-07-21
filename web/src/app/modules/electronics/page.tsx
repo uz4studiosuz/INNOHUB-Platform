@@ -37,8 +37,8 @@ export default function ElectronicsPage() {
       } else {
         setResult(data);
       }
-    } catch (err: any) {
-      setError(err.message || "Xatolik yuz berdi");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Xatolik yuz berdi");
     } finally {
       setLoading(false);
     }
@@ -51,7 +51,8 @@ export default function ElectronicsPage() {
   const isLedBurned = actualLedI > ledI * 1.5; // Burn if actual current is 50% higher than max current
 
   return (
-    <div className="flex flex-col gap-6 max-w-6xl mx-auto py-2">
+    <div className="flex-1 bg-[#080b11] overflow-y-auto">
+    <div className="flex flex-col gap-6 max-w-6xl mx-auto py-8 p-8">
       <div className="flex flex-col gap-1">
         <span className="text-xs font-bold text-emerald-500 tracking-wider uppercase">Elektrotexnika Laboratoriyasi</span>
         <h1 className="text-3xl font-extrabold text-white">Elektronika: Breadboard Simulyatsiyasi</h1>
@@ -209,6 +210,7 @@ export default function ElectronicsPage() {
           )}
         </div>
       </div>
+    </div>
     </div>
   );
 }

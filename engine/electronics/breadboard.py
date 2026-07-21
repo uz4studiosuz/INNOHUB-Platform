@@ -119,17 +119,24 @@ class Breadboard:
                                   max_current=max_current_A)
 
     def _get_node_indices(self):
-        """Map node IDs to matrix indices for nodal analysis."""
-        # Only consider nodes that have components connected
+        """Map node IDs to matrix indices for nodal analysis.
+
+        Nodal analysis requires exactly one reference (0V) node, otherwise
+        the conductance matrix is singular (voltages are only determined up
+        to an additive constant). The literal "gnd" node is used as
+        reference when a component actually connects to it; since hole-based
+        wiring (see hole_node()) never produces "gnd" as an endpoint, we fall
+        back to the first active node so every circuit has a valid reference.
+        """
         active_nodes = set()
         for comp in self.components:
             active_nodes.add(comp.node_a)
             active_nodes.add(comp.node_b)
 
-        # GND is reference (0V), exclude from equations
-        active_nodes.discard("gnd")
+        reference = "gnd" if "gnd" in active_nodes else (sorted(active_nodes)[0] if active_nodes else None)
+        active_nodes.discard(reference)
         active_nodes = sorted(active_nodes)
-        return {nid: i for i, nid in enumerate(active_nodes)}, active_nodes
+        return {nid: i for i, nid in enumerate(active_nodes)}, active_nodes, reference
 
     def solve_dc(self):
         """Solve circuit using modified nodal analysis (DC only).
@@ -141,7 +148,7 @@ class Breadboard:
         if not self.components:
             return {}
 
-        node_map, active_nodes = self._get_node_indices()
+        node_map, active_nodes, reference = self._get_node_indices()
         n = len(active_nodes)
         if n == 0:
             return {}
@@ -215,6 +222,8 @@ class Breadboard:
                 V, _, _, _ = np.linalg.lstsq(G, I, rcond=None)
 
             voltages = {"gnd": 0.0}
+            if reference is not None:
+                voltages[reference] = 0.0
             for i, nid in enumerate(active_nodes):
                 voltages[nid] = V[i]
 

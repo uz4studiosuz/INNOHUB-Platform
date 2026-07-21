@@ -204,71 +204,75 @@ export default function PhysicsLabPage() {
   }, [tab, experiment, values]);
 
   return (
-    <div className="flex flex-col min-h-screen p-6 gap-6">
-      <h1 className="text-3xl font-bold">Fizika Laboratoriyasi</h1>
-      <p className="text-gray-600 max-w-2xl">
-        Fizik kattaliklarni hisoblang. Manbalar: Halliday Resnick - Fundamentals of Physics.
-      </p>
-
-      <div className="flex flex-wrap gap-8">
-        <div className="flex flex-col gap-4 min-w-[280px] bg-gray-50 rounded-xl p-5 border border-gray-200">
-          <h2 className="font-semibold text-lg">Laboratoriya</h2>
-
-          <div className="flex gap-2 flex-wrap">
-            {(["mechanics", "electricity", "waves", "thermo"] as const).map(t => (
-              <button key={t} onClick={() => { setTab(t); setExpIndex(0); resetForExperiment(LAB_EXPERIMENTS[t][0]); }}
-                className={`px-3 py-1 rounded text-sm font-medium ${tab === t ? "bg-lime-600 text-white" : "bg-gray-200 text-gray-700"}`}>
-                {t === "mechanics" ? "Mexanika" : t === "electricity" ? "Elektr" : t === "waves" ? "To'lqinlar" : "Termo"}
-              </button>
-            ))}
-          </div>
-
-          <label className="flex flex-col gap-1">
-            <span className="text-sm text-gray-600">Tajriba</span>
-            <select value={expIndex} onChange={e => { const i = Number(e.target.value); setExpIndex(i); resetForExperiment(experiments[i]); }}
-              className="border border-gray-300 rounded px-2 py-1 text-sm">
-              {experiments.map((exp, i) => <option key={exp.key} value={i}>{exp.label}</option>)}
-            </select>
-          </label>
-
-          {experiment.fields.map(f => (
-            <label key={f.key} className="flex flex-col gap-1">
-              <span className="text-sm text-gray-600">{f.label}{f.unit ? ` (${f.unit})` : ""}</span>
-              <input
-                type="number"
-                step={f.step ?? 1}
-                value={values[f.key] ?? f.default}
-                onChange={e => setValues(v => ({ ...v, [f.key]: Number(e.target.value) }))}
-                className="border border-gray-300 rounded px-2 py-1 text-sm"
-              />
-            </label>
-          ))}
-
-          <button onClick={handleCompute} disabled={loading} className="mt-2 rounded-xl bg-lime-600 px-6 py-3 text-white font-semibold hover:bg-lime-700 disabled:opacity-50 transition-colors shadow-md">
-            {loading ? "Hisoblanmoqda..." : "▶ Hisoblash"}
-          </button>
+    <div className="flex-1 bg-[#080b11] overflow-y-auto">
+      <div className="flex flex-col gap-6 max-w-6xl mx-auto py-8 p-8 text-white">
+        <div>
+          <h1 className="text-3xl font-bold">Fizika Laboratoriyasi</h1>
+          <p className="text-slate-400 max-w-2xl mt-2">
+            Fizik kattaliklarni hisoblang. Manba: Halliday Resnick — Fundamentals of Physics.
+          </p>
         </div>
 
-        <div className="flex-1 min-w-[320px] flex flex-col gap-4">
-          {error && (
-            <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-600">
-              ❌ Xatolik: {error}
-            </div>
-          )}
+        <div className="flex flex-wrap gap-8">
+          <div className="flex flex-col gap-4 min-w-[280px] bg-[#0a0e18] rounded-xl p-5 border border-[rgba(255,255,255,0.1)]">
+            <h2 className="font-semibold text-lg">Laboratoriya</h2>
 
-          {resultEntries.length > 0 && (
-            <div className="bg-lime-50 rounded-xl p-6 border border-lime-200">
-              <h2 className="font-semibold text-lg mb-4">Natijalar</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {resultEntries.map(([key, value]) => (
-                  <div key={key} className="bg-white rounded-lg p-3 border border-lime-100">
-                    <div className="text-xs text-lime-700">{formatResultKey(key)}</div>
-                    <div className="text-lg font-bold text-lime-900">{formatResultValue(value as number)}</div>
-                  </div>
-                ))}
-              </div>
+            <div className="flex gap-2 flex-wrap">
+              {(["mechanics", "electricity", "waves", "thermo"] as const).map(t => (
+                <button key={t} onClick={() => { setTab(t); setExpIndex(0); resetForExperiment(LAB_EXPERIMENTS[t][0]); }}
+                  className={`px-3 py-1 rounded text-sm font-medium cursor-pointer ${tab === t ? "bg-lime-600 text-white" : "bg-[#141a2b] text-slate-300 border border-[rgba(255,255,255,0.1)]"}`}>
+                  {t === "mechanics" ? "Mexanika" : t === "electricity" ? "Elektr" : t === "waves" ? "To'lqinlar" : "Termo"}
+                </button>
+              ))}
             </div>
-          )}
+
+            <label className="flex flex-col gap-1">
+              <span className="text-sm text-slate-400">Tajriba</span>
+              <select value={expIndex} onChange={e => { const i = Number(e.target.value); setExpIndex(i); resetForExperiment(experiments[i]); }}
+                className="border border-[rgba(255,255,255,0.15)] bg-[#0a0e18] rounded px-2 py-1 text-sm">
+                {experiments.map((exp, i) => <option key={exp.key} value={i}>{exp.label}</option>)}
+              </select>
+            </label>
+
+            {experiment.fields.map(f => (
+              <label key={f.key} className="flex flex-col gap-1">
+                <span className="text-sm text-slate-400">{f.label}{f.unit ? ` (${f.unit})` : ""}</span>
+                <input
+                  type="number"
+                  step={f.step ?? 1}
+                  value={values[f.key] ?? f.default}
+                  onChange={e => setValues(v => ({ ...v, [f.key]: Number(e.target.value) }))}
+                  className="border border-[rgba(255,255,255,0.15)] bg-[#0a0e18] rounded px-2 py-1 text-sm"
+                />
+              </label>
+            ))}
+
+            <button onClick={handleCompute} disabled={loading} className="mt-2 rounded-xl bg-lime-600 px-6 py-3 text-white font-semibold hover:bg-lime-700 disabled:opacity-50 transition-colors shadow-md cursor-pointer">
+              {loading ? "Hisoblanmoqda..." : "▶ Hisoblash"}
+            </button>
+          </div>
+
+          <div className="flex-1 min-w-[320px] flex flex-col gap-4">
+            {error && (
+              <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 text-sm text-red-300">
+                ❌ Xatolik: {error}
+              </div>
+            )}
+
+            {resultEntries.length > 0 && (
+              <div className="bg-lime-500/10 rounded-xl p-6 border border-lime-500/30">
+                <h2 className="font-semibold text-lg mb-4">Natijalar</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {resultEntries.map(([key, value]) => (
+                    <div key={key} className="bg-[#0a0e18] rounded-lg p-3 border border-lime-500/20">
+                      <div className="text-xs text-lime-400">{formatResultKey(key)}</div>
+                      <div className="text-lg font-bold text-white">{formatResultValue(value as number)}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
