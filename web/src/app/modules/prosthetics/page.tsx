@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import { logIteration } from "../../../store/iterationStore";
 
 const MATERIALS = [
   { id: "aluminum_6061", name: "Alyuminiy 6061", E: 68.9, density: 2700, yield: 276 },
@@ -60,6 +61,11 @@ export default function ProstheticsPage() {
         return;
       }
       setResult(data);
+      logIteration(
+        "prosthetics",
+        { limbMass, limbLen, angle, loadN, matId, actuatorN },
+        { label: "Xavfsizlik koeff.", value: data.safety_factor }
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : "Xatolik yuz berdi");
     } finally {

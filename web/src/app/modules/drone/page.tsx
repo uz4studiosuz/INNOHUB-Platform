@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import { logIteration } from "../../../store/iterationStore";
 
 type DroneResult = {
   hover_rpm: number;
@@ -44,6 +45,11 @@ export default function DronePage() {
         return;
       }
       setResult(data);
+      logIteration(
+        "drone",
+        { mass, armLen, kt, maxRpm, propDia },
+        { label: "T/W nisbati", value: data.tw_ratio }
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : "Xatolik yuz berdi");
     } finally {

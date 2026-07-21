@@ -1,15 +1,22 @@
 "use client";
 
+import { Leaderboard } from "../../../../components/module-shell/Leaderboard";
+
 export default function RoverCompetitionPage() {
   return (
-    <div className="flex-1 p-8 bg-[#080b11] text-white overflow-y-auto flex items-center justify-center">
-      <div className="text-center max-w-lg">
-        <div className="text-5xl mb-4">🏆</div>
-        <h1 className="text-2xl font-bold mb-2">Competition — Mars Rally</h1>
-        <p className="text-slate-400 text-sm">
-          Rovlarni masofa, tezlik va nishab yengish qobiliyati bo&apos;yicha reytingda solishtirish moduli tez orada qo&apos;shiladi.
-        </p>
-      </div>
-    </div>
+    <Leaderboard
+      title="Competition — Mars Rally"
+      moduleKey="rover"
+      direction="max"
+      metricLabel="Masofa (m)"
+      unit=" m"
+      mockEntries={[
+        { name: "Alisher T.", value: 42.5 },
+        { name: "Dilnoza R.", value: 35.1 },
+        { name: "Javlon K.", value: 28.7 },
+        { name: "Madina S.", value: 21.3 },
+      ]}
+      color="#ea580c"
+    />
   );
 }

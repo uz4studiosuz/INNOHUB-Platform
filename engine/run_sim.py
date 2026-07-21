@@ -701,6 +701,35 @@ def run_physics_lab(params):
 
     return {"error": f"Unknown physics lab: {lab}"}
 
+def run_microelectronics(params):
+    from electronics.microcontroller import (
+        power_consumption_W, cycle_time_s, loop_time_s, gpio_budget, battery_life_hours,
+    )
+
+    clock_hz = params.get("clockHz", 16_000_000)
+    supply_v = params.get("supplyV", 5.0)
+    mcu_idle_a = params.get("mcuIdleCurrentA", 0.02)
+    peripheral_currents = params.get("peripheralCurrentsA", [])
+    instructions_per_loop = params.get("instructionsPerLoop", 1000)
+    gpio_total = params.get("gpioTotal", 20)
+    gpio_used = params.get("gpioUsed", 0)
+    battery_mah = params.get("batteryCapacityMah", 2000)
+
+    currents = [mcu_idle_a] + list(peripheral_currents)
+    total_current_a = sum(currents)
+    power_w = power_consumption_W(supply_v, currents)
+    remaining_pins = gpio_budget(gpio_total, gpio_used)
+
+    return {
+        "power_W": power_w,
+        "total_current_A": total_current_a,
+        "cycle_time_ns": cycle_time_s(clock_hz) * 1e9,
+        "loop_time_us": loop_time_s(clock_hz, instructions_per_loop) * 1e6,
+        "gpio_remaining": remaining_pins,
+        "gpio_over_budget": remaining_pins < 0,
+        "battery_life_hours": battery_life_hours(battery_mah, total_current_a) if total_current_a > 0 else float("inf"),
+    }
+
 def main():
     try:
         # Read from stdin if args are empty
@@ -737,6 +766,8 @@ def main():
             result = run_aerodynamics(params)
         elif module == "physics_lab":
             result = run_physics_lab(params)
+        elif module == "microelectronics":
+            result = run_microelectronics(params)
         else:
             result = {"error": f"Unknown module '{module}'"}
             

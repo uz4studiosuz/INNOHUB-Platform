@@ -1,15 +1,22 @@
 "use client";
 
+import { Leaderboard } from "../../../../components/module-shell/Leaderboard";
+
 export default function ElectronicsCompetitionPage() {
   return (
-    <div className="flex-1 p-8 bg-[#080b11] text-white overflow-y-auto flex items-center justify-center">
-      <div className="text-center max-w-lg">
-        <div className="text-5xl mb-4">🏆</div>
-        <h1 className="text-2xl font-bold mb-2">Competition — Circuit Challenge</h1>
-        <p className="text-slate-400 text-sm">
-          Eng samarali (kam quvvat isrofi bilan) sxema dizayni bo&apos;yicha reytingda solishtirish moduli tez orada qo&apos;shiladi.
-        </p>
-      </div>
-    </div>
+    <Leaderboard
+      title="Competition — Circuit Challenge"
+      moduleKey="electronics"
+      direction="max"
+      metricLabel="LED zapas toki (mA)"
+      unit=" mA"
+      mockEntries={[
+        { name: "Alisher T.", value: 12.4 },
+        { name: "Dilnoza R.", value: 9.1 },
+        { name: "Javlon K.", value: 6.7 },
+        { name: "Madina S.", value: 3.2 },
+      ]}
+      color="#059669"
+    />
   );
 }

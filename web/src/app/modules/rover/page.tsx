@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import { logIteration } from "../../../store/iterationStore";
 
 type RoverResult = {
   final_distance_m: number;
@@ -44,6 +45,11 @@ export default function RoverPage() {
         return;
       }
       setResult(data);
+      logIteration(
+        "rover",
+        { mass, torque, gear, incline, crr },
+        { label: "Masofa (m)", value: data.final_distance_m }
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : "Xatolik yuz berdi");
     } finally {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
+import { logIteration } from "../../../store/iterationStore";
 
 type LabTab = "mechanics" | "electricity" | "waves" | "thermo";
 
@@ -196,6 +197,14 @@ export default function PhysicsLabPage() {
         return;
       }
       setResult(data);
+      const firstNumeric = Object.entries(data).find(([, v]) => typeof v === "number") as [string, number] | undefined;
+      if (firstNumeric) {
+        logIteration(
+          "physics-lab",
+          { lab: tab, experiment: experiment.key, ...values },
+          { label: formatResultKey(firstNumeric[0]), value: firstNumeric[1] }
+        );
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Xatolik yuz berdi");
     } finally {

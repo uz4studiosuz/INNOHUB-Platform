@@ -73,7 +73,9 @@ export default function MicroelectronicsResearchPage() {
           <p>
             ENGINEERING tab&apos;ida 6 ta real komponent (ATmega328P, ESP32, RP2040, 74HC595, LM358,
             Arduino Uno R3) orasidan birini tanlab, uning klock tezligi, xotira, pinlar va
-            kuchlanish parametrlarini solishtirib ko&apos;rishingiz mumkin.
+            kuchlanish parametrlarini solishtirib ko&apos;rishingiz mumkin. Shu bilan birga, quvvat va
+            GPIO kalkulyatori orqali ulangan periferiyalar sonini, sikl vaqtini, GPIO pin budjetini
+            va batareya muddatini real vaqtda hisoblashingiz mumkin.
           </p>
         </Section>
       </div>

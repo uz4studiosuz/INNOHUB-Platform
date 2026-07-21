@@ -1,15 +1,21 @@
 "use client";
 
+import { Leaderboard } from "../../../../components/module-shell/Leaderboard";
+
 export default function ProstheticsCompetitionPage() {
   return (
-    <div className="flex-1 p-8 bg-[#080b11] text-white overflow-y-auto flex items-center justify-center">
-      <div className="text-center max-w-lg">
-        <div className="text-5xl mb-4">🏆</div>
-        <h1 className="text-2xl font-bold mb-2">Competition — Grip Challenge</h1>
-        <p className="text-slate-400 text-sm">
-          Protezlarni tutish kuchi va batareya muddati bo&apos;yicha reytingda solishtirish moduli tez orada qo&apos;shiladi.
-        </p>
-      </div>
-    </div>
+    <Leaderboard
+      title="Competition — Grip Challenge"
+      moduleKey="prosthetics"
+      direction="max"
+      metricLabel="Xavfsizlik koeffitsienti"
+      mockEntries={[
+        { name: "Alisher T.", value: 4.2 },
+        { name: "Dilnoza R.", value: 3.5 },
+        { name: "Javlon K.", value: 2.8 },
+        { name: "Madina S.", value: 2.1 },
+      ]}
+      color="#0d9488"
+    />
   );
 }

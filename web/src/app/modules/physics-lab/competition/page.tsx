@@ -1,15 +1,21 @@
 "use client";
 
+import { Leaderboard } from "../../../../components/module-shell/Leaderboard";
+
 export default function PhysicsLabCompetitionPage() {
   return (
-    <div className="flex-1 p-8 bg-[#080b11] text-white overflow-y-auto flex items-center justify-center">
-      <div className="text-center max-w-lg">
-        <div className="text-5xl mb-4">🏆</div>
-        <h1 className="text-2xl font-bold mb-2">Competition — Physics Bowl</h1>
-        <p className="text-slate-400 text-sm">
-          Fizika bilim testlari va tezkor hisoblash musobaqasi moduli tez orada qo&apos;shiladi.
-        </p>
-      </div>
-    </div>
+    <Leaderboard
+      title="Competition — Physics Bowl"
+      moduleKey="physics-lab"
+      direction="max"
+      metricLabel="Oxirgi tajriba natijasi (birligi tajribaga bog'liq)"
+      mockEntries={[
+        { name: "Alisher T.", value: 87 },
+        { name: "Dilnoza R.", value: 64 },
+        { name: "Javlon K.", value: 51 },
+        { name: "Madina S.", value: 38 },
+      ]}
+      color="#65a30d"
+    />
   );
 }

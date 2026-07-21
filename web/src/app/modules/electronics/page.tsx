@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import { logIteration } from "../../../store/iterationStore";
 
 type BreadboardResult = {
   voltage_drops: number[];
@@ -36,6 +37,13 @@ export default function ElectronicsPage() {
         setError(data.error);
       } else {
         setResult(data);
+        const actualI = Math.max(0, (supplyV - ledV) / (r1 + r2));
+        const marginMa = (ledI * 1.5 - actualI) * 1000;
+        logIteration(
+          "electronics",
+          { supplyV, r1, r2, ledV, ledI },
+          { label: "LED zapas toki", value: marginMa, unit: " mA" }
+        );
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Xatolik yuz berdi");
