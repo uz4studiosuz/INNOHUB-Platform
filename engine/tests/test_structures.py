@@ -65,6 +65,103 @@ def test_truss_member_safety_factor():
     assert abs(sf - 25.0) < 0.1
 
 
+def test_truss_member_mass_kg():
+    m = TrussMember(0, 1, area_m2=1e-4, density_kg_m3=2700.0)
+    nodes = [(0, 0), (3, 4)]  # length 5
+    expected = 5.0 * 1e-4 * 2700.0
+    assert abs(m.mass_kg(nodes) - expected) < 1e-9
+
+
+def test_truss_member_moment_of_inertia():
+    m = TrussMember(0, 1, area_m2=1e-4)
+    expected = (1e-4) ** 2 / 12.0
+    assert abs(m.moment_of_inertia_m4() - expected) < 1e-15
+
+
+def test_truss_member_buckling_critical_load():
+    m = TrussMember(0, 1, area_m2=1e-4, modulus_elasticity_pa=200e9)
+    nodes = [(0, 0), (2, 0)]  # length 2
+    I = (1e-4) ** 2 / 12.0
+    expected = math.pi ** 2 * 200e9 * I / (2.0 ** 2)
+    assert abs(m.buckling_critical_load(nodes) - expected) < 1e-3
+
+
+def test_truss_total_mass_kg():
+    truss = Truss()
+    truss.add_node(0, 0)
+    truss.add_node(3, 4)
+    truss.add_member(0, 1, area_m2=1e-4, density_kg_m3=2700.0)
+    expected = 5.0 * 1e-4 * 2700.0
+    assert abs(truss.total_mass_kg() - expected) < 1e-9
+
+
+def test_truss_load_test_failure_load_and_efficiency():
+    # Simple triangle, hand-computed reference: at fy=-1000N, method-of-joints
+    # gives member forces of +500 (tension, node0-node1), -559.017 (compression,
+    # diagonals) for this 2-2-sqrt5-ish geometry - verified against test_truss_solve_simple's
+    # topology so the linear-scaling failure load can be cross-checked by hand.
+    truss = Truss()
+    truss.add_node(0, 0)     # 0
+    truss.add_node(2, 0)     # 1
+    truss.add_node(1, 2)     # 2
+    truss.add_member(0, 1, area_m2=1e-4, E=200e9, yield_stress=250e6, density_kg_m3=7850.0)
+    truss.add_member(0, 2, area_m2=1e-4, E=200e9, yield_stress=250e6, density_kg_m3=7850.0)
+    truss.add_member(1, 2, area_m2=1e-4, E=200e9, yield_stress=250e6, density_kg_m3=7850.0)
+    truss.add_pin_support(0)
+    truss.add_roller_support_h(1)
+    truss.add_load(2, fy=-1000)
+
+    result = truss.load_test()
+
+    # Hand-check: diagonal members compress the most and are slender enough
+    # that Euler buckling governs their failure, not yield.
+    assert result["failing_member_index"] in (1, 2)
+    failing_member = result["members"][result["failing_member_index"]]
+    assert failing_member["is_buckling"] is True
+    assert failing_member["in_tension"] is False
+
+    # Efficiency = failure load / structure weight, both must be positive and finite.
+    assert result["failure_load_N"] > 0
+    assert result["structure_mass_kg"] > 0
+    expected_efficiency = result["failure_load_N"] / (result["structure_mass_kg"] * 9.81)
+    assert abs(result["efficiency"] - expected_efficiency) < 1e-6
+
+
+def test_truss_load_test_different_material_changes_efficiency():
+    def build(density, yield_stress):
+        truss = Truss()
+        truss.add_node(0, 0)
+        truss.add_node(2, 0)
+        truss.add_node(1, 2)
+        truss.add_member(0, 1, area_m2=1e-4, E=200e9, yield_stress=yield_stress, density_kg_m3=density)
+        truss.add_member(0, 2, area_m2=1e-4, E=200e9, yield_stress=yield_stress, density_kg_m3=density)
+        truss.add_member(1, 2, area_m2=1e-4, E=200e9, yield_stress=yield_stress, density_kg_m3=density)
+        truss.add_pin_support(0)
+        truss.add_roller_support_h(1)
+        truss.add_load(2, fy=-1000)
+        return truss
+
+    balsa = build(160.0, 15e6).load_test()
+    steel = build(8000.0, 250e6).load_test()
+
+    # Same geometry/load, much lighter material -> better (higher) efficiency.
+    assert balsa["structure_mass_kg"] < steel["structure_mass_kg"]
+    assert balsa["efficiency"] != steel["efficiency"]
+
+
+def test_truss_load_test_requires_nonzero_load():
+    import pytest
+    truss = Truss()
+    truss.add_node(0, 0)
+    truss.add_node(2, 0)
+    truss.add_member(0, 1)
+    truss.add_pin_support(0)
+    truss.add_roller_support_h(1)
+    truss.add_load(1, fx=0, fy=0)
+    with pytest.raises(ValueError):
+        truss.load_test()
+
+
 def test_truss_solve_simple():
     truss = Truss()
     truss.add_node(0, 0)    # 0
@@ -159,6 +256,13 @@ if __name__ == "__main__":
     test_truss_member_direction()
     test_truss_member_stress()
     test_truss_member_safety_factor()
+    test_truss_member_mass_kg()
+    test_truss_member_moment_of_inertia()
+    test_truss_member_buckling_critical_load()
+    test_truss_total_mass_kg()
+    test_truss_load_test_failure_load_and_efficiency()
+    test_truss_load_test_different_material_changes_efficiency()
+    test_truss_load_test_requires_nonzero_load()
     test_truss_solve_simple()
     test_bending_moment()
     test_bending_stress()

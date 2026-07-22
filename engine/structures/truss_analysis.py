@@ -7,17 +7,20 @@ Sources:
 
 import math
 
+from structures.beam_analysis import euler_buckling_load
+
 
 class TrussMember:
     """Single truss member with end nodes and material properties."""
 
     def __init__(self, node_i, node_j, area_m2=1e-4, modulus_elasticity_pa=200e9,
-                 yield_stress_pa=250e6):
+                 yield_stress_pa=250e6, density_kg_m3=7850.0):
         self.node_i = node_i
         self.node_j = node_j
         self.area = area_m2
         self.E = modulus_elasticity_pa
         self.yield_stress = yield_stress_pa
+        self.density = density_kg_m3
         self.force = 0.0  # + = tension, - = compression
 
     def length(self, nodes):
@@ -54,6 +57,26 @@ class TrussMember:
     def is_compression(self):
         return self.force < 0
 
+    def mass_kg(self, nodes):
+        """m = L * A * rho - Member mass from its volume and material density."""
+        return self.length(nodes) * self.area * self.density
+
+    def moment_of_inertia_m4(self):
+        """I = a^2 / 12, assuming a square cross-section of side a (a^2 = area).
+        Used only for the Euler buckling check - real truss members (angle
+        iron, tubes, etc.) have a different I for the same area, but a square
+        section is a reasonable order-of-magnitude stand-in without asking
+        the user for a cross-section shape.
+        """
+        return self.area ** 2 / 12.0
+
+    def buckling_critical_load(self, nodes):
+        """P_cr = pi^2 * E * I / L^2 - Euler critical buckling load.
+        Only meaningful for members in compression.
+        """
+        L = self.length(nodes)
+        return euler_buckling_load(self.E, self.moment_of_inertia_m4(), L)
+
 
 class Truss:
     """2D truss structure with nodes and members.
@@ -73,8 +96,9 @@ class Truss:
         self.nodes.append((x, y))
         return idx
 
-    def add_member(self, node_i, node_j, area_m2=1e-4, E=200e9, yield_stress=250e6):
-        member = TrussMember(node_i, node_j, area_m2, E, yield_stress)
+    def add_member(self, node_i, node_j, area_m2=1e-4, E=200e9, yield_stress=250e6,
+                    density_kg_m3=7850.0):
+        member = TrussMember(node_i, node_j, area_m2, E, yield_stress, density_kg_m3)
         self.members.append(member)
         return len(self.members) - 1
 
@@ -155,6 +179,81 @@ class Truss:
             self.members[mi].force = x[mi]
 
         return [m.force for m in self.members]
+
+    def total_mass_kg(self):
+        """Sum of member masses (length * area * density) - the structure's own weight."""
+        return sum(m.mass_kg(self.nodes) for m in self.members)
+
+    def total_weight_N(self):
+        return self.total_mass_kg() * 9.81
+
+    def load_test(self):
+        """Linear load test: solve once at the truss's currently-set reference
+        load, then use proportional scaling (member forces in a linear truss
+        scale linearly with the applied load) to find the load multiplier at
+        which the first member fails - either by exceeding its material yield
+        stress (tension or compression) or, for members in compression, by
+        Euler buckling - whichever limit is lower.
+
+        Returns a dict with the failure load, structure mass/efficiency, the
+        index of the first member to fail, and per-member failure details.
+        """
+        self.solve()
+
+        ref_load_magnitude = sum(math.hypot(fx, fy) for fx, fy in self.loads.values())
+        if ref_load_magnitude <= 0:
+            raise ValueError("Load test requires at least one non-zero reference load")
+
+        mass_kg = self.total_mass_kg()
+        weight_N = mass_kg * 9.81
+
+        member_results = []
+        best_scale = float("inf")
+        failing_index = None
+
+        for i, m in enumerate(self.members):
+            f = m.force
+            axial_limit_N = m.yield_stress * m.area
+            is_buckling = False
+
+            if f < 0:
+                p_cr = m.buckling_critical_load(self.nodes)
+                limit_N = min(axial_limit_N, p_cr)
+                is_buckling = p_cr < axial_limit_N
+            else:
+                limit_N = axial_limit_N
+
+            if abs(f) < 1e-9:
+                member_scale = float("inf")
+            else:
+                member_scale = limit_N / abs(f)
+
+            member_failure_load_N = (
+                ref_load_magnitude * member_scale if member_scale != float("inf") else float("inf")
+            )
+
+            member_results.append({
+                "force_N": f,
+                "stress_Pa": m.stress(),
+                "in_tension": m.is_tension(),
+                "is_buckling": is_buckling,
+                "member_failure_load_N": member_failure_load_N,
+            })
+
+            if member_scale < best_scale:
+                best_scale = member_scale
+                failing_index = i
+
+        failure_load_N = ref_load_magnitude * best_scale
+        efficiency = failure_load_N / weight_N if weight_N > 0 else float("inf")
+
+        return {
+            "failure_load_N": failure_load_N,
+            "structure_mass_kg": mass_kg,
+            "efficiency": efficiency,
+            "failing_member_index": failing_index,
+            "members": member_results,
+        }
 
 
 def _gaussian_solve(a, b):

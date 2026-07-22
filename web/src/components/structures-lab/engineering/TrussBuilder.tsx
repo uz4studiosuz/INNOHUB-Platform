@@ -1,26 +1,51 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { TrussToolbar } from "./TrussToolbar";
 import { TrussNode, TrussMemberDraft, BuilderMode, MATERIALS, SolvedMember, SupportType } from "./types";
+import { buildTrussApiParams } from "./trussApiParams";
+import { loadTrussDesign, saveTrussDesign } from "../../../store/trussDesignStore";
 
 const TrussCanvas = dynamic(() => import("./TrussCanvas"), {
   ssr: false,
   loading: () => <div className="flex-1 flex items-center justify-center bg-[#0f1e3d] text-gray-400">Canvas yuklanmoqda...</div>,
 });
 
-const GRID_SIZE = 30;
-const UNIT_METERS = 0.5; // meters per grid cell
-
 let nodeCounter = 1;
 let memberCounter = 1;
+
+function maxIdNum(ids: string[], prefix: string): number {
+  let max = 0;
+  for (const id of ids) {
+    if (id.startsWith(prefix)) {
+      const n = parseInt(id.slice(prefix.length), 10);
+      if (!isNaN(n) && n > max) max = n;
+    }
+  }
+  return max;
+}
 
 const SUPPORT_CYCLE: SupportType[] = ["none", "pin", "roller_h", "roller_v"];
 
 export default function TrussBuilder() {
-  const [nodes, setNodes] = useState<TrussNode[]>([]);
-  const [members, setMembers] = useState<TrussMemberDraft[]>([]);
+  const [nodes, setNodes] = useState<TrussNode[]>(() => {
+    const saved = loadTrussDesign();
+    if (saved) {
+      nodeCounter = Math.max(nodeCounter, maxIdNum(saved.nodes.map((n) => n.id), "n") + 1);
+      return saved.nodes;
+    }
+    return [];
+  });
+  const [members, setMembers] = useState<TrussMemberDraft[]>(() => {
+    const saved = loadTrussDesign();
+    if (saved) {
+      memberCounter = Math.max(memberCounter, maxIdNum(saved.members.map((m) => m.id), "m") + 1);
+      return saved.members;
+    }
+    return [];
+  });
+  const [designName, setDesignName] = useState(() => loadTrussDesign()?.name ?? "Mening ko'prigim");
   const [mode, setMode] = useState<BuilderMode>("node");
   const [memberFirstNode, setMemberFirstNode] = useState<string | null>(null);
   const [materialId, setMaterialId] = useState(MATERIALS[0].id);
@@ -30,6 +55,12 @@ export default function TrussBuilder() {
   const [error, setError] = useState<string | null>(null);
 
   const material = MATERIALS.find((m) => m.id === materialId) ?? MATERIALS[0];
+
+  // Keep the design synced to storage so the Competition tab can pick up
+  // whatever was last built here, whenever the user navigates away.
+  useEffect(() => {
+    saveTrussDesign({ name: designName, nodes, members });
+  }, [designName, nodes, members]);
 
   const handleAddNode = useCallback((x: number, y: number) => {
     setNodes((prev) => [...prev, { id: `n${nodeCounter++}`, x, y, support: "none", loadFx: 0, loadFy: 0 }]);
@@ -59,6 +90,7 @@ export default function TrussBuilder() {
               areaM2: material.areaM2,
               yieldStrengthPa: material.yieldStrengthPa,
               E: material.E,
+              densityKgM3: material.densityKgM3,
               materialLabel: material.label,
             },
           ]);
@@ -114,23 +146,10 @@ export default function TrussBuilder() {
 
     setSolving(true);
     try {
-      const idx = new Map(nodes.map((n, i) => [n.id, i]));
-      const nodesParam = nodes.map((n) => [(n.x / GRID_SIZE) * UNIT_METERS, (-n.y / GRID_SIZE) * UNIT_METERS]);
-      const membersParam = members.map((m) => [idx.get(m.nodeA), idx.get(m.nodeB), m.areaM2, m.E, m.yieldStrengthPa]);
-      const supportsParam: Record<number, string> = {};
-      const loadsParam: Record<number, [number, number]> = {};
-      nodes.forEach((n, i) => {
-        if (n.support !== "none") supportsParam[i] = n.support;
-        if (n.loadFx !== 0 || n.loadFy !== 0) loadsParam[i] = [n.loadFx, n.loadFy];
-      });
-
       const response = await fetch("/api/simulate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          module: "truss",
-          params: { nodes: nodesParam, members: membersParam, supports: supportsParam, loads: loadsParam },
-        }),
+        body: JSON.stringify({ module: "truss", params: buildTrussApiParams(nodes, members) }),
       });
       const data = await response.json();
       if (data.error) {
@@ -200,11 +219,22 @@ export default function TrussBuilder() {
         />
 
         <aside className="w-64 shrink-0 bg-[#0a0e18] text-white p-4 overflow-y-auto text-xs">
+          <label className="flex flex-col gap-1 mb-3">
+            <span className="text-gray-500">Dizayn nomi</span>
+            <input
+              type="text"
+              value={designName}
+              onChange={(e) => setDesignName(e.target.value)}
+              className="bg-[#141a2b] border border-[rgba(255,255,255,0.1)] rounded px-2 py-1 text-white"
+            />
+          </label>
+
           <h3 className="font-bold text-sm mb-2">Natijalar</h3>
           {error && <div className="bg-red-500/20 border border-red-500/40 text-red-300 rounded p-2 mb-2">{error}</div>}
           {!solved && !error && (
             <p className="text-gray-500">
               Tugun (●) qo&apos;yib, a&apos;zo (╱) bilan ulang, tayanch va yuk belgilang, so&apos;ng &quot;Tahlil qilish&quot;ni bosing.
+              Tugagach, COMPETITION tabida &quot;Monster Truck Rally&quot; yuk sinovidan o&apos;tkazing.
             </p>
           )}
           {solved && (

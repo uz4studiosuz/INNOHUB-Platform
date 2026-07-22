@@ -16,6 +16,7 @@ export interface TrussMemberDraft {
   areaM2: number;
   yieldStrengthPa: number;
   E: number;
+  densityKgM3: number;
   materialLabel: string;
 }
 
@@ -27,13 +28,14 @@ export interface MaterialOption {
   areaM2: number;
   yieldStrengthPa: number;
   E: number;
+  densityKgM3: number;
 }
 
 export const MATERIALS: MaterialOption[] = [
-  { id: "balsa", label: "Balsa yog'och", areaM2: 0.00003, yieldStrengthPa: 14_893_000, E: 3.5e9 },
-  { id: "aluminum_6061", label: "Alyuminiy 6061", areaM2: 0.00001, yieldStrengthPa: 276e6, E: 68.9e9 },
-  { id: "carbon_fiber", label: "Uglerod tolasi", areaM2: 0.00001, yieldStrengthPa: 3500e6, E: 230e9 },
-  { id: "steel_304", label: "Po'lat 304", areaM2: 0.00001, yieldStrengthPa: 215e6, E: 193e9 },
+  { id: "balsa", label: "Balsa yog'och", areaM2: 0.00003, yieldStrengthPa: 14_893_000, E: 3.5e9, densityKgM3: 160 },
+  { id: "aluminum_6061", label: "Alyuminiy 6061", areaM2: 0.00001, yieldStrengthPa: 276e6, E: 68.9e9, densityKgM3: 2700 },
+  { id: "carbon_fiber", label: "Uglerod tolasi", areaM2: 0.00001, yieldStrengthPa: 3500e6, E: 230e9, densityKgM3: 1600 },
+  { id: "steel_304", label: "Po'lat 304", areaM2: 0.00001, yieldStrengthPa: 215e6, E: 193e9, densityKgM3: 8000 },
 ];
 
 export interface SolvedMember {

@@ -351,7 +351,7 @@ def run_prosthetic(params):
         "available_materials": list_materials()
     }
 
-def run_truss(params):
+def _build_truss_from_params(params):
     from structures.truss_analysis import Truss
 
     nodes = params.get("nodes")
@@ -375,7 +375,8 @@ def run_truss(params):
             area = m[2] if len(m) > 2 else 1e-4
             e_mod = m[3] if len(m) > 3 else 200e9
             yield_stress = m[4] if len(m) > 4 else 250e6
-            truss.add_member(m[0], m[1], area, e_mod, yield_stress)
+            density = m[5] if len(m) > 5 else 7850.0
+            truss.add_member(m[0], m[1], area, e_mod, yield_stress, density)
     else:
         truss.add_member(0, 1)
         truss.add_member(0, 2)
@@ -400,6 +401,11 @@ def run_truss(params):
     else:
         truss.add_load(2, 0.0, -1000.0)
 
+    return truss
+
+def run_truss(params):
+    truss = _build_truss_from_params(params)
+
     try:
         forces = truss.solve()
         members_out = []
@@ -414,6 +420,30 @@ def run_truss(params):
                 "in_tension": m.is_tension()
             })
         return {"member_forces_N": list(forces), "members": members_out}
+    except ValueError as e:
+        return {"error": str(e)}
+
+def run_truss_loadtest(params):
+    truss = _build_truss_from_params(params)
+
+    try:
+        result = truss.load_test()
+        return {
+            "failureLoadN": result["failure_load_N"],
+            "structureMassKg": result["structure_mass_kg"],
+            "efficiency": result["efficiency"],
+            "failingMemberIndex": result["failing_member_index"],
+            "members": [
+                {
+                    "force_N": mr["force_N"],
+                    "stress_Pa": mr["stress_Pa"],
+                    "in_tension": mr["in_tension"],
+                    "isBuckling": mr["is_buckling"],
+                    "memberFailureLoadN": mr["member_failure_load_N"],
+                }
+                for mr in result["members"]
+            ],
+        }
     except ValueError as e:
         return {"error": str(e)}
 
@@ -760,6 +790,8 @@ def main():
             result = run_prosthetic(params)
         elif module == "truss":
             result = run_truss(params)
+        elif module == "truss_loadtest":
+            result = run_truss_loadtest(params)
         elif module == "mechanics":
             result = run_mechanics(params)
         elif module == "aerodynamics":

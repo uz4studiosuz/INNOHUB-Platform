@@ -31,6 +31,26 @@ function RegularTriangle({ x, y, size, fill }: { x: number; y: number; size: num
   return <Line points={points} closed fill={fill} />;
 }
 
+function hexToRgb(hex: string): { r: number; g: number; b: number } {
+  const n = parseInt(hex.slice(1), 16);
+  return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
+}
+
+function blendHex(hexA: string, hexB: string, t: number): string {
+  const a = hexToRgb(hexA);
+  const b = hexToRgb(hexB);
+  const r = Math.round(a.r + (b.r - a.r) * t);
+  const g = Math.round(a.g + (b.g - a.g) * t);
+  const bl = Math.round(a.b + (b.b - a.b) * t);
+  return `rgb(${r},${g},${bl})`;
+}
+
+/** Gradient color by how close a member is to ITS OWN failure point (0 = unloaded, 1 = at limit). */
+function intensityColor(inTension: boolean, fraction: number): string {
+  const t = Math.max(0, Math.min(1, fraction));
+  return inTension ? blendHex("#facc15", "#1d4ed8", t) : blendHex("#f59e0b", "#b91c1c", t);
+}
+
 function LoadArrow({ x, y, fx, fy }: { x: number; y: number; fx: number; fy: number }) {
   if (fx === 0 && fy === 0) return null;
   // Screen y grows downward; a negative fy (downward load) draws an arrow pointing down.
@@ -57,6 +77,10 @@ interface TrussCanvasProps {
   onNodeClick: (id: string) => void;
   onNodeDrag: (id: string, x: number, y: number) => void;
   onMemberClick: (id: string) => void;
+  /** Disables editing (drag/click-to-add/click-to-delete) - used for read-only displays like Competition. */
+  readOnly?: boolean;
+  /** Color members by how close each is to ITS OWN failure point instead of the flat safetyFactor<1 scheme. */
+  intensityMode?: boolean;
 }
 
 export default function TrussCanvas({
@@ -69,6 +93,8 @@ export default function TrussCanvas({
   onNodeClick,
   onNodeDrag,
   onMemberClick,
+  readOnly = false,
+  intensityMode = false,
 }: TrussCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 800, height: 500 });
@@ -87,12 +113,12 @@ export default function TrussCanvas({
   const handleStageClick = useCallback(
     (e: KonvaEventObject<MouseEvent>) => {
       const stage = e.target.getStage();
-      if (e.target === stage && mode === "node" && stage) {
+      if (!readOnly && e.target === stage && mode === "node" && stage) {
         const pos = stage.getPointerPosition();
         if (pos) onAddNode(snap(pos.x), snap(pos.y));
       }
     },
-    [mode, onAddNode]
+    [mode, onAddNode, readOnly]
   );
 
   const nodeMap = new Map(nodes.map((n) => [n.id, n]));
@@ -118,11 +144,19 @@ export default function TrussCanvas({
             const b = nodeMap.get(m.nodeB);
             if (!a || !b) return null;
             const res = solved?.get(m.id);
-            const color = res ? (res.safetyFactor < 1 ? "#ff0000" : res.inTension ? "#3b82f6" : "#ef4444") : "#94a3b8";
+            let color = "#94a3b8";
+            if (res) {
+              if (intensityMode) {
+                const fraction = res.safetyFactor > 0 ? 1 / res.safetyFactor : 1;
+                color = intensityColor(res.inTension, fraction);
+              } else {
+                color = res.safetyFactor < 1 ? "#ff0000" : res.inTension ? "#3b82f6" : "#ef4444";
+              }
+            }
             const midX = (a.x + b.x) / 2;
             const midY = (a.y + b.y) / 2;
             return (
-              <Group key={m.id} onClick={() => mode === "delete" && onMemberClick(m.id)}>
+              <Group key={m.id} onClick={() => !readOnly && mode === "delete" && onMemberClick(m.id)}>
                 <Line points={[a.x, a.y, b.x, b.y]} stroke={color} strokeWidth={res && res.safetyFactor < 1 ? 5 : 3} />
                 {res && (
                   <Text
@@ -154,8 +188,8 @@ export default function TrussCanvas({
                 fill="#e2e8f0"
                 stroke="#0f1e3d"
                 strokeWidth={2}
-                draggable={mode === "node"}
-                onClick={() => onNodeClick(n.id)}
+                draggable={!readOnly && mode === "node"}
+                onClick={() => !readOnly && onNodeClick(n.id)}
                 onDragEnd={(e) => onNodeDrag(n.id, snap(e.target.x()), snap(e.target.y()))}
               />
             </Group>
