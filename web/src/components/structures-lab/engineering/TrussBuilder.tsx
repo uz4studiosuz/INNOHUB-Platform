@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import { TrussToolbar } from "./TrussToolbar";
 import { TrussNode, TrussMemberDraft, BuilderMode, MATERIALS, SolvedMember, SupportType } from "./types";
 import { buildTrussApiParams } from "./trussApiParams";
+import { computeStability, stabilityErrorMessage } from "./trussStability";
 import { loadTrussDesign, saveTrussDesign } from "../../../store/trussDesignStore";
 import { useHasMounted } from "../../../lib/useHasMounted";
 
@@ -45,6 +46,7 @@ export default function TrussBuilder() {
   const [error, setError] = useState<string | null>(null);
 
   const material = MATERIALS.find((m) => m.id === materialId) ?? MATERIALS[0];
+  const stability = computeStability(nodes, members);
 
   // Load whatever was last saved, exactly once, after the client has
   // actually mounted (hasMounted flips true post-hydration). This is a
@@ -152,6 +154,11 @@ export default function TrussBuilder() {
       setError("Kamida bitta tayanch (support) belgilang.");
       return;
     }
+    const stabilityError = stabilityErrorMessage(stability);
+    if (stabilityError) {
+      setError(stabilityError);
+      return;
+    }
 
     setSolving(true);
     try {
@@ -193,7 +200,7 @@ export default function TrussBuilder() {
     } finally {
       setSolving(false);
     }
-  }, [nodes, members]);
+  }, [nodes, members, stability]);
 
   const worstMember = solved ? Array.from(solved.values()).sort((a, b) => a.safetyFactor - b.safetyFactor)[0] : null;
 
@@ -237,6 +244,36 @@ export default function TrussBuilder() {
               className="bg-[#141a2b] border border-[rgba(255,255,255,0.1)] rounded px-2 py-1 text-white"
             />
           </label>
+
+          {nodes.length > 0 && (
+            <div className="mb-3 bg-[#141a2b] border border-[rgba(255,255,255,0.08)] rounded p-2 flex flex-col gap-1">
+              <div className="flex justify-between text-gray-400">
+                <span>Tugunlar (j)</span>
+                <span className="text-white font-semibold">{stability.joints}</span>
+              </div>
+              <div className="flex justify-between text-gray-400">
+                <span>A&apos;zolar (m)</span>
+                <span className="text-white font-semibold">{stability.members}</span>
+              </div>
+              <div className="flex justify-between text-gray-400">
+                <span>Tayanch reaksiyalari (r)</span>
+                <span className="text-white font-semibold">{stability.reactions}</span>
+              </div>
+              <div
+                className={`text-center rounded px-2 py-1 mt-1 font-bold ${
+                  stability.status === "determinate"
+                    ? "bg-emerald-500/20 text-emerald-300"
+                    : stability.status === "unstable"
+                    ? "bg-red-500/20 text-red-300"
+                    : "bg-amber-500/20 text-amber-300"
+                }`}
+              >
+                {stability.status === "determinate" && `✓ Barqaror (2j = m+r = ${stability.twoJ})`}
+                {stability.status === "unstable" && `⚠ Beqaror: m+r=${stability.mPlusR} < 2j=${stability.twoJ}`}
+                {stability.status === "indeterminate" && `⚠ Ortiqcha: m+r=${stability.mPlusR} > 2j=${stability.twoJ}`}
+              </div>
+            </div>
+          )}
 
           <h3 className="font-bold text-sm mb-2">Natijalar</h3>
           {error && <div className="bg-red-500/20 border border-red-500/40 text-red-300 rounded p-2 mb-2">{error}</div>}

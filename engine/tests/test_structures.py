@@ -162,6 +162,96 @@ def test_truss_load_test_requires_nonzero_load():
         truss.load_test()
 
 
+def test_stability_check_determinate():
+    truss = Truss()
+    truss.add_node(0, 0)
+    truss.add_node(2, 0)
+    truss.add_node(1, 2)
+    truss.add_member(0, 1)
+    truss.add_member(0, 2)
+    truss.add_member(1, 2)
+    truss.add_pin_support(0)
+    truss.add_roller_support_h(1)
+
+    check = truss.stability_check()
+    assert check["joints"] == 3
+    assert check["members"] == 3
+    assert check["reactions"] == 3
+    assert check["two_j"] == 6
+    assert check["m_plus_r"] == 6
+    assert check["status"] == "determinate"
+
+
+def test_stability_check_unstable():
+    # Same 3 joints, but missing the top member - just two members hinged
+    # at the base supports can't resist a sideways load: a mechanism.
+    truss = Truss()
+    truss.add_node(0, 0)
+    truss.add_node(2, 0)
+    truss.add_node(1, 2)
+    truss.add_member(0, 1)
+    truss.add_member(0, 2)
+    truss.add_pin_support(0)
+    truss.add_roller_support_h(1)
+
+    check = truss.stability_check()
+    assert check["m_plus_r"] == 5
+    assert check["two_j"] == 6
+    assert check["status"] == "unstable"
+
+
+def test_stability_check_indeterminate():
+    # Same stable triangle, but pinned at BOTH supports instead of
+    # pin + roller - one redundant reaction component.
+    truss = Truss()
+    truss.add_node(0, 0)
+    truss.add_node(2, 0)
+    truss.add_node(1, 2)
+    truss.add_member(0, 1)
+    truss.add_member(0, 2)
+    truss.add_member(1, 2)
+    truss.add_pin_support(0)
+    truss.add_pin_support(1)
+
+    check = truss.stability_check()
+    assert check["m_plus_r"] == 7
+    assert check["two_j"] == 6
+    assert check["status"] == "indeterminate"
+
+
+def test_solve_raises_for_unstable_structure():
+    import pytest
+    truss = Truss()
+    truss.add_node(0, 0)
+    truss.add_node(2, 0)
+    truss.add_node(1, 2)
+    truss.add_member(0, 1)
+    truss.add_member(0, 2)
+    truss.add_pin_support(0)
+    truss.add_roller_support_h(1)
+    truss.add_load(2, fy=-1000)
+
+    with pytest.raises(ValueError, match="unstable"):
+        truss.solve()
+
+
+def test_solve_raises_for_indeterminate_structure():
+    import pytest
+    truss = Truss()
+    truss.add_node(0, 0)
+    truss.add_node(2, 0)
+    truss.add_node(1, 2)
+    truss.add_member(0, 1)
+    truss.add_member(0, 2)
+    truss.add_member(1, 2)
+    truss.add_pin_support(0)
+    truss.add_pin_support(1)
+    truss.add_load(2, fy=-1000)
+
+    with pytest.raises(ValueError, match="indeterminate"):
+        truss.solve()
+
+
 def test_truss_solve_simple():
     truss = Truss()
     truss.add_node(0, 0)    # 0
@@ -263,6 +353,11 @@ if __name__ == "__main__":
     test_truss_load_test_failure_load_and_efficiency()
     test_truss_load_test_different_material_changes_efficiency()
     test_truss_load_test_requires_nonzero_load()
+    test_stability_check_determinate()
+    test_stability_check_unstable()
+    test_stability_check_indeterminate()
+    test_solve_raises_for_unstable_structure()
+    test_solve_raises_for_indeterminate_structure()
     test_truss_solve_simple()
     test_bending_moment()
     test_bending_stress()

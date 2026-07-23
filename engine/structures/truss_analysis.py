@@ -117,12 +117,59 @@ class Truss:
     def add_load(self, node_idx, fx=0.0, fy=0.0):
         self.loads[node_idx] = (fx, fy)
 
+    def stability_check(self):
+        """Static determinacy check: m + r vs 2j (Hibbeler, Statics - the
+        method of joints needs exactly 2j independent equilibrium equations).
+          m + r < 2j  -> unstable (mechanism): too few members/supports
+          m + r = 2j  -> statically determinate: solvable by method of joints
+          m + r > 2j  -> statically indeterminate: more restraints than needed
+        j = joints (nodes), m = members, r = reaction components contributed
+        by supports (pin = 2, roller = 1).
+        """
+        j = len(self.nodes)
+        m = len(self.members)
+        r = sum(2 if s == 'pin' else 1 for s in self.supports.values())
+        two_j = 2 * j
+        m_plus_r = m + r
+
+        if m_plus_r < two_j:
+            status = 'unstable'
+        elif m_plus_r == two_j:
+            status = 'determinate'
+        else:
+            status = 'indeterminate'
+
+        return {
+            'joints': j,
+            'members': m,
+            'reactions': r,
+            'two_j': two_j,
+            'm_plus_r': m_plus_r,
+            'status': status,
+        }
+
     def solve(self):
         """Solve truss using method of joints (equilibrium at each node).
 
         Returns list of member forces (+ = tension, - = compression).
         Source: Hibbeler, Engineering Mechanics: Statics, Method of Joints.
         """
+        check = self.stability_check()
+        if check['status'] == 'unstable':
+            missing = check['two_j'] - check['m_plus_r']
+            raise ValueError(
+                f"Structure is unstable (mechanism): m + r = {check['m_plus_r']}, "
+                f"need 2j = {check['two_j']} (missing {missing} member(s)/reaction(s)). "
+                f"Add more members or supports."
+            )
+        if check['status'] == 'indeterminate':
+            extra = check['m_plus_r'] - check['two_j']
+            raise ValueError(
+                f"Structure is statically indeterminate: m + r = {check['m_plus_r']}, "
+                f"but 2j = {check['two_j']} ({extra} redundant member(s)/reaction(s)). "
+                f"Method of joints cannot solve this - remove a member or support."
+            )
+
         n_nodes = len(self.nodes)
         n_members = len(self.members)
 

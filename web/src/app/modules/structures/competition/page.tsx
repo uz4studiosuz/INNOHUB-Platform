@@ -8,6 +8,7 @@ import { buildTrussApiParams } from "../../../../components/structures-lab/engin
 import { SolvedMember } from "../../../../components/structures-lab/engineering/types";
 import { addBridgeResult, getBridgeResults } from "../../../../store/bridgeLeaderboardStore";
 import { useHasMounted } from "../../../../lib/useHasMounted";
+import { computeStability, stabilityErrorMessage } from "../../../../components/structures-lab/engineering/trussStability";
 
 const TrussCanvas = dynamic(() => import("../../../../components/structures-lab/engineering/TrussCanvas"), {
   ssr: false,
@@ -62,6 +63,11 @@ export default function StructuresCompetitionPage() {
 
   const handleTest = useCallback(async () => {
     if (!design) return;
+    const stabilityError = stabilityErrorMessage(computeStability(design.nodes, design.members));
+    if (stabilityError) {
+      setError(stabilityError);
+      return;
+    }
     setTesting(true);
     setError(null);
     setResult(null);

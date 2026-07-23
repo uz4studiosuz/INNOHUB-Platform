@@ -403,8 +403,20 @@ def _build_truss_from_params(params):
 
     return truss
 
+def _stability_out(truss):
+    check = truss.stability_check()
+    return {
+        "joints": check["joints"],
+        "members": check["members"],
+        "reactions": check["reactions"],
+        "twoJ": check["two_j"],
+        "mPlusR": check["m_plus_r"],
+        "status": check["status"],
+    }
+
 def run_truss(params):
     truss = _build_truss_from_params(params)
+    stability = _stability_out(truss)
 
     try:
         forces = truss.solve()
@@ -419,12 +431,13 @@ def run_truss(params):
                 "safety_factor": m.safety_factor(),
                 "in_tension": m.is_tension()
             })
-        return {"member_forces_N": list(forces), "members": members_out}
+        return {"member_forces_N": list(forces), "members": members_out, "stability": stability}
     except ValueError as e:
-        return {"error": str(e)}
+        return {"error": str(e), "stability": stability}
 
 def run_truss_loadtest(params):
     truss = _build_truss_from_params(params)
+    stability = _stability_out(truss)
 
     try:
         result = truss.load_test()
@@ -443,9 +456,10 @@ def run_truss_loadtest(params):
                 }
                 for mr in result["members"]
             ],
+            "stability": stability,
         }
     except ValueError as e:
-        return {"error": str(e)}
+        return {"error": str(e), "stability": stability}
 
 def run_mechanics(params):
     mode = params.get("mode", "friction")
