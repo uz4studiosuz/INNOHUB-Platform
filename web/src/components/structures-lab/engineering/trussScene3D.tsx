@@ -32,8 +32,10 @@ export function useTrussBounds(nodes: TrussNode[]) {
   }, [nodes]);
 }
 
+const UNSOLVED_WOOD_COLOR = "#c19a6b";
+
 export function memberColorFor(res: SolvedMember | undefined): string {
-  if (!res) return "#94a3b8";
+  if (!res) return UNSOLVED_WOOD_COLOR;
   return res.safetyFactor < 1 ? "#ff0000" : res.inTension ? "#3b82f6" : "#ef4444";
 }
 
@@ -42,12 +44,18 @@ export function MemberBeam({
   b,
   color,
   thick,
+  sceneRadius,
   onClick,
 }: {
   a: THREE.Vector3;
   b: THREE.Vector3;
   color: string;
   thick: boolean;
+  /** The overall truss's bounding radius (useTrussBounds) - beam thickness
+   * is a fraction of this, not a fixed absolute size, so members stay
+   * visibly beam-like (not hairline-thin) regardless of the design's scale.
+   */
+  sceneRadius: number;
   onClick?: (e: ThreeEvent<MouseEvent>) => void;
 }) {
   const { position, quaternion, length } = useMemo(() => {
@@ -58,21 +66,31 @@ export function MemberBeam({
     return { position: mid, quaternion: quat, length: len };
   }, [a, b]);
 
-  const radius = thick ? 0.09 : 0.06;
+  const radius = Math.max(sceneRadius * (thick ? 0.05 : 0.035), 0.08);
 
   return (
     <mesh position={position} quaternion={quaternion} castShadow receiveShadow onClick={onClick}>
       <cylinderGeometry args={[radius, radius, length, 10]} />
-      <meshStandardMaterial color={color} roughness={0.6} metalness={0.15} />
+      <meshStandardMaterial color={color} roughness={0.75} metalness={0.05} />
     </mesh>
   );
 }
 
-export function SupportGlyph3D({ pos, type }: { pos: THREE.Vector3; type: TrussNode["support"] }) {
+export function SupportGlyph3D({
+  pos,
+  type,
+  sceneRadius,
+}: {
+  pos: THREE.Vector3;
+  type: TrussNode["support"];
+  sceneRadius: number;
+}) {
   if (type === "none") return null;
+  const coneRadius = sceneRadius * 0.14;
+  const coneHeight = sceneRadius * 0.2;
   return (
-    <mesh position={[pos.x, pos.y - 0.3, pos.z]} rotation={[Math.PI, 0, 0]} castShadow>
-      <coneGeometry args={[0.32, 0.45, 4]} />
+    <mesh position={[pos.x, pos.y - coneHeight * 0.65, pos.z]} rotation={[Math.PI, 0, 0]} castShadow>
+      <coneGeometry args={[coneRadius, coneHeight, 4]} />
       <meshStandardMaterial color={type === "pin" ? "#475569" : "#94a3b8"} />
     </mesh>
   );
@@ -137,6 +155,7 @@ export function TrussSceneContents({
             b={b}
             color={memberColorFor(res)}
             thick={!!res && res.safetyFactor < 1}
+            sceneRadius={radius}
             onClick={
               onMemberClick
                 ? (e) => {
@@ -166,16 +185,16 @@ export function TrussSceneContents({
                   : undefined
               }
             >
-              <sphereGeometry args={[0.16, 12, 12]} />
+              <sphereGeometry args={[Math.max(radius * 0.045, 0.12), 12, 12]} />
               <meshStandardMaterial color="#e2e8f0" />
             </mesh>
             {memberFirstNode === n.id && (
               <mesh position={pos} rotation={[Math.PI / 2, 0, 0]}>
-                <ringGeometry args={[0.22, 0.28, 24]} />
+                <ringGeometry args={[radius * 0.07, radius * 0.09, 24]} />
                 <meshBasicMaterial color="#facc15" side={THREE.DoubleSide} />
               </mesh>
             )}
-            <SupportGlyph3D pos={pos} type={n.support} />
+            <SupportGlyph3D pos={pos} type={n.support} sceneRadius={radius} />
           </group>
         );
       })}

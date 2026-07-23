@@ -219,7 +219,19 @@ class Truss:
             b[2 * node_idx] = -fx
             b[2 * node_idx + 1] = -fy
 
-        x = _least_squares_solve(A, b)
+        try:
+            x = _least_squares_solve(A, b)
+        except ValueError:
+            # The joint count passed (m + r = 2j), so this is a geometric/form
+            # instability the counting rule can't catch - e.g. members at a
+            # joint are collinear, or a group of members is parallel and
+            # can't resist load in the perpendicular direction.
+            raise ValueError(
+                "Structure passes the joint count (m + r = 2j) but this specific member "
+                "layout is still geometrically unstable (e.g. members meeting at a joint "
+                "are collinear, or don't triangulate in some direction). Reposition nodes "
+                "so members form clear triangles rather than straight chains."
+            )
 
         # Extract member forces
         for mi in range(n_members):
