@@ -1,12 +1,13 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { loadTrussDesign, TrussDesign } from "../../../../store/trussDesignStore";
 import { buildTrussApiParams } from "../../../../components/structures-lab/engineering/trussApiParams";
 import { SolvedMember } from "../../../../components/structures-lab/engineering/types";
-import { addBridgeResult, getBridgeResults, BridgeResult } from "../../../../store/bridgeLeaderboardStore";
+import { addBridgeResult, getBridgeResults } from "../../../../store/bridgeLeaderboardStore";
+import { useHasMounted } from "../../../../lib/useHasMounted";
 
 const TrussCanvas = dynamic(() => import("../../../../components/structures-lab/engineering/TrussCanvas"), {
   ssr: false,
@@ -37,14 +38,24 @@ function materialLabelFor(design: TrussDesign): string {
 }
 
 export default function StructuresCompetitionPage() {
-  const [design] = useState<TrussDesign | null>(() => loadTrussDesign());
+  // localStorage doesn't exist during SSR, so both are read directly from
+  // the store only once the client has actually mounted (hasMounted flips
+  // true post-hydration). Before that, design/leaderboard stay at their
+  // SSR-safe defaults so the server and the client's first render match -
+  // reading them eagerly would trigger a hydration mismatch. Re-deriving
+  // on every render (rather than caching in state) also means the
+  // leaderboard automatically reflects a just-added result on the very
+  // next re-render, with no extra state to keep in sync.
+  const hasMounted = useHasMounted();
+  const design: TrussDesign | null = hasMounted ? loadTrussDesign() : null;
+  const leaderboard = hasMounted ? getBridgeResults() : [];
+
   const [result, setResult] = useState<LoadTestResult | null>(null);
   const [solvedMap, setSolvedMap] = useState<Map<string, SolvedMember> | null>(null);
   const [testing, setTesting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [truckX, setTruckX] = useState(0);
   const [displayLoad, setDisplayLoad] = useState(0);
-  const [leaderboard, setLeaderboard] = useState<BridgeResult[]>(() => getBridgeResults());
   const animRef = useRef<number | null>(null);
 
   const hasDesign = !!design && design.nodes.length >= 2 && design.members.length >= 1;
@@ -111,7 +122,6 @@ export default function StructuresCompetitionPage() {
           failureLoadN: data.failureLoadN,
           efficiency: data.efficiency,
         });
-        setLeaderboard(getBridgeResults());
       };
       animRef.current = requestAnimationFrame(step);
     } catch (err) {
@@ -120,10 +130,7 @@ export default function StructuresCompetitionPage() {
     }
   }, [design]);
 
-  const rankedLeaderboard = useMemo(
-    () => [...leaderboard].sort((a, b) => b.efficiency - a.efficiency),
-    [leaderboard]
-  );
+  const rankedLeaderboard = [...leaderboard].sort((a, b) => b.efficiency - a.efficiency);
 
   const failingMember = result && result.failingMemberIndex !== null ? result.members[result.failingMemberIndex] : null;
 

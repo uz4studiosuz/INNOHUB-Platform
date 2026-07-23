@@ -6,46 +6,36 @@ import { TrussToolbar } from "./TrussToolbar";
 import { TrussNode, TrussMemberDraft, BuilderMode, MATERIALS, SolvedMember, SupportType } from "./types";
 import { buildTrussApiParams } from "./trussApiParams";
 import { loadTrussDesign, saveTrussDesign } from "../../../store/trussDesignStore";
+import { useHasMounted } from "../../../lib/useHasMounted";
 
 const TrussCanvas = dynamic(() => import("./TrussCanvas"), {
   ssr: false,
   loading: () => <div className="flex-1 flex items-center justify-center bg-[#0f1e3d] text-gray-400">Canvas yuklanmoqda...</div>,
 });
 
-let nodeCounter = 1;
-let memberCounter = 1;
-
-function maxIdNum(ids: string[], prefix: string): number {
+function nextId(items: { id: string }[], prefix: string): string {
   let max = 0;
-  for (const id of ids) {
+  for (const { id } of items) {
     if (id.startsWith(prefix)) {
       const n = parseInt(id.slice(prefix.length), 10);
       if (!isNaN(n) && n > max) max = n;
     }
   }
-  return max;
+  return `${prefix}${max + 1}`;
 }
 
 const SUPPORT_CYCLE: SupportType[] = ["none", "pin", "roller_h", "roller_v"];
 
 export default function TrussBuilder() {
-  const [nodes, setNodes] = useState<TrussNode[]>(() => {
-    const saved = loadTrussDesign();
-    if (saved) {
-      nodeCounter = Math.max(nodeCounter, maxIdNum(saved.nodes.map((n) => n.id), "n") + 1);
-      return saved.nodes;
-    }
-    return [];
-  });
-  const [members, setMembers] = useState<TrussMemberDraft[]>(() => {
-    const saved = loadTrussDesign();
-    if (saved) {
-      memberCounter = Math.max(memberCounter, maxIdNum(saved.members.map((m) => m.id), "m") + 1);
-      return saved.members;
-    }
-    return [];
-  });
-  const [designName, setDesignName] = useState(() => loadTrussDesign()?.name ?? "Mening ko'prigim");
+  // All three start as the SSR-safe default (localStorage doesn't exist on
+  // the server) and are populated after mount below - reading them
+  // synchronously in a useState initializer would make the client's first
+  // render differ from the server-rendered HTML and trigger a hydration
+  // mismatch.
+  const [nodes, setNodes] = useState<TrussNode[]>([]);
+  const [members, setMembers] = useState<TrussMemberDraft[]>([]);
+  const [designName, setDesignName] = useState("Mening ko'prigim");
+  const [hydrated, setHydrated] = useState(false);
   const [mode, setMode] = useState<BuilderMode>("node");
   const [memberFirstNode, setMemberFirstNode] = useState<string | null>(null);
   const [materialId, setMaterialId] = useState(MATERIALS[0].id);
@@ -56,14 +46,33 @@ export default function TrussBuilder() {
 
   const material = MATERIALS.find((m) => m.id === materialId) ?? MATERIALS[0];
 
+  // Load whatever was last saved, exactly once, after the client has
+  // actually mounted (hasMounted flips true post-hydration). This is a
+  // render-phase state update guarded by `hydrated` - not an effect - so it
+  // runs before this render commits, with no flicker and no separate effect
+  // needed just to sync from a browser-only store.
+  const hasMounted = useHasMounted();
+  if (hasMounted && !hydrated) {
+    const saved = loadTrussDesign();
+    if (saved) {
+      setNodes(saved.nodes);
+      setMembers(saved.members);
+      setDesignName(saved.name);
+    }
+    setHydrated(true);
+  }
+
   // Keep the design synced to storage so the Competition tab can pick up
-  // whatever was last built here, whenever the user navigates away.
+  // whatever was last built here, whenever the user navigates away. Gated on
+  // `hydrated` so this doesn't fire with the empty initial state and
+  // clobber the just-loaded design before the effect above applies it.
   useEffect(() => {
+    if (!hydrated) return;
     saveTrussDesign({ name: designName, nodes, members });
-  }, [designName, nodes, members]);
+  }, [hydrated, designName, nodes, members]);
 
   const handleAddNode = useCallback((x: number, y: number) => {
-    setNodes((prev) => [...prev, { id: `n${nodeCounter++}`, x, y, support: "none", loadFx: 0, loadFy: 0 }]);
+    setNodes((prev) => [...prev, { id: nextId(prev, "n"), x, y, support: "none", loadFx: 0, loadFy: 0 }]);
     setSolved(null);
   }, []);
 
@@ -84,7 +93,7 @@ export default function TrussBuilder() {
           setMembers((prev) => [
             ...prev,
             {
-              id: `m${memberCounter++}`,
+              id: nextId(prev, "m"),
               nodeA: memberFirstNode,
               nodeB: id,
               areaM2: material.areaM2,

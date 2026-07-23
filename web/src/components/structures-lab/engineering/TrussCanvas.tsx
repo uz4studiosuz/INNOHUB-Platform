@@ -133,7 +133,7 @@ export default function TrussCanvas({
   return (
     <div ref={containerRef} className="flex-1 relative" style={{ background: "#0f1e3d" }}>
       <Stage width={dimensions.width} height={dimensions.height} onClick={handleStageClick}>
-        <Layer>
+        <Layer listening={false}>
           <Rect x={0} y={0} width={dimensions.width} height={dimensions.height} fill="#0f1e3d" />
           {gridLines}
         </Layer>
