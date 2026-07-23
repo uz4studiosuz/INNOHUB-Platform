@@ -7,6 +7,7 @@ import { TrussNode, TrussMemberDraft, BuilderMode, MATERIALS, SolvedMember, Supp
 import { buildTrussApiParams } from "./trussApiParams";
 import { computeStability, stabilityErrorMessage } from "./trussStability";
 import { nextId, mirrorTrussHorizontally } from "./trussMirror";
+import { buildExampleWarrenTruss } from "./trussExample";
 import { loadTrussDesign, saveTrussDesign } from "../../../store/trussDesignStore";
 import { useHasMounted } from "../../../lib/useHasMounted";
 
@@ -152,6 +153,15 @@ export default function TrussBuilder() {
     setError(null);
   }, [nodes, members]);
 
+  const handleLoadExample = useCallback(() => {
+    const example = buildExampleWarrenTruss();
+    setNodes(example.nodes);
+    setMembers(example.members);
+    setDesignName(example.name);
+    setSolved(null);
+    setError(null);
+  }, []);
+
   const handleSolve = useCallback(async () => {
     setError(null);
     if (nodes.length < 2 || members.length < 1) {
@@ -227,6 +237,7 @@ export default function TrussBuilder() {
         onSolve={handleSolve}
         onClear={handleClear}
         onMirror={handleMirror}
+        onLoadExample={handleLoadExample}
         solving={solving}
         view={view}
         onViewChange={setView}

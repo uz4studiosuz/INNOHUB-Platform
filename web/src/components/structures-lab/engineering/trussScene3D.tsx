@@ -39,11 +39,45 @@ export function memberColorFor(res: SolvedMember | undefined): string {
   return res.safetyFactor < 1 ? "#ff0000" : res.inTension ? "#3b82f6" : "#ef4444";
 }
 
+let woodTextureCache: THREE.CanvasTexture | null = null;
+
+/** A small procedural wood-grain texture, generated once and reused by every
+ * beam (a shared THREE.Texture instance - repeat/wrap are set once here and
+ * never mutated per-instance, since mutating a shared texture's repeat per
+ * beam would make every beam jump to whatever beam last touched it). */
+function getWoodTexture(): THREE.CanvasTexture {
+  if (woodTextureCache) return woodTextureCache;
+
+  const canvas = document.createElement("canvas");
+  canvas.width = 64;
+  canvas.height = 64;
+  const ctx = canvas.getContext("2d")!;
+  ctx.fillStyle = "#c19a6b";
+  ctx.fillRect(0, 0, 64, 64);
+  for (let i = 0; i < 36; i++) {
+    const y = Math.random() * 64;
+    ctx.strokeStyle = `rgba(110, 76, 42, ${0.08 + Math.random() * 0.14})`;
+    ctx.lineWidth = 0.6 + Math.random() * 1.3;
+    ctx.beginPath();
+    ctx.moveTo(0, y + (Math.random() - 0.5) * 4);
+    ctx.bezierCurveTo(16, y + (Math.random() - 0.5) * 6, 48, y + (Math.random() - 0.5) * 6, 64, y + (Math.random() - 0.5) * 4);
+    ctx.stroke();
+  }
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set(1, 3);
+  woodTextureCache = texture;
+  return texture;
+}
+
 export function MemberBeam({
   a,
   b,
   color,
   thick,
+  isWood,
   sceneRadius,
   onClick,
 }: {
@@ -51,6 +85,11 @@ export function MemberBeam({
   b: THREE.Vector3;
   color: string;
   thick: boolean;
+  /** True for the default (not-yet-analyzed) state - renders as a square
+   * timber beam with a wood-grain texture. Once solved, force-colored
+   * members render as plain flat color for a clearer tension/compression read.
+   */
+  isWood: boolean;
   /** The overall truss's bounding radius (useTrussBounds) - beam thickness
    * is a fraction of this, not a fixed absolute size, so members stay
    * visibly beam-like (not hairline-thin) regardless of the design's scale.
@@ -66,12 +105,18 @@ export function MemberBeam({
     return { position: mid, quaternion: quat, length: len };
   }, [a, b]);
 
-  const radius = Math.max(sceneRadius * (thick ? 0.05 : 0.035), 0.08);
+  const side = Math.max(sceneRadius * (thick ? 0.09 : 0.065), 0.14);
+  const woodTexture = isWood ? getWoodTexture() : null;
 
   return (
     <mesh position={position} quaternion={quaternion} castShadow receiveShadow onClick={onClick}>
-      <cylinderGeometry args={[radius, radius, length, 10]} />
-      <meshStandardMaterial color={color} roughness={0.75} metalness={0.05} />
+      <boxGeometry args={[side, length, side]} />
+      <meshStandardMaterial
+        color={color}
+        map={woodTexture}
+        roughness={isWood ? 0.85 : 0.55}
+        metalness={isWood ? 0.02 : 0.15}
+      />
     </mesh>
   );
 }
@@ -155,6 +200,7 @@ export function TrussSceneContents({
             b={b}
             color={memberColorFor(res)}
             thick={!!res && res.safetyFactor < 1}
+            isWood={!res}
             sceneRadius={radius}
             onClick={
               onMemberClick
