@@ -6,6 +6,7 @@ import { TrussToolbar, ViewMode } from "./TrussToolbar";
 import { TrussNode, TrussMemberDraft, BuilderMode, MATERIALS, SolvedMember, SupportType } from "./types";
 import { buildTrussApiParams } from "./trussApiParams";
 import { computeStability, stabilityErrorMessage } from "./trussStability";
+import { nextId, mirrorTrussHorizontally } from "./trussMirror";
 import { loadTrussDesign, saveTrussDesign } from "../../../store/trussDesignStore";
 import { useHasMounted } from "../../../lib/useHasMounted";
 
@@ -18,17 +19,6 @@ const TrussViewport3D = dynamic(() => import("./TrussViewport3D"), {
   ssr: false,
   loading: () => <div className="flex-1 flex items-center justify-center bg-[#0f1e3d] text-gray-400">3D ko&apos;rinish yuklanmoqda...</div>,
 });
-
-function nextId(items: { id: string }[], prefix: string): string {
-  let max = 0;
-  for (const { id } of items) {
-    if (id.startsWith(prefix)) {
-      const n = parseInt(id.slice(prefix.length), 10);
-      if (!isNaN(n) && n > max) max = n;
-    }
-  }
-  return `${prefix}${max + 1}`;
-}
 
 const SUPPORT_CYCLE: SupportType[] = ["none", "pin", "roller_h", "roller_v"];
 
@@ -150,6 +140,18 @@ export default function TrussBuilder() {
     setError(null);
   }, []);
 
+  const handleMirror = useCallback(() => {
+    if (nodes.length === 0) {
+      setError("Avval nusxalash uchun ferma quring.");
+      return;
+    }
+    const mirrored = mirrorTrussHorizontally(nodes, members);
+    setNodes(mirrored.nodes);
+    setMembers(mirrored.members);
+    setSolved(null);
+    setError(null);
+  }, [nodes, members]);
+
   const handleSolve = useCallback(async () => {
     setError(null);
     if (nodes.length < 2 || members.length < 1) {
@@ -224,6 +226,7 @@ export default function TrussBuilder() {
         onLoadMagnitudeChange={setLoadMagnitude}
         onSolve={handleSolve}
         onClear={handleClear}
+        onMirror={handleMirror}
         solving={solving}
         view={view}
         onViewChange={setView}
@@ -243,7 +246,16 @@ export default function TrussBuilder() {
             onMemberClick={handleMemberClick}
           />
         ) : (
-          <TrussViewport3D nodes={nodes} members={members} solved={solved} />
+          <TrussViewport3D
+            nodes={nodes}
+            members={members}
+            solved={solved}
+            mode={mode}
+            memberFirstNode={memberFirstNode}
+            onAddNode={handleAddNode}
+            onNodeClick={handleNodeClick}
+            onMemberClick={handleMemberClick}
+          />
         )}
 
         <aside className="w-64 shrink-0 bg-[#0a0e18] text-white p-4 overflow-y-auto text-xs">
