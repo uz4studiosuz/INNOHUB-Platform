@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
-import { TrussToolbar } from "./TrussToolbar";
+import { TrussToolbar, ViewMode } from "./TrussToolbar";
 import { TrussNode, TrussMemberDraft, BuilderMode, MATERIALS, SolvedMember, SupportType } from "./types";
 import { buildTrussApiParams } from "./trussApiParams";
 import { computeStability, stabilityErrorMessage } from "./trussStability";
@@ -12,6 +12,11 @@ import { useHasMounted } from "../../../lib/useHasMounted";
 const TrussCanvas = dynamic(() => import("./TrussCanvas"), {
   ssr: false,
   loading: () => <div className="flex-1 flex items-center justify-center bg-[#0f1e3d] text-gray-400">Canvas yuklanmoqda...</div>,
+});
+
+const TrussViewport3D = dynamic(() => import("./TrussViewport3D"), {
+  ssr: false,
+  loading: () => <div className="flex-1 flex items-center justify-center bg-[#0f1e3d] text-gray-400">3D ko&apos;rinish yuklanmoqda...</div>,
 });
 
 function nextId(items: { id: string }[], prefix: string): string {
@@ -38,6 +43,7 @@ export default function TrussBuilder() {
   const [designName, setDesignName] = useState("Mening ko'prigim");
   const [hydrated, setHydrated] = useState(false);
   const [mode, setMode] = useState<BuilderMode>("node");
+  const [view, setView] = useState<ViewMode>("2d");
   const [memberFirstNode, setMemberFirstNode] = useState<string | null>(null);
   const [materialId, setMaterialId] = useState(MATERIALS[0].id);
   const [loadMagnitude, setLoadMagnitude] = useState(500);
@@ -219,20 +225,26 @@ export default function TrussBuilder() {
         onSolve={handleSolve}
         onClear={handleClear}
         solving={solving}
+        view={view}
+        onViewChange={setView}
       />
 
       <div className="flex flex-1 min-h-0">
-        <TrussCanvas
-          nodes={nodes}
-          members={members}
-          mode={mode}
-          memberFirstNode={memberFirstNode}
-          solved={solved}
-          onAddNode={handleAddNode}
-          onNodeClick={handleNodeClick}
-          onNodeDrag={handleNodeDrag}
-          onMemberClick={handleMemberClick}
-        />
+        {view === "2d" ? (
+          <TrussCanvas
+            nodes={nodes}
+            members={members}
+            mode={mode}
+            memberFirstNode={memberFirstNode}
+            solved={solved}
+            onAddNode={handleAddNode}
+            onNodeClick={handleNodeClick}
+            onNodeDrag={handleNodeDrag}
+            onMemberClick={handleMemberClick}
+          />
+        ) : (
+          <TrussViewport3D nodes={nodes} members={members} solved={solved} />
+        )}
 
         <aside className="w-64 shrink-0 bg-[#0a0e18] text-white p-4 overflow-y-auto text-xs">
           <label className="flex flex-col gap-1 mb-3">

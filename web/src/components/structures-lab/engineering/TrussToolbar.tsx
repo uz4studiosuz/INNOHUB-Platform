@@ -10,6 +10,8 @@ const MODES: { id: BuilderMode; label: string; icon: string }[] = [
   { id: "delete", label: "O'chirish", icon: "✕" },
 ];
 
+export type ViewMode = "2d" | "3d";
+
 export function TrussToolbar({
   mode,
   onModeChange,
@@ -20,6 +22,8 @@ export function TrussToolbar({
   onSolve,
   onClear,
   solving,
+  view,
+  onViewChange,
 }: {
   mode: BuilderMode;
   onModeChange: (m: BuilderMode) => void;
@@ -30,23 +34,50 @@ export function TrussToolbar({
   onSolve: () => void;
   onClear: () => void;
   solving: boolean;
+  view: ViewMode;
+  onViewChange: (v: ViewMode) => void;
 }) {
   return (
     <div className="flex flex-wrap items-center gap-2 px-4 py-2 bg-[#e4e4e4] border-b border-gray-300">
       <div className="flex gap-1">
-        {MODES.map((m) => (
-          <button
-            key={m.id}
-            onClick={() => onModeChange(m.id)}
-            className={`px-3 py-1.5 rounded text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-colors ${
-              mode === m.id ? "bg-violet-600 text-white" : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-100"
-            }`}
-          >
-            <span>{m.icon}</span>
-            {m.label}
-          </button>
-        ))}
+        <button
+          onClick={() => onViewChange("2d")}
+          className={`px-3 py-1.5 rounded text-xs font-bold cursor-pointer transition-colors ${
+            view === "2d" ? "bg-violet-600 text-white" : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-100"
+          }`}
+        >
+          2D
+        </button>
+        <button
+          onClick={() => onViewChange("3d")}
+          className={`px-3 py-1.5 rounded text-xs font-bold cursor-pointer transition-colors ${
+            view === "3d" ? "bg-violet-600 text-white" : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-100"
+          }`}
+        >
+          🔄 3D
+        </button>
       </div>
+
+      <span className="h-6 w-px bg-gray-400 mx-1" />
+
+      {view === "2d" ? (
+        <div className="flex gap-1">
+          {MODES.map((m) => (
+            <button
+              key={m.id}
+              onClick={() => onModeChange(m.id)}
+              className={`px-3 py-1.5 rounded text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-colors ${
+                mode === m.id ? "bg-violet-600 text-white" : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-100"
+              }`}
+            >
+              <span>{m.icon}</span>
+              {m.label}
+            </button>
+          ))}
+        </div>
+      ) : (
+        <span className="text-xs text-gray-500 italic">3D ko&apos;rish rejimi — tahrirlash uchun 2D&apos;ga qayting</span>
+      )}
 
       <span className="h-6 w-px bg-gray-400 mx-1" />
 
@@ -63,7 +94,7 @@ export function TrussToolbar({
         </select>
       </label>
 
-      {mode === "load" && (
+      {view === "2d" && mode === "load" && (
         <label className="flex items-center gap-1.5 text-xs font-semibold text-gray-600">
           Yuk (N):
           <input

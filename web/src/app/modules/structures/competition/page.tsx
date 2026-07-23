@@ -15,6 +15,11 @@ const TrussCanvas = dynamic(() => import("../../../../components/structures-lab/
   loading: () => <div className="flex-1 flex items-center justify-center bg-[#0f1e3d] text-gray-400">Canvas yuklanmoqda...</div>,
 });
 
+const TrussViewport3D = dynamic(() => import("../../../../components/structures-lab/engineering/TrussViewport3D"), {
+  ssr: false,
+  loading: () => <div className="flex-1 flex items-center justify-center bg-[#0f1e3d] text-gray-400">3D ko&apos;rinish yuklanmoqda...</div>,
+});
+
 interface LoadTestMember {
   force_N: number;
   stress_Pa: number;
@@ -57,6 +62,7 @@ export default function StructuresCompetitionPage() {
   const [error, setError] = useState<string | null>(null);
   const [truckX, setTruckX] = useState(0);
   const [displayLoad, setDisplayLoad] = useState(0);
+  const [view, setView] = useState<"2d" | "3d">("2d");
   const animRef = useRef<number | null>(null);
 
   const hasDesign = !!design && design.nodes.length >= 2 && design.members.length >= 1;
@@ -170,13 +176,29 @@ export default function StructuresCompetitionPage() {
             Dizayn: <span className="text-white font-semibold">{design!.name}</span>
           </p>
         </div>
-        <button
-          onClick={handleTest}
-          disabled={testing}
-          className="px-5 py-2 rounded-xl bg-violet-600 text-white font-bold hover:bg-violet-700 disabled:opacity-50 cursor-pointer"
-        >
-          {testing ? "Sinov ketmoqda..." : "🚚 Sinovni boshlash"}
-        </button>
+        <div className="flex items-center gap-3">
+          <div className="flex gap-1 bg-[#0a0e18] border border-[rgba(255,255,255,0.1)] rounded-lg p-1">
+            <button
+              onClick={() => setView("2d")}
+              className={`px-3 py-1 rounded text-xs font-bold cursor-pointer ${view === "2d" ? "bg-violet-600 text-white" : "text-slate-400 hover:text-white"}`}
+            >
+              2D
+            </button>
+            <button
+              onClick={() => setView("3d")}
+              className={`px-3 py-1 rounded text-xs font-bold cursor-pointer ${view === "3d" ? "bg-violet-600 text-white" : "text-slate-400 hover:text-white"}`}
+            >
+              🔄 3D
+            </button>
+          </div>
+          <button
+            onClick={handleTest}
+            disabled={testing}
+            className="px-5 py-2 rounded-xl bg-violet-600 text-white font-bold hover:bg-violet-700 disabled:opacity-50 cursor-pointer"
+          >
+            {testing ? "Sinov ketmoqda..." : "🚚 Sinovni boshlash"}
+          </button>
+        </div>
       </div>
 
       {error && (
@@ -187,20 +209,24 @@ export default function StructuresCompetitionPage() {
 
       <div className="flex flex-1 min-h-0">
         <div className="flex-1 relative min-w-0">
-          <TrussCanvas
-            nodes={design!.nodes}
-            members={design!.members}
-            mode="delete"
-            memberFirstNode={null}
-            solved={solvedMap}
-            onAddNode={() => {}}
-            onNodeClick={() => {}}
-            onNodeDrag={() => {}}
-            onMemberClick={() => {}}
-            readOnly
-            intensityMode
-          />
-          {(testing || result) && (
+          {view === "2d" ? (
+            <TrussCanvas
+              nodes={design!.nodes}
+              members={design!.members}
+              mode="delete"
+              memberFirstNode={null}
+              solved={solvedMap}
+              onAddNode={() => {}}
+              onNodeClick={() => {}}
+              onNodeDrag={() => {}}
+              onMemberClick={() => {}}
+              readOnly
+              intensityMode
+            />
+          ) : (
+            <TrussViewport3D nodes={design!.nodes} members={design!.members} solved={solvedMap} />
+          )}
+          {view === "2d" && (testing || result) && (
             <div
               className="absolute top-2 text-3xl pointer-events-none transition-none"
               style={{ left: `${5 + truckX * 0.9}%`, transform: "translateX(-50%)" }}
