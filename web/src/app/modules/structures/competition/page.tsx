@@ -15,9 +15,9 @@ const TrussCanvas = dynamic(() => import("../../../../components/structures-lab/
   loading: () => <div className="flex-1 flex items-center justify-center bg-[#0f1e3d] text-gray-400">Canvas yuklanmoqda...</div>,
 });
 
-const TrussViewport3D = dynamic(() => import("../../../../components/structures-lab/engineering/TrussViewport3D"), {
+const TrussRally3D = dynamic(() => import("../../../../components/structures-lab/engineering/TrussRally3D"), {
   ssr: false,
-  loading: () => <div className="flex-1 flex items-center justify-center bg-[#0f1e3d] text-gray-400">3D ko&apos;rinish yuklanmoqda...</div>,
+  loading: () => <div className="flex-1 flex items-center justify-center bg-[#0f1e3d] text-gray-400">3D sinov maydoni yuklanmoqda...</div>,
 });
 
 interface LoadTestMember {
@@ -224,7 +224,12 @@ export default function StructuresCompetitionPage() {
               intensityMode
             />
           ) : (
-            <TrussViewport3D nodes={design!.nodes} members={design!.members} solved={solvedMap} />
+            <TrussRally3D
+              nodes={design!.nodes}
+              members={design!.members}
+              solved={solvedMap}
+              truckProgress={testing || result ? truckX / 100 : null}
+            />
           )}
           {view === "2d" && (testing || result) && (
             <div
