@@ -100,14 +100,18 @@ export default function TrussCanvas({
   const [dimensions, setDimensions] = useState({ width: 800, height: 500 });
 
   useEffect(() => {
-    function resize() {
-      if (containerRef.current) {
-        setDimensions({ width: containerRef.current.offsetWidth, height: containerRef.current.offsetHeight });
-      }
-    }
+    const el = containerRef.current;
+    if (!el) return;
+    // A window "resize" event alone misses flex-layout reflows that don't
+    // resize the window itself (e.g. entering/leaving fullscreen, a sidebar
+    // toggling) - a ResizeObserver on the container catches those too, so
+    // the canvas can't get stuck at whatever size it happened to measure
+    // on first mount.
+    const resize = () => setDimensions({ width: el.offsetWidth, height: el.offsetHeight });
     resize();
-    window.addEventListener("resize", resize);
-    return () => window.removeEventListener("resize", resize);
+    const observer = new ResizeObserver(resize);
+    observer.observe(el);
+    return () => observer.disconnect();
   }, []);
 
   const handleStageClick = useCallback(

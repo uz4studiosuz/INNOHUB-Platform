@@ -7,7 +7,7 @@ const TABS = [
   { label: "HOME",           href: "/modules/structures/home" },
   { label: "RESEARCH",       href: "/modules/structures/research" },
   { label: "ENGINEERING",    href: "/modules/structures" },
-  { label: "COMPETITION",    href: "/modules/structures/competition" },
+  { label: "TRUCK RALLY",    href: "/modules/structures/competition" },
   { label: "OUTPUTS",        href: "/modules/structures/outputs" },
   { label: "BUILD AND TEST", href: "/modules/structures/build-test" },
 ] as const;

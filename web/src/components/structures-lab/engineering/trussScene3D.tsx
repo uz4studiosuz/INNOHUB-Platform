@@ -4,9 +4,19 @@ import { useMemo } from "react";
 import type { ThreeEvent } from "@react-three/fiber";
 import * as THREE from "three";
 import { TrussNode, TrussMemberDraft, SolvedMember, BuilderMode } from "./types";
-import { GRID_SIZE } from "./trussApiParams";
+import { GRID_SIZE, UNIT_METERS } from "./trussApiParams";
 
 export const SCALE = 1 / 15; // canvas px -> 3D units
+
+/** Real bridges aren't a single flat truss - they have two parallel truss
+ * sides (the ones the user draws in 2D), spaced apart by the deck width and
+ * tied together by floor beams (bottom) and lateral bracing (top) at every
+ * joint. This is a rendering-only extrusion: the analyzed structure is still
+ * the single 2D truss (both sides carry an identical, symmetric copy of it).
+ */
+export const BRIDGE_DEPTH_METERS = 3.5;
+const DEPTH_UNITS = BRIDGE_DEPTH_METERS * (GRID_SIZE / UNIT_METERS) * SCALE;
+const HALF_DEPTH = DEPTH_UNITS / 2;
 
 export function toVec3(n: TrussNode, centerX: number, centerY: number): THREE.Vector3 {
   // Screen y grows downward; flip so "up" on screen is +Y in 3D too.
@@ -37,6 +47,24 @@ const UNSOLVED_WOOD_COLOR = "#c19a6b";
 export function memberColorFor(res: SolvedMember | undefined): string {
   if (!res) return UNSOLVED_WOOD_COLOR;
   return res.safetyFactor < 1 ? "#ff0000" : res.inTension ? "#3b82f6" : "#ef4444";
+}
+
+/** WhiteBox Truck Rally colors members by force magnitude (N) rather than by
+ * tension/compression - this is a distinct legend from the Engineering "Load
+ * Test" safety-factor coloring (memberColorFor above), used only when the
+ * Truck Rally scene opts in via TrussSceneContents' colorByForce prop. */
+export const FORCE_BANDS: { max: number; color: string; label: string }[] = [
+  { max: 100, color: "#facc15", label: "100N" },
+  { max: 300, color: "#f97316", label: "300N" },
+  { max: 500, color: "#22c55e", label: "500N" },
+  { max: 700, color: "#3b82f6", label: "700N" },
+  { max: 900, color: "#92400e", label: "900N" },
+  { max: Infinity, color: "#0a0a0a", label: "1100N" },
+];
+
+export function forceBandColor(forceN: number): string {
+  const f = Math.abs(forceN);
+  return FORCE_BANDS.find((b) => f <= b.max)!.color;
 }
 
 let woodTextureCache: THREE.CanvasTexture | null = null;
@@ -154,6 +182,10 @@ interface TrussSceneContentsProps {
   onAddNode?: (x: number, y: number) => void;
   onNodeClick?: (id: string) => void;
   onMemberClick?: (id: string) => void;
+  /** Truck Rally opts in to color solved members by force magnitude (N)
+   * against FORCE_BANDS instead of the default tension/compression coloring.
+   */
+  colorByForce?: boolean;
 }
 
 export function TrussSceneContents({
@@ -165,10 +197,111 @@ export function TrussSceneContents({
   onAddNode,
   onNodeClick,
   onMemberClick,
+  colorByForce,
 }: TrussSceneContentsProps) {
   const { center, radius } = useTrussBounds(nodes);
-  const nodeMap = useMemo(() => new Map(nodes.map((n) => [n.id, toVec3(n, center.x, center.y)])), [nodes, center]);
+  // The design (nodes/members) is drawn as one 2D truss; rendered as the two
+  // real physical sides of the bridge, offset +-halfDepth in Z. Editing only
+  // ever targets the front side - the back side is a pure visual mirror.
+  const frontNodeMap = useMemo(
+    () => new Map(nodes.map((n) => [n.id, toVec3(n, center.x, center.y).setZ(-HALF_DEPTH)])),
+    [nodes, center]
+  );
+  const backNodeMap = useMemo(
+    () => new Map(nodes.map((n) => [n.id, toVec3(n, center.x, center.y).setZ(HALF_DEPTH)])),
+    [nodes, center]
+  );
   const interactive = !!onAddNode || !!onNodeClick || !!onMemberClick;
+
+  const renderMembers = (nodeMap: Map<string, THREE.Vector3>, side: "front" | "back") =>
+    members.map((m) => {
+      const a = nodeMap.get(m.nodeA);
+      const b = nodeMap.get(m.nodeB);
+      if (!a || !b) return null;
+      const res = solved?.get(m.id);
+      const color = colorByForce && res ? forceBandColor(res.forceN) : memberColorFor(res);
+      return (
+        <MemberBeam
+          key={`${side}-${m.id}`}
+          a={a}
+          b={b}
+          color={color}
+          thick={!!res && res.safetyFactor < 1}
+          isWood={!res}
+          sceneRadius={radius}
+          onClick={
+            side === "front" && onMemberClick
+              ? (e) => {
+                  e.stopPropagation();
+                  if (mode === "delete") onMemberClick(m.id);
+                }
+              : undefined
+          }
+        />
+      );
+    });
+
+  const renderNodes = (nodeMap: Map<string, THREE.Vector3>, side: "front" | "back") =>
+    nodes.map((n) => {
+      const pos = nodeMap.get(n.id);
+      if (!pos) return null;
+      return (
+        <group key={`${side}-${n.id}`}>
+          <mesh
+            position={pos}
+            castShadow
+            onClick={
+              side === "front" && onNodeClick
+                ? (e) => {
+                    e.stopPropagation();
+                    onNodeClick(n.id);
+                  }
+                : undefined
+            }
+          >
+            <sphereGeometry args={[Math.max(radius * 0.045, 0.12), 12, 12]} />
+            <meshStandardMaterial color="#e2e8f0" />
+          </mesh>
+          {side === "front" && memberFirstNode === n.id && (
+            <mesh position={pos} rotation={[Math.PI / 2, 0, 0]}>
+              <ringGeometry args={[radius * 0.07, radius * 0.09, 24]} />
+              <meshBasicMaterial color="#facc15" side={THREE.DoubleSide} />
+            </mesh>
+          )}
+          <SupportGlyph3D pos={pos} type={n.support} sceneRadius={radius} />
+        </group>
+      );
+    });
+
+  // Floor beams (bottom joints) + lateral struts (top joints) tying the two
+  // sides together - one straight cross beam per joint, front side to back side.
+  const crossBraces = nodes.map((n) => {
+    const a = frontNodeMap.get(n.id);
+    const b = backNodeMap.get(n.id);
+    if (!a || !b) return null;
+    return <MemberBeam key={`brace-${n.id}`} a={a} b={b} color={UNSOLVED_WOOD_COLOR} thick={false} isWood sceneRadius={radius} />;
+  });
+
+  // Diagonal (X) bracing across the deck and across the top: real truss
+  // bridges brace every chord panel this way, not just with straight struts.
+  // A member counts as a "chord" segment (top or bottom row) when its two
+  // ends sit at the same height in the original 2D drawing; only those get
+  // crossed diagonally between the front and back sides.
+  const nodeById = useMemo(() => new Map(nodes.map((n) => [n.id, n])), [nodes]);
+  const xBracing = members.flatMap((m) => {
+    const na = nodeById.get(m.nodeA);
+    const nb = nodeById.get(m.nodeB);
+    if (!na || !nb || Math.abs(na.y - nb.y) >= GRID_SIZE / 2) return [];
+    const fa = frontNodeMap.get(m.nodeA);
+    const bb = backNodeMap.get(m.nodeB);
+    const ba = backNodeMap.get(m.nodeA);
+    const fb = frontNodeMap.get(m.nodeB);
+    if (!fa || !bb || !ba || !fb) return [];
+    return [
+      <MemberBeam key={`xbrace-a-${m.id}`} a={fa} b={bb} color={UNSOLVED_WOOD_COLOR} thick={false} isWood sceneRadius={radius} />,
+      <MemberBeam key={`xbrace-b-${m.id}`} a={ba} b={fb} color={UNSOLVED_WOOD_COLOR} thick={false} isWood sceneRadius={radius} />,
+    ];
+  });
 
   return (
     <>
@@ -188,62 +321,12 @@ export function TrussSceneContents({
         </mesh>
       )}
 
-      {members.map((m) => {
-        const a = nodeMap.get(m.nodeA);
-        const b = nodeMap.get(m.nodeB);
-        if (!a || !b) return null;
-        const res = solved?.get(m.id);
-        return (
-          <MemberBeam
-            key={m.id}
-            a={a}
-            b={b}
-            color={memberColorFor(res)}
-            thick={!!res && res.safetyFactor < 1}
-            isWood={!res}
-            sceneRadius={radius}
-            onClick={
-              onMemberClick
-                ? (e) => {
-                    e.stopPropagation();
-                    if (mode === "delete") onMemberClick(m.id);
-                  }
-                : undefined
-            }
-          />
-        );
-      })}
-
-      {nodes.map((n) => {
-        const pos = nodeMap.get(n.id);
-        if (!pos) return null;
-        return (
-          <group key={n.id}>
-            <mesh
-              position={pos}
-              castShadow
-              onClick={
-                onNodeClick
-                  ? (e) => {
-                      e.stopPropagation();
-                      onNodeClick(n.id);
-                    }
-                  : undefined
-              }
-            >
-              <sphereGeometry args={[Math.max(radius * 0.045, 0.12), 12, 12]} />
-              <meshStandardMaterial color="#e2e8f0" />
-            </mesh>
-            {memberFirstNode === n.id && (
-              <mesh position={pos} rotation={[Math.PI / 2, 0, 0]}>
-                <ringGeometry args={[radius * 0.07, radius * 0.09, 24]} />
-                <meshBasicMaterial color="#facc15" side={THREE.DoubleSide} />
-              </mesh>
-            )}
-            <SupportGlyph3D pos={pos} type={n.support} sceneRadius={radius} />
-          </group>
-        );
-      })}
+      {renderMembers(frontNodeMap, "front")}
+      {renderMembers(backNodeMap, "back")}
+      {crossBraces}
+      {xBracing}
+      {renderNodes(frontNodeMap, "front")}
+      {renderNodes(backNodeMap, "back")}
     </>
   );
 }

@@ -2,6 +2,7 @@
 
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
+import { PCFShadowMap } from "three";
 import { TrussNode, TrussMemberDraft, SolvedMember, BuilderMode } from "./types";
 import { useTrussBounds, TrussSceneContents } from "./trussScene3D";
 
@@ -31,7 +32,7 @@ export default function TrussViewport3D({
 
   return (
     <div className="flex-1 relative" style={{ background: "#0f1e3d" }}>
-      <Canvas shadows camera={{ position: [radius * 1.6, radius * 1.3, radius * 1.6], fov: 45 }}>
+      <Canvas shadows={{ type: PCFShadowMap }} camera={{ position: [radius * 1.6, radius * 1.3, radius * 1.6], fov: 45 }}>
         <color attach="background" args={["#0f1e3d"]} />
         <ambientLight intensity={0.6} />
         <hemisphereLight args={["#93c5fd", "#0f1e3d", 0.5]} />

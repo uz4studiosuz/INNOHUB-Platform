@@ -395,3 +395,14 @@ input[type="range"] {
 .animate-fadeIn {
   animation: fadeIn 0.4s ease-out forwards;
 }
+
+/* ─── Live load gauge needle (Structures Competition) ─── */
+@keyframes gaugeNeedleWobble {
+  0%, 100% { transform: rotate(-2deg); }
+  50% { transform: rotate(2deg); }
+}
+
+.gauge-needle-live {
+  animation: gaugeNeedleWobble 0.3s ease-in-out infinite;
+  transform-origin: left center;
+}

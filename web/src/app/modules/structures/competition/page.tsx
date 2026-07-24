@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { loadTrussDesign, TrussDesign } from "../../../../store/trussDesignStore";
@@ -62,8 +62,25 @@ export default function StructuresCompetitionPage() {
   const [error, setError] = useState<string | null>(null);
   const [truckX, setTruckX] = useState(0);
   const [displayLoad, setDisplayLoad] = useState(0);
+  const [gaugeMaxN, setGaugeMaxN] = useState(1200);
   const [view, setView] = useState<"2d" | "3d">("2d");
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const animRef = useRef<number | null>(null);
+  const viewportRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const onChange = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener("fullscreenchange", onChange);
+    return () => document.removeEventListener("fullscreenchange", onChange);
+  }, []);
+
+  const toggleFullscreen = useCallback(() => {
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+    } else {
+      viewportRef.current?.requestFullscreen();
+    }
+  }, []);
 
   const hasDesign = !!design && design.nodes.length >= 2 && design.members.length >= 1;
 
@@ -80,6 +97,7 @@ export default function StructuresCompetitionPage() {
     setSolvedMap(null);
     setTruckX(0);
     setDisplayLoad(0);
+    setGaugeMaxN(1200);
 
     try {
       const response = await fetch("/api/simulate", {
@@ -96,6 +114,7 @@ export default function StructuresCompetitionPage() {
         setTesting(false);
         return;
       }
+      setGaugeMaxN(Math.max(data.failureLoadN * 1.15, 200));
 
       const start = performance.now();
       const step = (now: number) => {
@@ -208,7 +227,13 @@ export default function StructuresCompetitionPage() {
       )}
 
       <div className="flex flex-1 min-h-0">
-        <div className="flex-1 relative min-w-0">
+        <div ref={viewportRef} className="flex-1 flex flex-col relative min-w-0 bg-[#080b11]">
+          <button
+            onClick={toggleFullscreen}
+            className="absolute bottom-2 right-2 z-10 px-3 py-1.5 rounded text-xs font-bold bg-[#0a0e18]/90 border border-[rgba(255,255,255,0.15)] text-slate-300 hover:bg-[#141a2b] cursor-pointer"
+          >
+            {isFullscreen ? "⛶ Kichraytirish" : "⛶ Kattalashtirish"}
+          </button>
           {view === "2d" ? (
             <TrussCanvas
               nodes={design!.nodes}
@@ -239,9 +264,50 @@ export default function StructuresCompetitionPage() {
               🚚
             </div>
           )}
-          {(testing || result) && (
-            <div className="absolute top-2 right-4 bg-[#0a0e18]/90 border border-[rgba(255,255,255,0.1)] rounded-lg px-3 py-1.5 text-xs">
-              Joriy yuk: <span className="font-bold text-amber-400">{displayLoad.toFixed(0)} N</span>
+          {view === "2d" && (testing || result) && (
+            <div className="absolute top-2 right-4 bg-[#0a0e18]/90 border border-[rgba(255,255,255,0.1)] rounded-xl px-3 py-3 flex items-center gap-3">
+              <div
+                className="relative w-8 h-56 rounded-full border border-[rgba(255,255,255,0.2)] overflow-hidden shrink-0"
+                style={{ background: "linear-gradient(to top, #16a34a 0%, #84cc16 30%, #eab308 55%, #f97316 78%, #dc2626 100%)" }}
+              >
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className="absolute left-0 right-0 h-px bg-black/25" style={{ bottom: `${(i + 1) * 16.6}%` }} />
+                ))}
+                <div
+                  className="absolute left-0 right-0"
+                  style={{ bottom: `${Math.max(0, Math.min(100, (displayLoad / gaugeMaxN) * 100))}%` }}
+                >
+                  <div className={`h-[3px] bg-white shadow-[0_0_8px_2px_rgba(255,255,255,0.85)] ${testing ? "gauge-needle-live" : ""}`} />
+                </div>
+              </div>
+              <div>
+                <div className="text-slate-400 uppercase font-bold text-[10px] tracking-wide">Joriy yuk</div>
+                <div className="font-bold text-2xl text-amber-400 leading-tight">
+                  {displayLoad.toFixed(0)}
+                  <span className="text-xs text-slate-400 font-semibold"> N</span>
+                </div>
+                <div className="text-[10px] text-slate-500">shkala: 0–{gaugeMaxN.toFixed(0)} N</div>
+              </div>
+            </div>
+          )}
+          {view === "3d" && (testing || result) && (
+            <div className="absolute top-2 right-4 flex flex-col gap-1">
+              {[
+                { c: "#0a0a0a", t: "1100N", light: true },
+                { c: "#92400e", t: "900N", light: true },
+                { c: "#3b82f6", t: "700N", light: true },
+                { c: "#22c55e", t: "500N", light: false },
+                { c: "#f97316", t: "300N", light: false },
+                { c: "#facc15", t: "100N", light: false },
+              ].map((b) => (
+                <div
+                  key={b.t}
+                  className="w-16 h-7 flex items-center justify-center rounded text-[11px] font-bold"
+                  style={{ background: b.c, color: b.light ? "#fff" : "#1a1a1a" }}
+                >
+                  {b.t}
+                </div>
+              ))}
             </div>
           )}
         </div>
