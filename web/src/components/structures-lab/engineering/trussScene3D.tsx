@@ -186,6 +186,12 @@ interface TrussSceneContentsProps {
    * against FORCE_BANDS instead of the default tension/compression coloring.
    */
   colorByForce?: boolean;
+  /** Truck Rally realism mode: keep every member as natural timber (matching
+   * the real WhiteBox rally, where the bridge stays wood while the truck
+   * crosses) and only highlight the single first-failing member in red -
+   * instead of the multi-colored per-member force/safety scheme, which reads
+   * as noisy and un-serious in the arena view. */
+  keepWood?: boolean;
 }
 
 export function TrussSceneContents({
@@ -198,6 +204,7 @@ export function TrussSceneContents({
   onNodeClick,
   onMemberClick,
   colorByForce,
+  keepWood,
 }: TrussSceneContentsProps) {
   const { center, radius } = useTrussBounds(nodes);
   // The design (nodes/members) is drawn as one 2D truss; rendered as the two
@@ -219,15 +226,24 @@ export function TrussSceneContents({
       const b = nodeMap.get(m.nodeB);
       if (!a || !b) return null;
       const res = solved?.get(m.id);
-      const color = colorByForce && res ? forceBandColor(res.forceN) : memberColorFor(res);
+      const failing = !!res && res.safetyFactor < 1;
+      let color: string;
+      let isWoodBeam: boolean;
+      if (keepWood) {
+        color = failing ? "#b91c1c" : UNSOLVED_WOOD_COLOR;
+        isWoodBeam = !failing;
+      } else {
+        color = colorByForce && res ? forceBandColor(res.forceN) : memberColorFor(res);
+        isWoodBeam = !res;
+      }
       return (
         <MemberBeam
           key={`${side}-${m.id}`}
           a={a}
           b={b}
           color={color}
-          thick={!!res && res.safetyFactor < 1}
-          isWood={!res}
+          thick={failing}
+          isWood={isWoodBeam}
           sceneRadius={radius}
           onClick={
             side === "front" && onMemberClick

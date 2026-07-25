@@ -264,7 +264,7 @@ export default function StructuresCompetitionPage() {
               🚚
             </div>
           )}
-          {view === "2d" && (testing || result) && (
+          {(testing || result) && (
             <div className="absolute top-2 right-4 bg-[#0a0e18]/90 border border-[rgba(255,255,255,0.1)] rounded-xl px-3 py-3 flex items-center gap-3">
               <div
                 className="relative w-8 h-56 rounded-full border border-[rgba(255,255,255,0.2)] overflow-hidden shrink-0"
@@ -288,26 +288,6 @@ export default function StructuresCompetitionPage() {
                 </div>
                 <div className="text-[10px] text-slate-500">shkala: 0–{gaugeMaxN.toFixed(0)} N</div>
               </div>
-            </div>
-          )}
-          {view === "3d" && (testing || result) && (
-            <div className="absolute top-2 right-4 flex flex-col gap-1">
-              {[
-                { c: "#0a0a0a", t: "1100N", light: true },
-                { c: "#92400e", t: "900N", light: true },
-                { c: "#3b82f6", t: "700N", light: true },
-                { c: "#22c55e", t: "500N", light: false },
-                { c: "#f97316", t: "300N", light: false },
-                { c: "#facc15", t: "100N", light: false },
-              ].map((b) => (
-                <div
-                  key={b.t}
-                  className="w-16 h-7 flex items-center justify-center rounded text-[11px] font-bold"
-                  style={{ background: b.c, color: b.light ? "#fff" : "#1a1a1a" }}
-                >
-                  {b.t}
-                </div>
-              ))}
             </div>
           )}
         </div>

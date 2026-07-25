@@ -7,7 +7,8 @@ import * as THREE from "three";
 import { TrussNode, TrussMemberDraft, SolvedMember } from "./types";
 import { toVec3, useTrussBounds, TrussSceneContents } from "./trussScene3D";
 
-const WHEEL_RADIUS = 0.6; // monster-truck sized wheel
+const WHEEL_RADIUS = 0.62; // monster-truck sized wheel
+const WHEEL_WIDTH = 0.52;
 const DRIVE_SPEED = 0.22; // progress units (0..1) per second
 const FORWARD_KEYS = ["ArrowRight", "ArrowUp", "d", "D", "w", "W"];
 const BACKWARD_KEYS = ["ArrowLeft", "ArrowDown", "a", "A", "s", "S"];
@@ -23,154 +24,221 @@ function seededRandom(seed: number): number {
   return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
 }
 
-/** A monster-truck: cab leading (+X, the direction of travel across the
- * bridge), lifted body on tall wide wheels, open bed trailing behind it. */
-function TruckModel({ position }: { position: THREE.Vector3 }) {
-  const wheels: [number, number, number][] = [
-    [-1.05, 0, 0.68],
-    [-1.05, 0, -0.68],
-    [0.75, 0, 0.68],
-    [0.75, 0, -0.68],
-  ];
+/** One monster-truck wheel: a wide black rubber tyre with a bright metal rim
+ * hub on each outer face. The cylinder's default axis is +Y; the parent group
+ * rotates it +90deg about X so the axle runs along Z (left-right), i.e. the
+ * round face points sideways and the wheel rolls along +X (travel direction).
+ * The earlier build rotated about Z, which pointed the round faces forward and
+ * made the wheels read as barrels - the "cartoon tyre" look. */
+function MonsterWheel({ position }: { position: [number, number, number] }) {
   return (
-    <group position={position}>
-      <mesh position={[-0.35, 0.85, 0]} castShadow>
-        <boxGeometry args={[1.9, 0.55, 1.15]} />
-        <meshStandardMaterial color="#f97316" />
+    <group position={position} rotation={[Math.PI / 2, 0, 0]}>
+      {/* tyre */}
+      <mesh castShadow>
+        <cylinderGeometry args={[WHEEL_RADIUS, WHEEL_RADIUS, WHEEL_WIDTH, 32]} />
+        <meshStandardMaterial color="#141414" roughness={0.95} metalness={0.05} />
       </mesh>
-      <mesh position={[-0.35, 1.18, 0.52]} castShadow>
-        <boxGeometry args={[1.9, 0.22, 0.08]} />
-        <meshStandardMaterial color="#c2410c" />
+      {/* sidewall bevel (slightly smaller, softer black) to avoid a flat disc face */}
+      <mesh position={[0, WHEEL_WIDTH / 2 - 0.01, 0]}>
+        <cylinderGeometry args={[WHEEL_RADIUS * 0.82, WHEEL_RADIUS, 0.06, 32]} />
+        <meshStandardMaterial color="#0c0c0c" roughness={1} />
       </mesh>
-      <mesh position={[-0.35, 1.18, -0.52]} castShadow>
-        <boxGeometry args={[1.9, 0.22, 0.08]} />
-        <meshStandardMaterial color="#c2410c" />
+      <mesh position={[0, -WHEEL_WIDTH / 2 + 0.01, 0]}>
+        <cylinderGeometry args={[WHEEL_RADIUS, WHEEL_RADIUS * 0.82, 0.06, 32]} />
+        <meshStandardMaterial color="#0c0c0c" roughness={1} />
       </mesh>
-      <mesh position={[0.85, 1.25, 0]} castShadow>
-        <boxGeometry args={[1.0, 0.9, 1.1]} />
-        <meshStandardMaterial color="#ea580c" />
-      </mesh>
-      <mesh position={[1.25, 1.35, 0]} castShadow>
-        <boxGeometry args={[0.08, 0.55, 0.95]} />
-        <meshStandardMaterial color="#1e293b" metalness={0.3} roughness={0.2} />
-      </mesh>
-      <mesh position={[1.42, 0.82, 0]} castShadow>
-        <boxGeometry args={[0.28, 0.3, 1.15]} />
-        <meshStandardMaterial color="#3f3f46" />
-      </mesh>
-      {[0.62, -0.62].map((z) => (
-        <mesh key={z} position={[1.05, 1.35, z]} castShadow>
-          <boxGeometry args={[0.06, 0.14, 0.1]} />
-          <meshStandardMaterial color="#1e293b" />
-        </mesh>
-      ))}
-      {wheels.map(([x, y, z], i) => (
-        <mesh key={i} position={[x, y, z]} rotation={[0, 0, Math.PI / 2]} castShadow>
-          <cylinderGeometry args={[WHEEL_RADIUS, WHEEL_RADIUS, 0.4, 20]} />
-          <meshStandardMaterial color="#111827" roughness={0.9} />
+      {/* metal rim hubs */}
+      {[WHEEL_WIDTH / 2 + 0.005, -WHEEL_WIDTH / 2 - 0.005].map((yy, i) => (
+        <mesh key={i} position={[0, yy, 0]}>
+          <cylinderGeometry args={[WHEEL_RADIUS * 0.48, WHEEL_RADIUS * 0.48, 0.04, 6]} />
+          <meshStandardMaterial color="#c9ccd1" metalness={0.85} roughness={0.3} />
         </mesh>
       ))}
     </group>
   );
 }
 
-/** Dirt ramp/abutment at each bridge end (previously a green "canyon bank" -
- * recolored to match the arena's dirt floor, since the bridge now sits over
- * open arena ground rather than a canyon gap). */
+/** A lifted monster-truck: cab leading (+X, the direction of travel across the
+ * bridge), a two-tone lifted body on four tall wide wheels, a roll bar and a
+ * trailing open bed. Deliberately clean/low-poly but proportioned like a real
+ * vehicle rather than a toy. */
+function TruckModel({ position }: { position: THREE.Vector3 }) {
+  const wheels: [number, number, number][] = [
+    [-0.95, 0, 0.7],
+    [-0.95, 0, -0.7],
+    [0.85, 0, 0.7],
+    [0.85, 0, -0.7],
+  ];
+  const bodyY = WHEEL_RADIUS + 0.28; // sit the chassis above the axles (lift)
+  return (
+    <group position={position}>
+      {/* chassis rail */}
+      <mesh position={[-0.05, bodyY - 0.12, 0]} castShadow>
+        <boxGeometry args={[2.5, 0.14, 0.9]} />
+        <meshStandardMaterial color="#1f2937" metalness={0.5} roughness={0.5} />
+      </mesh>
+      {/* bed / lower body */}
+      <mesh position={[-0.45, bodyY + 0.22, 0]} castShadow>
+        <boxGeometry args={[1.7, 0.5, 1.16]} />
+        <meshStandardMaterial color="#ea6a1e" metalness={0.35} roughness={0.4} />
+      </mesh>
+      {/* bed side rails */}
+      {[0.56, -0.56].map((z) => (
+        <mesh key={z} position={[-0.45, bodyY + 0.52, z]} castShadow>
+          <boxGeometry args={[1.7, 0.18, 0.06]} />
+          <meshStandardMaterial color="#b5461a" roughness={0.5} />
+        </mesh>
+      ))}
+      {/* cab */}
+      <mesh position={[0.75, bodyY + 0.58, 0]} castShadow>
+        <boxGeometry args={[0.95, 0.72, 1.08]} />
+        <meshStandardMaterial color="#f2761f" metalness={0.35} roughness={0.4} />
+      </mesh>
+      {/* windshield */}
+      <mesh position={[1.13, bodyY + 0.7, 0]} castShadow>
+        <boxGeometry args={[0.06, 0.42, 0.9]} />
+        <meshStandardMaterial color="#0f1e2e" metalness={0.4} roughness={0.15} />
+      </mesh>
+      {/* roll bar */}
+      <mesh position={[0.28, bodyY + 0.9, 0]}>
+        <boxGeometry args={[0.07, 0.5, 1.02]} />
+        <meshStandardMaterial color="#111827" metalness={0.4} roughness={0.4} />
+      </mesh>
+      {/* headlights */}
+      {[0.5, -0.5].map((z) => (
+        <mesh key={z} position={[1.24, bodyY + 0.3, z]}>
+          <boxGeometry args={[0.05, 0.12, 0.16]} />
+          <meshStandardMaterial color="#fffbe6" emissive="#fff3b0" emissiveIntensity={0.7} />
+        </mesh>
+      ))}
+      {wheels.map((w, i) => (
+        <MonsterWheel key={i} position={w} />
+      ))}
+    </group>
+  );
+}
+
+/** Dirt ramp/abutment at each bridge end, colored to match the arena floor. */
 function EndRamp({ x, y, depth, width }: { x: number; y: number; depth: number; width: number }) {
   return (
-    <mesh position={[x, y - 0.5, 0]} receiveShadow>
+    <mesh position={[x, y - 0.5, 0]} receiveShadow castShadow>
       <boxGeometry args={[width, 1, depth]} />
-      <meshStandardMaterial color="#6b4f2a" roughness={0.95} />
+      <meshStandardMaterial color="#7a5a34" roughness={0.98} />
     </mesh>
   );
 }
 
-/** A big circular dirt arena floor beneath the whole scene. */
+/** The compacted-dirt arena floor beneath the whole scene. */
 function ArenaFloor({ radius, y }: { radius: number; y: number }) {
   return (
     <mesh position={[0, y - 0.55, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-      <circleGeometry args={[radius * 6, 48]} />
-      <meshStandardMaterial color="#6b4f2a" roughness={1} />
+      <circleGeometry args={[radius, 64]} />
+      <meshStandardMaterial color="#79582f" roughness={1} />
     </mesh>
   );
 }
 
 let crowdTextureCache: THREE.CanvasTexture | null = null;
 
-/** A small procedural "crowd" texture (scattered colored dots on a stand
- * background) - generated once and cached, same pattern as the wood-grain
- * texture in trussScene3D.tsx. */
+/** A distant-crowd texture: a dark packed-stand base with faint horizontal
+ * seat rows and small, muted specks (mostly clothing/skin tones, only a few
+ * bright). Reads as a filled stadium from a distance rather than the earlier
+ * confetti of saturated primary dots. Generated once and cached. */
 function getCrowdTexture(): THREE.CanvasTexture {
   if (crowdTextureCache) return crowdTextureCache;
   const c = document.createElement("canvas");
-  c.width = 128;
-  c.height = 64;
+  c.width = 256;
+  c.height = 128;
   const ctx = c.getContext("2d")!;
-  ctx.fillStyle = "#243b6b";
-  ctx.fillRect(0, 0, 128, 64);
-  const colors = ["#e2e8f0", "#f97316", "#dc2626", "#facc15", "#38bdf8", "#a3e635"];
-  for (let i = 0; i < 900; i++) {
+  ctx.fillStyle = "#20283a";
+  ctx.fillRect(0, 0, 256, 128);
+  // faint seat rows
+  for (let y = 4; y < 128; y += 9) {
+    ctx.fillStyle = "rgba(255,255,255,0.05)";
+    ctx.fillRect(0, y, 256, 1);
+  }
+  const muted = ["#5b6472", "#7d8390", "#9aa0ab", "#a9865f", "#c2a07a", "#4a5261", "#6b5548"];
+  const bright = ["#c94f4f", "#4f74c9", "#d8b34a"];
+  for (let i = 0; i < 2600; i++) {
     const rx = seededRandom(i * 7 + 1);
     const ry = seededRandom(i * 7 + 2);
     const rc = seededRandom(i * 7 + 3);
-    ctx.fillStyle = colors[Math.floor(rc * colors.length)];
-    ctx.fillRect(rx * 128, ry * 64, 2, 2);
+    // ~8% bright, rest muted
+    ctx.fillStyle = rc > 0.92 ? bright[Math.floor(seededRandom(i * 7 + 4) * bright.length)] : muted[Math.floor(rc * muted.length)];
+    ctx.fillRect(rx * 256, ry * 128, 1.6, 1.6);
   }
   const t = new THREE.CanvasTexture(c);
   t.wrapS = t.wrapT = THREE.RepeatWrapping;
-  t.repeat.set(6, 2);
+  t.repeat.set(22, 5);
   crowdTextureCache = t;
   return t;
 }
 
-/** One tiered spectator stand facing the arena, with a procedural crowd
- * texture on its raked seating face and a plain concrete base. */
-function CrowdStand({
-  position,
-  rotationY,
-  width,
-  height,
-}: {
-  position: [number, number, number];
-  rotationY: number;
-  width: number;
-  height: number;
-}) {
-  const tex = getCrowdTexture();
+/** An enclosed stadium bowl: a raked (truncated-cone) seating shell of crowd
+ * texture rising all the way around the arena, a dark barrier wall at track
+ * level, and a top rim cap. Replaces the four flat tilted "billboard" stands. */
+function StadiumBowl({ innerR, baseY, height }: { innerR: number; baseY: number; height: number }) {
+  const crowd = getCrowdTexture();
   return (
-    <group position={position} rotation={[0, rotationY, 0]}>
-      <mesh rotation={[-Math.PI / 6, 0, 0]} receiveShadow>
-        <planeGeometry args={[width, height]} />
-        <meshStandardMaterial map={tex} roughness={0.95} side={THREE.DoubleSide} />
+    <group position={[0, baseY, 0]}>
+      {/* raked seating (wider at the top) */}
+      <mesh position={[0, height / 2 + height * 0.18, 0]} receiveShadow>
+        <cylinderGeometry args={[innerR + height * 1.05, innerR + height * 0.15, height, 64, 1, true]} />
+        <meshStandardMaterial map={crowd} side={THREE.DoubleSide} roughness={1} />
       </mesh>
-      <mesh position={[0, -height * 0.28, height * 0.22]} receiveShadow>
-        <boxGeometry args={[width, height * 0.5, height * 0.45]} />
-        <meshStandardMaterial color="#9ca3af" roughness={0.9} />
+      {/* barrier wall at track level */}
+      <mesh position={[0, height * 0.14, 0]}>
+        <cylinderGeometry args={[innerR, innerR, height * 0.28, 64, 1, true]} />
+        <meshStandardMaterial color="#22344d" side={THREE.DoubleSide} roughness={0.9} />
+      </mesh>
+      {/* top rim cap */}
+      <mesh position={[0, height + height * 0.18, 0]}>
+        <cylinderGeometry args={[innerR + height * 1.05, innerR + height * 1.02, height * 0.08, 64, 1, true]} />
+        <meshStandardMaterial color="#334155" side={THREE.DoubleSide} roughness={0.85} />
       </mesh>
     </group>
   );
 }
 
-/** A big sky-colored dome enclosing the arena (rendered back-face-in so it
- * reads as a distant backdrop rather than a solid ball). */
+let skyTextureCache: THREE.CanvasTexture | null = null;
+
+/** A vertical sky gradient (pale near the horizon, deeper blue overhead). */
+function getSkyTexture(): THREE.CanvasTexture {
+  if (skyTextureCache) return skyTextureCache;
+  const c = document.createElement("canvas");
+  c.width = 4;
+  c.height = 256;
+  const ctx = c.getContext("2d")!;
+  const g = ctx.createLinearGradient(0, 0, 0, 256);
+  g.addColorStop(0, "#3f78c4"); // top (V=1 maps near the dome top)
+  g.addColorStop(0.55, "#7fb0e0");
+  g.addColorStop(1, "#d6e8f5"); // horizon
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, 4, 256);
+  const t = new THREE.CanvasTexture(c);
+  skyTextureCache = t;
+  return t;
+}
+
+/** A sky-gradient dome enclosing the arena (rendered back-face-in). */
 function SkyDome({ radius }: { radius: number }) {
+  const tex = getSkyTexture();
   return (
     <mesh>
-      <sphereGeometry args={[radius * 20, 24, 16]} />
-      <meshBasicMaterial color="#7db4e6" side={THREE.BackSide} />
+      <sphereGeometry args={[radius * 22, 32, 20]} />
+      <meshBasicMaterial map={tex} side={THREE.BackSide} />
     </mesh>
   );
 }
 
-/** A low ring of distant mountain peaks around the arena horizon. */
+/** A low ring of hazy distant mountains around the horizon. */
 function MountainRing({ radius, y }: { radius: number; y: number }) {
   const peaks = useMemo(
     () =>
-      Array.from({ length: 14 }).map((_, i) => {
-        const ang = (i / 14) * Math.PI * 2;
+      Array.from({ length: 22 }).map((_, i) => {
+        const ang = (i / 22) * Math.PI * 2;
         const rr = seededRandom(i * 5 + 11);
-        return { x: Math.cos(ang) * radius * 12, z: Math.sin(ang) * radius * 12, h: radius * (2 + rr * 2.5) };
+        return { x: Math.cos(ang) * radius * 13, z: Math.sin(ang) * radius * 13, h: radius * (2.4 + rr * 2.8) };
       }),
     [radius]
   );
@@ -178,8 +246,8 @@ function MountainRing({ radius, y }: { radius: number; y: number }) {
     <>
       {peaks.map((p, i) => (
         <mesh key={i} position={[p.x, y, p.z]}>
-          <coneGeometry args={[p.h * 0.9, p.h, 4]} />
-          <meshStandardMaterial color="#5b6b52" roughness={1} />
+          <coneGeometry args={[p.h * 1.05, p.h, 4]} />
+          <meshStandardMaterial color="#8296a6" roughness={1} />
         </mesh>
       ))}
     </>
@@ -191,21 +259,21 @@ function FloodLight({ x, z, y, h }: { x: number; z: number; y: number; h: number
   return (
     <group position={[x, y, z]}>
       <mesh position={[0, h / 2, 0]}>
-        <cylinderGeometry args={[0.06, 0.06, h, 8]} />
-        <meshStandardMaterial color="#3f3f46" />
+        <cylinderGeometry args={[0.08, 0.1, h, 8]} />
+        <meshStandardMaterial color="#2b2f36" metalness={0.4} roughness={0.6} />
       </mesh>
-      <mesh position={[0, h, 0]} rotation={[Math.PI / 8, 0, 0]}>
-        <boxGeometry args={[1.2, 0.7, 0.12]} />
-        <meshStandardMaterial color="#e5e7eb" emissive="#fff7d6" emissiveIntensity={0.6} />
+      <mesh position={[0, h, 0]} rotation={[Math.PI / 7, 0, 0]}>
+        <boxGeometry args={[1.6, 0.9, 0.14]} />
+        <meshStandardMaterial color="#d8dde3" emissive="#fff7d6" emissiveIntensity={0.9} />
       </mesh>
     </group>
   );
 }
 
 /** A ring of colored advertising banners around the inner track wall. */
-function BannerRow({ radius, y, count = 10 }: { radius: number; y: number; count?: number }) {
+function BannerRow({ radius, y, count = 14 }: { radius: number; y: number; count?: number }) {
   const banners = useMemo(() => {
-    const colors = ["#dc2626", "#2563eb", "#f59e0b", "#16a34a", "#7c3aed"];
+    const colors = ["#c62828", "#1565c0", "#ef6c00", "#2e7d32", "#6a1b9a", "#00838f"];
     return Array.from({ length: count }).map((_, i) => {
       const ang = (i / count) * Math.PI * 2;
       const rc = seededRandom(i * 9 + 5);
@@ -221,7 +289,7 @@ function BannerRow({ radius, y, count = 10 }: { radius: number; y: number; count
     <>
       {banners.map((b, i) => (
         <mesh key={i} position={[b.x, y, b.z]} rotation={[0, b.ry, 0]}>
-          <planeGeometry args={[radius * 0.32, radius * 0.2]} />
+          <planeGeometry args={[(radius * 2 * Math.PI) / (count * 1.05), radius * 0.14]} />
           <meshBasicMaterial color={b.color} side={THREE.DoubleSide} />
         </mesh>
       ))}
@@ -229,8 +297,8 @@ function BannerRow({ radius, y, count = 10 }: { radius: number; y: number; count
   );
 }
 
-/** A scattered pile of broken timber under the bridge - wreckage from
- * earlier failed crossings. */
+/** A scattered pile of broken timber under the bridge - wreckage from earlier
+ * failed crossings. */
 function DebrisPile({ x, y, z, count = 14 }: { x: number; y: number; z: number; count?: number }) {
   const bits = useMemo(
     () =>
@@ -245,19 +313,16 @@ function DebrisPile({ x, y, z, count = 14 }: { x: number; y: number; z: number; 
   return (
     <>
       {bits.map((b, i) => (
-        <mesh key={i} position={[x + b.dx, y + 0.1, z + b.dz]} rotation={[0, b.ry, Math.PI / 2]}>
-          <boxGeometry args={[0.12, b.len, 0.12]} />
-          <meshStandardMaterial color="#c19a6b" roughness={0.9} />
+        <mesh key={i} position={[x + b.dx, y + 0.1, z + b.dz]} rotation={[0, b.ry, Math.PI / 2]} castShadow>
+          <boxGeometry args={[0.1, b.len, 0.1]} />
+          <meshStandardMaterial color="#a98763" roughness={0.9} />
         </mesh>
       ))}
     </>
   );
 }
 
-/** Advances manualX every frame while a drive key is held - lives inside the
- * Canvas (useFrame is r3f's render-loop hook, not a React effect) so the
- * outer component's state update happens once per frame, not on every
- * keydown/keyup. */
+/** Advances manualX every frame while a drive key is held. */
 function ManualDriveController({
   keysRef,
   onStep,
@@ -274,15 +339,9 @@ function ManualDriveController({
 
 type CamPreset = "orbit" | "crowd" | "highBed" | "lowBed";
 
-/** Overrides the default camera every frame to match one of the WhiteBox
- * Truck Rally camera presets - Crowd (wide stadium view), High/Low Bridge
- * Truck Bed (chase cam following the truck). OrbitControls and this
- * component fight over the SAME shared camera object (r3f's single default
- * camera), so on unmount (switching back to orbit) we must explicitly
- * restore a sane framing position - otherwise OrbitControls just takes over
- * from wherever this preset left the camera (typically jammed right up
- * against the truck), which is the "camera stuck inside the geometry" bug
- * this guards against. */
+/** Overrides the default camera every frame to match one of the WhiteBox Truck
+ * Rally camera presets. On unmount (back to orbit) it restores a sane framing
+ * so OrbitControls doesn't inherit a camera jammed against the truck. */
 function PresetCamera({
   preset,
   truckPos,
@@ -301,13 +360,13 @@ function PresetCamera({
   const desired = useMemo(() => new THREE.Vector3(), []);
   useFrame(() => {
     if (preset === "crowd") {
-      desired.set(0, deckY + radius * 2.2, radius * 5);
-      target.copy(center);
+      desired.set(radius * 1.5, deckY + radius * 1.6, radius * 4.2);
+      target.set(center.x, deckY + radius * 0.3, center.z);
     } else if (preset === "highBed") {
       desired.set(truckPos.x - radius * 1.2, truckPos.y + radius * 1.1, truckPos.z + radius * 0.9);
       target.copy(truckPos);
     } else if (preset === "lowBed") {
-      desired.set(truckPos.x - radius * 0.9, truckPos.y + 0.6, truckPos.z + 0.4);
+      desired.set(truckPos.x - radius * 0.9, truckPos.y + 0.7, truckPos.z + 0.5);
       target.set(truckPos.x + radius, truckPos.y + 0.4, truckPos.z);
     }
     camera.position.lerp(desired, 0.08);
@@ -346,7 +405,8 @@ export default function TrussRally3D({ nodes, members, solved, truckProgress }: 
 
   const bankWidth = Math.max((maxX - minX) * 0.6, 4);
   const bankDepth = radius * 3;
-  const arenaR = radius * 4;
+  const arenaFloorR = radius * 3.4;
+  const bowlHeight = radius * 2.4;
 
   const arenaCenter = useMemo(() => new THREE.Vector3(0, deckY, 0), [deckY]);
 
@@ -398,34 +458,37 @@ export default function TrussRally3D({ nodes, members, solved, truckProgress }: 
   }, [effectiveT, minX, maxX, deckY]);
 
   return (
-    <div className="flex-1 relative" style={{ background: "#7db4e6" }}>
-      <Canvas shadows={{ type: THREE.PCFShadowMap }} camera={{ position: [radius * 1.8, radius * 1.4, radius * 2], fov: 45 }}>
-        <color attach="background" args={["#7db4e6"]} />
-        <ambientLight intensity={0.7} />
-        <hemisphereLight args={["#bcdcf5", "#6b4f2a", 0.5]} />
-        <directionalLight position={[radius * 2, radius * 3, radius]} intensity={1.3} castShadow />
-        <directionalLight position={[-radius * 2, radius, -radius]} intensity={0.4} color="#fff7e0" />
+    <div className="flex-1 relative" style={{ background: "#8fb8e0" }}>
+      <Canvas shadows={{ type: THREE.PCFSoftShadowMap }} camera={{ position: [radius * 1.8, radius * 1.4, radius * 2], fov: 45 }}>
+        <ambientLight intensity={0.55} />
+        <hemisphereLight args={["#cfe3f5", "#6b4f2a", 0.55]} />
+        <directionalLight
+          position={[radius * 2.5, radius * 3.5, radius * 1.5]}
+          intensity={1.35}
+          color="#fff4dd"
+          castShadow
+          shadow-mapSize-width={1024}
+          shadow-mapSize-height={1024}
+        />
+        <directionalLight position={[-radius * 2, radius * 1.5, -radius * 2]} intensity={0.35} color="#cfe0ff" />
 
         <SkyDome radius={radius} />
-        <MountainRing radius={radius} y={deckY - radius * 0.3} />
+        <MountainRing radius={radius} y={deckY - radius * 0.2} />
 
-        <TrussSceneContents nodes={nodes} members={members} solved={solved} colorByForce />
+        <ArenaFloor radius={arenaFloorR} y={deckY} />
+        <StadiumBowl innerR={arenaFloorR} baseY={deckY - 0.55} height={bowlHeight} />
+        <BannerRow radius={arenaFloorR - 0.05} y={deckY - 0.05} />
 
-        <ArenaFloor radius={radius} y={deckY} />
+        <TrussSceneContents nodes={nodes} members={members} solved={solved} keepWood />
+
         <EndRamp x={minX - bankWidth / 2 - 0.5} y={deckY} width={bankWidth} depth={bankDepth} />
         <EndRamp x={maxX + bankWidth / 2 + 0.5} y={deckY} width={bankWidth} depth={bankDepth} />
-        <DebrisPile x={(minX + maxX) / 2} y={deckY} z={0} />
-        <BannerRow radius={arenaR * 0.98} y={deckY + arenaR * 0.06} />
+        <DebrisPile x={(minX + maxX) / 2} y={deckY - 0.4} z={0} />
 
-        <CrowdStand position={[0, deckY + arenaR * 0.35, -arenaR]} rotationY={0} width={arenaR * 2.2} height={arenaR * 0.9} />
-        <CrowdStand position={[0, deckY + arenaR * 0.35, arenaR]} rotationY={Math.PI} width={arenaR * 2.2} height={arenaR * 0.9} />
-        <CrowdStand position={[-arenaR, deckY + arenaR * 0.35, 0]} rotationY={Math.PI / 2} width={arenaR * 2.2} height={arenaR * 0.9} />
-        <CrowdStand position={[arenaR, deckY + arenaR * 0.35, 0]} rotationY={-Math.PI / 2} width={arenaR * 2.2} height={arenaR * 0.9} />
-
-        <FloodLight x={-arenaR * 1.1} z={-arenaR * 1.1} y={deckY} h={radius * 2.2} />
-        <FloodLight x={arenaR * 1.1} z={-arenaR * 1.1} y={deckY} h={radius * 2.2} />
-        <FloodLight x={-arenaR * 1.1} z={arenaR * 1.1} y={deckY} h={radius * 2.2} />
-        <FloodLight x={arenaR * 1.1} z={arenaR * 1.1} y={deckY} h={radius * 2.2} />
+        <FloodLight x={-arenaFloorR * 0.8} z={-arenaFloorR * 0.8} y={deckY} h={bowlHeight * 1.15} />
+        <FloodLight x={arenaFloorR * 0.8} z={-arenaFloorR * 0.8} y={deckY} h={bowlHeight * 1.15} />
+        <FloodLight x={-arenaFloorR * 0.8} z={arenaFloorR * 0.8} y={deckY} h={bowlHeight * 1.15} />
+        <FloodLight x={arenaFloorR * 0.8} z={arenaFloorR * 0.8} y={deckY} h={bowlHeight * 1.15} />
 
         {showTruck && <TruckModel position={truckPos} />}
         {manualMode && <ManualDriveController keysRef={keysRef} onStep={handleStep} />}
@@ -434,7 +497,7 @@ export default function TrussRally3D({ nodes, members, solved, truckProgress }: 
           <PresetCamera preset={effectivePreset} truckPos={truckPos} center={arenaCenter} radius={radius} deckY={deckY} />
         )}
         {effectivePreset === "orbit" && (
-          <OrbitControls enableDamping dampingFactor={0.08} minDistance={2} maxDistance={radius * 8} />
+          <OrbitControls enableDamping dampingFactor={0.08} minDistance={2} maxDistance={radius * 10} target={[0, deckY, 0]} />
         )}
       </Canvas>
 
