@@ -406,3 +406,17 @@ input[type="range"] {
   animation: gaugeNeedleWobble 0.3s ease-in-out infinite;
   transform-origin: left center;
 }
+
+/* ─── Electronics: wire tie-points ───
+   The component artwork already prints its own pin holes and labels, so a
+   terminal stays invisible until you reach for it and then rings itself. */
+.elec-terminal {
+  border-radius: 50%;
+  background: transparent;
+  transition: background 90ms ease-out, box-shadow 90ms ease-out;
+}
+
+.elec-terminal:hover {
+  background: rgba(34, 197, 94, 0.45);
+  box-shadow: 0 0 0 2px rgba(21, 128, 61, 0.9);
+}
