@@ -386,6 +386,369 @@ input[type="range"] {
   background: #aaa;
 }
 
+.dock-btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* The panel shell, and the tab left behind when it is collapsed. */
+.dock-panel {
+  width: 274px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  background: #f4f4f4;
+  border-left: 1px solid #b0b0b0;
+  box-shadow: -2px 0 6px rgba(0, 0, 0, 0.06);
+  z-index: 10;
+}
+
+.dock-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.dock-header-icon {
+  color: #ea580c;
+}
+
+.dock-header-close {
+  background: none;
+  border: none;
+  color: #475569;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  padding: 0 2px;
+}
+
+.dock-header-close:hover {
+  color: #0f172a;
+}
+
+.dock-collapsed {
+  align-self: flex-start;
+  writing-mode: vertical-rl;
+  padding: 12px 6px;
+  margin: 8px 0 0;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  background: #d4d4d4;
+  color: #1e293b;
+  border: 1px solid #b0b0b0;
+  border-right: none;
+  border-radius: 4px 0 0 4px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.dock-collapsed:hover {
+  background: #c0c0c0;
+}
+
+/* Section heading inside the panel. Without its own colour this inherited the
+   page's near-white text and vanished against the panel. */
+.dock-category {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: #64748b;
+  background: #e8e8e8;
+  border-top: 1px solid #d4d4d4;
+  border-bottom: 1px solid #d4d4d4;
+  padding: 4px 12px;
+  margin-top: 8px;
+}
+
+/* Read-only label/value pair. These were `display: block` for want of a rule,
+   which ran the label straight into its value ("Empty Mass-275.00 g"). */
+.dock-info-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 12px;
+  border-bottom: 1px solid #ececec;
+}
+
+.dock-info-label {
+  font-size: 11.5px;
+  color: #64748b;
+}
+
+.dock-info-value {
+  font-size: 11.5px;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  color: #1e293b;
+  text-align: right;
+}
+
+/* ─── Fin profile editor ─── */
+.fin-editor {
+  padding: 8px 10px 10px;
+  background: #0b1b2e;
+  border-bottom: 1px solid #d4d4d4;
+}
+
+.fin-editor svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.fin-editor-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+  font-size: 10px;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  color: #94a3b8;
+}
+
+.fin-editor-legend b { color: #22d3ee; }
+
+/* Laid over the 3D viewport: the rocket shows through, and only the outline and
+   its handles take pointer events so the model can still be orbited around it. */
+.fin-editor-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(46vh, 340px);
+  padding: 0;
+  background: transparent;
+  border: none;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.fin-editor-overlay svg {
+  overflow: visible;
+}
+
+.fin-editor-overlay circle,
+.fin-editor-overlay polygon {
+  pointer-events: all;
+}
+
+.fin-editor-overlay .fin-editor-legend {
+  justify-content: center;
+  margin-top: 4px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+/* Small segmented choice, for stock that only comes in a few sizes. */
+.dock-chip {
+  min-width: 30px;
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  border: 1px solid #b0b0b0;
+  border-radius: 3px;
+  background: #fff;
+  color: #475569;
+  cursor: pointer;
+}
+
+.dock-chip:hover { background: #ececec; }
+
+.dock-chip-on {
+  background: #ea580c;
+  border-color: #ea580c;
+  color: #fff;
+}
+
+.dock-slider {
+  padding: 6px 12px;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.dock-slider-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 3px;
+}
+
+.dock-slider-value {
+  font-size: 11.5px;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  color: #1d4ed8;
+  font-weight: 700;
+}
+
+.dock-slider input[type="range"] {
+  width: 100%;
+  accent-color: #ea580c;
+}
+
+.dock-note {
+  font-size: 11px;
+  line-height: 1.45;
+  color: #64748b;
+  padding: 8px 12px;
+}
+
+.dock-messages {
+  padding: 8px 12px;
+  border-top: 1px solid #d4d4d4;
+  background: #fafafa;
+}
+
+.dock-error,
+.dock-hint {
+  font-size: 11px;
+  line-height: 1.4;
+  margin-bottom: 5px;
+}
+
+.dock-error { color: #b91c1c; font-weight: 600; }
+.dock-hint { color: #92400e; }
+
+/* CG / CP picture in the stability panel. */
+.dock-stab {
+  padding: 12px 12px 6px;
+  position: relative;
+}
+
+.dock-stab-body {
+  height: 10px;
+  border-radius: 5px;
+  background: linear-gradient(90deg, #cbd5e1, #94a3b8);
+}
+
+.dock-stab-mark {
+  position: absolute;
+  top: 8px;
+  width: 3px;
+  height: 18px;
+  border-radius: 2px;
+  transform: translateX(-1.5px);
+}
+
+.dock-stab-legend {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 10px;
+  font-size: 10.5px;
+  color: #475569;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+}
+
+.dock-stab-legend i {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  margin-right: 3px;
+}
+
+.dock-stab-nose {
+  margin-left: auto;
+  color: #94a3b8;
+}
+
+/* ─── Scrollbar used by the docking station and report pages ─── */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #ececec;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #b8b8b8;
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #9a9a9a;
+}
+
+/* ─── 1:1 printable build templates ───
+   Sizes inside .pt-sheet are given in real mm so a 100%-scale print comes out
+   life size; nothing here may use relative units. */
+.pt-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.pt-print-btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  background: #1f2937;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.pt-print-btn:hover { background: #111827; }
+
+.pt-sheet {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.pt-sheet-head {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #6b7280;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 8px;
+  margin-bottom: 12px;
+}
+
+.pt-block { margin-bottom: 22px; }
+
+.pt-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 6px;
+}
+
+.pt-meta {
+  display: block;
+  font-size: 10.5px;
+  font-weight: 400;
+  color: #6b7280;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  margin-top: 2px;
+}
+
+@media print {
+  /* Only the templates go on paper. */
+  body * { visibility: hidden; }
+  .print-templates, .print-templates * { visibility: visible; }
+  .print-templates {
+    position: absolute;
+    inset: 0;
+    background: #fff;
+  }
+  .no-print { display: none !important; }
+  .pt-sheet { border: none; padding: 0; }
+  .pt-break { break-before: page; }
+}
+
 /* ─── Fade-in animation ─── */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(8px); }
@@ -420,3 +783,15 @@ input[type="range"] {
   background: rgba(34, 197, 94, 0.45);
   box-shadow: 0 0 0 2px rgba(21, 128, 61, 0.9);
 }
+
+/* Running DC motor: the artwork is a side view, so the shaft gets a spinner. */
+@keyframes elecSpin {
+  to { transform: rotate(360deg); }
+}
+
+.elec-spin {
+  animation: elecSpin 1s linear infinite;
+  transform-origin: 0 0;
+}
+
+/* touch to force a CSS rebuild */

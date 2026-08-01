@@ -106,6 +106,77 @@ void loop() {
       wire("w3", "l", "cathode", "u", "gnd1", "#111827"),
     ],
   },
+  {
+    key: "servo",
+    name: "Servo motorni burish (Servo.h)",
+    code: `// Servo kutubxonasi bilan burchakni boshqarish
+#include <Servo.h>
+
+Servo qanot;
+
+void setup() {
+  qanot.attach(9);
+  Serial.begin(9600);
+}
+
+void loop() {
+  for (int a = 0; a <= 180; a += 15) {
+    qanot.write(a);
+    Serial.println(a);
+    delay(200);
+  }
+  for (int a = 180; a >= 0; a -= 15) {
+    qanot.write(a);
+    delay(200);
+  }
+}`,
+    components: [
+      { id: "u", type: "arduino-uno", x: 80, y: 120, rotation: 0, props: {} },
+      { id: "s", type: "servo", x: 640, y: 150, rotation: 0, props: {} },
+    ],
+    wires: [
+      wire("w1", "u", "d9", "s", "sig", "#ca8a04"),
+      wire("w2", "u", "5v", "s", "vcc", "#dc2626"),
+      wire("w3", "u", "gnd1", "s", "gnd", "#111827"),
+    ],
+  },
+  {
+    key: "lcd",
+    name: "LCD 16x2 ekranga yozish (LiquidCrystal.h)",
+    code: `// LiquidCrystal — 16x2 ekranga matn chiqarish
+#include <LiquidCrystal.h>
+
+// Pinlar: RS, E, D4, D5, D6, D7
+LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
+
+void setup() {
+  lcd.begin(16, 2);
+  lcd.print("INNO HUB");
+}
+
+void loop() {
+  lcd.setCursor(0, 1);
+  lcd.print("Vaqt: ");
+  lcd.print(millis() / 1000);
+  lcd.print("s");
+  delay(200);
+}`,
+    components: [
+      { id: "u", type: "arduino-uno", x: 60, y: 330, rotation: 0, props: {} },
+      { id: "L", type: "lcd16x2", x: 600, y: 90, rotation: 0, props: {} },
+    ],
+    // The six data lines the constructor names, plus power for the panel.
+    wires: [
+      wire("w1", "u", "d12", "L", "rs", "#16a34a"),
+      wire("w2", "u", "d11", "L", "e", "#16a34a"),
+      wire("w3", "u", "d5", "L", "db4", "#2563eb"),
+      wire("w4", "u", "d4", "L", "db5", "#2563eb"),
+      wire("w5", "u", "d3", "L", "db6", "#2563eb"),
+      wire("w6", "u", "d2", "L", "db7", "#2563eb"),
+      wire("w7", "u", "5v", "L", "vdd", "#dc2626"),
+      wire("w8", "u", "gnd1", "L", "vss", "#111827"),
+    ],
+  },
 ];
 
 export const DEFAULT_CODE = EXAMPLES[0].code;

@@ -13,18 +13,24 @@ export function StadiumArena() {
     metalness: 0.05,
   }), []);
 
-  // Mountains Background with elevation variations
+  // Mountains Background with elevation variations. The variation comes from a
+  // seeded hash rather than Math.random: the same skyline has to come back on
+  // every render, and an impure call here is a React rules violation.
   const mountains = useMemo(() => {
     const group = new THREE.Group();
     const mat = new THREE.MeshStandardMaterial({ color: "#3f4a28", roughness: 0.85 });
-    
+    const jitter = (i: number, salt: number) => {
+      const s = Math.sin(i * 12.9898 + salt * 78.233) * 43758.5453;
+      return s - Math.floor(s);
+    };
+
     for (let i = 0; i < 16; i++) {
       const angle = Math.PI + (i / 15) * Math.PI;
-      const radius = 420 + Math.random() * 80;
+      const radius = 420 + jitter(i, 1) * 80;
       const x = Math.cos(angle) * radius;
       const z = Math.sin(angle) * radius - 100;
-      const height = 90 + Math.random() * 110;
-      const radiusBase = 110 + Math.random() * 40;
+      const height = 90 + jitter(i, 2) * 110;
+      const radiusBase = 110 + jitter(i, 3) * 40;
 
       const geo = new THREE.ConeGeometry(radiusBase, height, 10);
       const mesh = new THREE.Mesh(geo, mat);

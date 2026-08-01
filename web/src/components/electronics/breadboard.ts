@@ -79,6 +79,7 @@ export function buildBreadboardDef(): ComponentDef {
   return {
     type: "breadboard",
     name: "Breadboard",
+    art: "breadboard.svg",
     category: "breadboards",
     width: BB.width,
     height: BB.height,

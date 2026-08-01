@@ -1,16 +1,19 @@
-import { computeRocketMetrics } from "./src/lib/physics/rocketPhysics";
+// Quick sanity print of the rocket flight model, outside the browser:
+//   node node_modules/jiti/lib/jiti-cli.mjs testRocket.ts
+import { computeRocketMetrics, DEFAULT_DESIGN } from "./src/lib/physics/rocketPhysics";
 
-const botDesign = {
-  propulsion: { pressurePsi: 50, waterVolumeL: 0.35, bottleSize: "20oz_coke" as const },
-  recovery: { system: "parachute" as const, parachuteSizeMm: 200 },
-  nose: { materialCode: "BT55", ballSizeMm: 38, clayMassG: 20.0 },
-  coneTube: { lengthMm: 120.0, diameterMm: 60 },
-  coneTransition: { transitionLengthMm: 120.0 },
-  fins: { count: 3, shapePoints: 4, spanMm: 40, rootChordMm: 50, tipChordMm: 20, sweepMm: 20, material: "default" },
-};
+const a = computeRocketMetrics(DEFAULT_DESIGN);
 
-const analysis = computeRocketMetrics(botDesign);
-console.log("Max height:", analysis.maxHeightM);
-console.log("Flight path length:", analysis.flightPath.length);
-console.log("First 5 points:", analysis.flightPath.slice(0, 5));
-console.log("Apogee point:", analysis.flightPath.find(p => p.h === analysis.maxHeightM));
+console.log("Apogee:          ", a.maxHeightM.toFixed(2), "m");
+console.log("Burnout velocity:", a.burnoutVelocityMs.toFixed(2), "m/s");
+console.log("Burn time:       ", (a.burnTimeS * 1000).toFixed(1), "ms");
+console.log("Peak thrust:     ", a.peakThrustN.toFixed(1), "N");
+console.log("Total impulse:   ", a.impulseNs.toFixed(3), "Ns");
+console.log("Cd:              ", a.dragCoefficient.toFixed(3));
+console.log("CG dry / wet:    ", a.cgDryMm.toFixed(1), "/", a.cgMm.toFixed(1), "mm");
+console.log("CP:              ", a.cpMm.toFixed(1), "mm");
+console.log("Static margin:   ", a.staticMarginCal.toFixed(2), "cal ->", a.stability);
+console.log("Descent rate:    ", a.descentRateMs.toFixed(2), "m/s", `(${a.deployStatus})`);
+console.log("Flight time:     ", a.totalFlightTimeS.toFixed(2), "s over", a.flightPath.length, "samples");
+console.log("Status:          ", a.specStatus, a.specErrors.length ? a.specErrors : "");
+if (a.hints.length) console.log("Hints:\n -", a.hints.join("\n - "));

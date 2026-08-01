@@ -1,273 +1,424 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { OrbitControls, Environment, Grid, Html } from "@react-three/drei";
+import { OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 import { useRocketStore } from "../../../../store/rocketStore";
 import { RocketModel } from "../../../../components/rocket-viewport/RocketModel";
-import { RocketNavbar } from "../../../../components/rocket-lab/RocketNavbar";
 import { StadiumArena } from "../../../../components/rocket-viewport/StadiumArena";
 import { DetailedLaunchPad } from "../../../../components/rocket-viewport/DetailedLaunchPad";
+import {
+  computeRocketMetrics, sampleFlight, RocketAnalysis, RocketDesign, DEFAULT_DESIGN,
+} from "../../../../lib/physics/rocketPhysics";
 
-import { computeRocketMetrics } from "../../../../lib/physics/rocketPhysics";
+/**
+ * The model is built at 1 mm = 0.1 scene units, so a metre of altitude is 100
+ * units. The launch animation used to assign metres straight to position.y,
+ * which made a 25 m flight look like the rocket hopped half its own length.
+ */
+const METRE = 100 * 0.1 * 10; // 1 m = 1000 mm = 1000 * 0.1 units
+/** Altitude is compressed for the camera; a true 25 m would leave the frame. */
+const ALTITUDE_VIEW_SCALE = 0.35;
 
-const botDesign: any = {
-  propulsion: { pressurePsi: 50, waterVolumeL: 0.35, bottleSize: "20oz_coke" },
-  recovery: { system: "parachute", parachuteSizeMm: 200 },
-  nose: { materialCode: "BT55", ballSizeMm: 38, clayMassG: 20.0 },
-  coneTube: { lengthMm: 120.0, diameterMm: 60 },
-  coneTransition: { transitionLengthMm: 120.0 },
-  fins: { count: 3, shapePoints: 4, spanMm: 40, rootChordMm: 50, tipChordMm: 20, sweepMm: 20, material: "default" },
-};
+interface Opponent { name: string; design: RocketDesign; colour: string }
 
-const BOTS = [
+/**
+ * Three rivals, each losing for a different reason drawn straight from the real
+ * rules: one breaks the deploy rule the help video says catches 99 students out
+ * of 100, one exceeds the five-fin limit, and one is perfectly legal but flies a
+ * tiny parachute - which costs it the flight-time race even though it reaches
+ * the same apogee.
+ */
+const OPPONENTS: Opponent[] = [
   {
-    name: "Standard Bot",
-    design: botDesign,
-    analysis: computeRocketMetrics(botDesign)
-  }
+    name: "Sardor (loysiz nos)",
+    colour: "#f59e0b",
+    design: {
+      ...DEFAULT_DESIGN,
+      nose: { ...DEFAULT_DESIGN.nose, clayMassG: 0 },
+    },
+  },
+  {
+    name: "Nilufar (kichik parashyut)",
+    colour: "#a855f7",
+    design: {
+      ...DEFAULT_DESIGN,
+      recovery: { system: "parachute", parachuteSizeMm: 110 },
+    },
+  },
+  {
+    name: "Bekzod (6 qanot)",
+    colour: "#22d3ee",
+    design: {
+      ...DEFAULT_DESIGN,
+      fins: { ...DEFAULT_DESIGN.fins, count: 6 },
+    },
+  },
 ];
 
-function SimulatedRocket({ design, analysis, isBot, phase, setFinished }: { design: any, analysis: any, isBot: boolean, phase: string, setFinished: (bot: boolean) => void }) {
+type Phase = "STAGING" | "LAUNCHING" | "RESULTS";
+
+/**
+ * What the airshow is scored on. The original Rockets 2.0 races "for total
+ * flight time and/or maximum height", so both are offered and flight time is
+ * the default - it is the one the results screen highlights, and it makes the
+ * parachute a real design decision instead of dead weight.
+ */
+type ScoreBy = "time" | "height";
+
+const SCORE_LABEL: Record<ScoreBy, string> = {
+  time: "Umumiy uchish vaqti",
+  height: "Maksimal balandlik",
+};
+
+interface Entrant { name: string; design: RocketDesign; analysis: RocketAnalysis; isPlayer: boolean; colour: string }
+
+function FlyingRocket({ entrant, phase, onLanded, x }: {
+  entrant: Entrant;
+  phase: Phase;
+  onLanded: (name: string) => void;
+  x: number;
+}) {
   const ref = useRef<THREE.Group>(null);
-  const parachuteRef = useRef<THREE.Mesh>(null);
-  const flightStartTimeRef = useRef(0);
-  const finishedRef = useRef(false);
+  const chuteRef = useRef<THREE.Group>(null);
+  const startRef = useRef(0);
+  const landedRef = useRef(false);
   const { clock } = useThree();
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (phase === "LAUNCHING") {
-      flightStartTimeRef.current = clock.getElapsedTime();
-      finishedRef.current = false;
+      startRef.current = clock.getElapsedTime();
+      landedRef.current = false;
     } else if (phase === "STAGING") {
-      if (ref.current) ref.current.position.y = 0;
-      if (parachuteRef.current) parachuteRef.current.scale.set(0, 0, 0);
-      finishedRef.current = false;
+      landedRef.current = false;
+      // Put the airframe back on the pad. These are three.js objects, not React
+      // state, so resetting them here costs no re-render.
+      if (ref.current) { ref.current.position.y = 0; ref.current.rotation.z = 0; }
+      if (chuteRef.current) chuteRef.current.scale.setScalar(0);
     }
   }, [phase, clock]);
 
   useFrame(() => {
     if (phase !== "LAUNCHING" || !ref.current) return;
-    
-    const t = clock.getElapsedTime() - flightStartTimeRef.current;
-    const { flightPath, deployStatus, ascentTimeS } = analysis;
+    const a = entrant.analysis;
+    const total = a.totalFlightTimeS;
+    const t = clock.getElapsedTime() - startRef.current;
 
-    if (!flightPath || flightPath.length === 0) return;
+    const s = sampleFlight(a.flightPath, Math.min(t, total));
+    if (!s) return;
 
-    const totalTime = flightPath[flightPath.length - 1].t;
+    ref.current.position.y = Math.max(0, s.h * METRE * ALTITUDE_VIEW_SCALE);
+    // Lean over through apogee, the way a stable rocket arcs.
+    const arc = a.ascentTimeS > 0 ? Math.min(1, Math.max(0, (t - a.ascentTimeS) / 1.2)) : 0;
+    ref.current.rotation.z = arc * (entrant.isPlayer ? -0.5 : 0.5) * (a.deployStatus === "Will Deploy" ? 1 : 2.2);
 
-    let currentY = 0;
-    
-    if (t < 0) {
-      currentY = 0;
-    } else if (t >= totalTime) {
-      // Landed
-      currentY = 0;
-      if (parachuteRef.current && deployStatus === "Will Deploy") {
-         parachuteRef.current.scale.set(0,0,0); // deflate
-      }
-      if (!finishedRef.current) {
-        finishedRef.current = true;
-        setFinished(isBot);
-      }
-    } else {
-      // Find interpolation points in flightPath
-      let idx = Math.floor(t / 0.01);
-      if (idx >= flightPath.length - 1) idx = flightPath.length - 2;
-      if (idx < 0) idx = 0;
-      
-      // Fine-tune index in case of slight dt variations
-      while (idx < flightPath.length - 1 && flightPath[idx + 1].t < t) idx++;
-      while (idx > 0 && flightPath[idx].t > t) idx--;
-
-      const p1 = flightPath[idx];
-      const p2 = flightPath[idx + 1] || p1;
-      
-      const timeDiff = p2.t - p1.t;
-      const fraction = timeDiff > 0 ? (t - p1.t) / timeDiff : 0;
-      currentY = p1.h + (p2.h - p1.h) * fraction;
-      const currentV = p1.v + (p2.v - p1.v) * fraction;
-
-      if (deployStatus === "Will Deploy") {
-        if (currentV < 0) {
-          if (parachuteRef.current) {
-             const descentT = t - ascentTimeS;
-             if (descentT > 0) {
-                 const s = Math.min(1, descentT * 2); // open in 0.5s
-                 parachuteRef.current.scale.set(s, s, s);
-             }
-          }
-        } else {
-          if (parachuteRef.current) parachuteRef.current.scale.set(0,0,0);
-        }
-      }
+    if (chuteRef.current) {
+      const open = a.deployStatus === "Will Deploy" && t > a.ascentTimeS;
+      const k = open ? Math.min(1, (t - a.ascentTimeS) * 3) : 0;
+      chuteRef.current.scale.setScalar(k);
     }
 
-    ref.current.position.y = Math.max(0, currentY); // prevent going underground
+    if (t >= total && !landedRef.current) {
+      landedRef.current = true;
+      onLanded(entrant.name);
+    }
   });
 
   return (
-    <group ref={ref}>
-      <RocketModel designOverride={design} hideUI={true} />
-      {/* Simple Parachute Mesh */}
-      <mesh ref={parachuteRef} position={[0, 40, 0]} scale={[0,0,0]}>
-        <sphereGeometry args={[20, 16, 16, 0, Math.PI * 2, 0, Math.PI / 2]} />
-        <meshStandardMaterial color="#fcd34d" side={THREE.DoubleSide} />
-        <lineSegments>
-          <edgesGeometry args={[new THREE.SphereGeometry(20, 16, 16, 0, Math.PI * 2, 0, Math.PI / 2)]} />
-          <lineBasicMaterial color="#d97706" />
-        </lineSegments>
-      </mesh>
+    <group position={[x, 0, 0]}>
+      <DetailedLaunchPad position={[0, 0, 0]} />
+      <group position={[0, 10, 0]}>
+        <group ref={ref}>
+          <RocketModel designOverride={entrant.design} hideUI isLaunching={phase === "LAUNCHING"} />
+          <group ref={chuteRef} position={[0, 44, 0]} scale={[0, 0, 0]}>
+            <mesh>
+              <sphereGeometry args={[18, 20, 12, 0, Math.PI * 2, 0, Math.PI / 2]} />
+              <meshStandardMaterial color={entrant.colour} side={THREE.DoubleSide} roughness={0.7} />
+            </mesh>
+          </group>
+        </group>
+      </group>
     </group>
   );
 }
 
+/**
+ * Distance at which a box of the given half-extents just fits the frame. Both
+ * axes have to be checked: the viewport here is much wider than it is tall, so
+ * it is almost always the vertical field of view that limits things, and ignoring
+ * that is what let the rockets run off the top of the picture.
+ */
+function fitDistance(halfH: number, halfW: number, cam: THREE.PerspectiveCamera): number {
+  const vFov = (cam.fov * Math.PI) / 180;
+  const tanV = Math.tan(vFov / 2);
+  return Math.max(halfH / tanV, halfW / (tanV * Math.max(0.1, cam.aspect)));
+}
+
+/**
+ * Frames the line-up before launch and tracks it afterwards.
+ *
+ * A 45 m flight is over twenty times the rocket's own length, so pulling back far
+ * enough to hold the whole trajectory would shrink the rockets to specks. Instead
+ * the camera keeps a readable distance and pans upward with the leader, easing
+ * back only enough to keep some sky and ground context - the way launch footage
+ * is actually shot.
+ */
+function LaunchCamera({ entrants, phase, spread, rocketTop }: {
+  entrants: Entrant[];
+  phase: Phase;
+  /** Half-width of the pad line-up, in scene units. */
+  spread: number;
+  /** Height of the tallest airframe on its pad, in scene units. */
+  rocketTop: number;
+}) {
+  const startRef = useRef(0);
+  const { clock } = useThree();
+
+  React.useEffect(() => { if (phase === "LAUNCHING") startRef.current = clock.getElapsedTime(); }, [phase, clock]);
+
+  useFrame((state) => {
+    const cam = state.camera as THREE.PerspectiveCamera;
+    if (!(cam instanceof THREE.PerspectiveCamera)) return;
+
+    // Staging: hold the whole row of rockets, ground included, with a margin.
+    const stageHalfH = (rocketTop * 1.25) / 2;
+    const stageDist = fitDistance(stageHalfH, spread * 1.12, cam);
+    let targetY = rocketTop * 0.45;
+    let dist = stageDist;
+    let ease = 0.08;
+
+    if (phase === "LAUNCHING") {
+      const t = state.clock.getElapsedTime() - startRef.current;
+      const highest = Math.max(0, ...entrants.map((e) =>
+        sampleFlight(e.analysis.flightPath, Math.min(t, e.analysis.totalFlightTimeS))?.h ?? 0
+      ));
+      const y = highest * METRE * ALTITUDE_VIEW_SCALE;
+      // Follow the leader, but never drop below the pads.
+      targetY = Math.max(rocketTop * 0.45, y + rocketTop * 0.3);
+      // Ease back a little with altitude so there is context, capped so the
+      // rockets stay big enough to see.
+      dist = stageDist * (1 + Math.min(1.1, y / (rocketTop * 14)));
+      ease = 0.05;
+    }
+
+    const camY = targetY + dist * 0.16;
+    cam.position.y += (camY - cam.position.y) * ease;
+    const flat = new THREE.Vector3(cam.position.x, 0, cam.position.z);
+    if (flat.lengthSq() < 1e-6) flat.set(0, 0, 1);
+    flat.normalize().multiplyScalar(dist);
+    cam.position.x += (flat.x - cam.position.x) * ease;
+    cam.position.z += (flat.z - cam.position.z) * ease;
+    cam.lookAt(0, targetY, 0);
+  });
+  return null;
+}
+
 export default function CompetitionPage() {
   const store = useRocketStore();
-  const [phase, setPhase] = useState<"STAGING" | "LAUNCHING" | "RESULTS">("STAGING");
-  const [finishedCount, setFinishedCount] = useState(0);
+  const [phase, setPhase] = useState<Phase>("STAGING");
+  const [landed, setLanded] = useState<string[]>([]);
+  const [scoreBy, setScoreBy] = useState<ScoreBy>("time");
 
-  const bot = BOTS[0];
-  const playerAnalysis = store.analysis;
+  const playerDesign: RocketDesign = useMemo(() => ({
+    propulsion: store.propulsion,
+    recovery: store.recovery,
+    nose: store.nose,
+    coneTube: store.coneTube,
+    coneTransition: store.coneTransition,
+    fins: store.fins,
+  }), [store.propulsion, store.recovery, store.nose, store.coneTube, store.coneTransition, store.fins]);
 
-  const handleStart = () => {
-    setFinishedCount(0);
-    setPhase("LAUNCHING");
-  };
+  const entrants: Entrant[] = useMemo(() => [
+    { name: "Siz", design: playerDesign, analysis: store.analysis, isPlayer: true, colour: "#fcd34d" },
+    ...OPPONENTS.map((o) => ({
+      name: o.name, design: o.design, analysis: computeRocketMetrics(o.design), isPlayer: false, colour: o.colour,
+    })),
+  ], [playerDesign, store.analysis]);
 
-  const handleFinish = (isBot: boolean) => {
-    setFinishedCount(prev => {
-      const next = prev + 1;
-      if (next >= 2) {
-        setPhase("RESULTS");
-      }
+  const handleLanded = (name: string) => {
+    setLanded((prev) => {
+      if (prev.includes(name)) return prev;
+      const next = [...prev, name];
+      if (next.length >= entrants.length) setPhase("RESULTS");
       return next;
     });
   };
 
-  const determineWinner = () => {
-    if (playerAnalysis.specStatus === "OUT_OF_SPEC") return bot.name;
-    if (bot.analysis.specStatus === "OUT_OF_SPEC") return "You (Student)";
-    
-    return playerAnalysis.maxHeightM > bot.analysis.maxHeightM ? "You (Student)" : bot.name;
-  };
+  /**
+   * Ranking rule: anything out of spec is disqualified first, then the chosen
+   * metric decides. A rocket whose parachute never opens still places - it just
+   * comes down fast, which costs it the flight-time race by itself.
+   */
+  const ranked = useMemo(() => {
+    const metric = (e: Entrant) =>
+      scoreBy === "time" ? e.analysis.totalFlightTimeS : e.analysis.maxHeightM;
+    return [...entrants].sort((a, b) => {
+      const rank = (e: Entrant) => (e.analysis.specStatus === "IN_SPEC" ? 1e6 : 0) + metric(e);
+      return rank(b) - rank(a);
+    });
+  }, [entrants, scoreBy]);
+
+  const spacing = 70;
+  const offset = ((entrants.length - 1) * spacing) / 2;
+  /** Pad height plus the tallest airframe, so the camera knows what to frame. */
+  const rocketTop = useMemo(
+    () => 10 + Math.max(...entrants.map((e) => e.analysis.bodyLengthMm)) * 0.1,
+    [entrants]
+  );
 
   return (
     <div className="absolute inset-0 bg-[#f8f8f8] flex flex-col">
-      <RocketNavbar />
-      
-      {/* Top Bar for Competition */}
-      <div className="h-16 bg-white border-b border-gray-300 shadow-sm flex items-center justify-between px-8 z-10">
+      <div className="h-14 bg-white border-b border-gray-300 shadow-sm flex items-center justify-between px-6 z-10 flex-shrink-0">
         <div>
-          <h2 className="text-xl font-bold text-gray-800">Launch Simulation</h2>
-          <p className="text-xs text-gray-500">Compare your design against opponents</p>
+          <h2 className="text-lg font-bold text-gray-800">Uchirish musobaqasi</h2>
+          <p className="text-[11px] text-gray-500">
+            {`${OPPONENTS.length} ta raqibga qarshi · g'olib ${SCORE_LABEL[scoreBy].toLowerCase()} bo'yicha`}
+            {store.analysis.specStatus === "OUT_OF_SPEC" && (
+              <span className="text-red-600 font-bold"> — dizayningiz talabga javob bermaydi, diskvalifikatsiya</span>
+            )}
+          </p>
         </div>
-        <div className="flex gap-4">
-          <button 
-            onClick={() => setPhase("STAGING")} 
-            className="px-6 py-2 bg-gray-200 text-gray-800 rounded font-bold hover:bg-gray-300"
+        <div className="flex items-center gap-3">
+          <label className="flex items-center gap-2 text-xs text-gray-600">
+            Mezon
+            <select
+              value={scoreBy}
+              onChange={(e) => setScoreBy(e.target.value as ScoreBy)}
+              disabled={phase === "LAUNCHING"}
+              className="border border-gray-300 rounded px-2 py-1.5 text-xs font-semibold text-gray-800 bg-white"
+            >
+              <option value="time">Uchish vaqti</option>
+              <option value="height">Balandlik</option>
+            </select>
+          </label>
+          <button
+            onClick={() => { setPhase("STAGING"); setLanded([]); }}
+            className="px-5 py-2 bg-gray-200 text-gray-800 rounded font-bold text-sm hover:bg-gray-300 disabled:opacity-40"
             disabled={phase === "STAGING"}
           >
-            RESET
+            QAYTA TIKLASH
           </button>
-          <button 
-            onClick={handleStart} 
-            className="px-8 py-2 bg-green-500 text-white rounded font-bold shadow hover:bg-green-600"
-            disabled={phase !== "STAGING"}
+          <button
+            onClick={() => { setLanded([]); setPhase("LAUNCHING"); }}
+            className="px-7 py-2 bg-green-600 text-white rounded font-bold text-sm shadow hover:bg-green-700 disabled:opacity-40"
+            disabled={phase === "LAUNCHING"}
           >
-            LAUNCH
+            ▲ UCHIRISH
           </button>
         </div>
       </div>
 
-      <div className="flex-1 relative">
-        <Canvas camera={{ position: [0, 30, 150], fov: 45 }} shadows gl={{ antialias: true }}>
-          <OrbitControls maxPolarAngle={Math.PI / 2 - 0.05} target={[0, 20, 0]} />
-
+      <div className="flex-1 relative min-h-0">
+        <Canvas camera={{ position: [0, 60, 320], fov: 45 }} shadows gl={{ antialias: true }}>
+          {/* Orbiting is for inspecting the line-up; while the camera is driving
+              itself the controls step aside so the two do not fight. */}
+          <OrbitControls
+            maxPolarAngle={Math.PI / 2 - 0.03}
+            target={[0, rocketTop * 0.45, 0]}
+            enabled={false}
+          />
           <StadiumArena />
-
-          {/* Player Rocket Launch Pad */}
-          <group position={[-30, 0, 0]}>
-            <DetailedLaunchPad position={[0, 0, 0]} />
-            <group position={[0, 10, 0]}>
-              <SimulatedRocket design={store} analysis={store.analysis} isBot={false} phase={phase} setFinished={handleFinish} />
-            </group>
-          </group>
-
-          {/* Bot Rocket Launch Pad */}
-          <group position={[30, 0, 0]}>
-            <DetailedLaunchPad position={[0, 0, 0]} />
-            <group position={[0, 10, 0]}>
-              <SimulatedRocket design={bot.design} analysis={bot.analysis} isBot={true} phase={phase} setFinished={handleFinish} />
-            </group>
-          </group>
+          <LaunchCamera entrants={entrants} phase={phase} spread={offset + spacing * 0.5} rocketTop={rocketTop} />
+          {entrants.map((e, i) => (
+            <FlyingRocket key={e.name} entrant={e} phase={phase} onLanded={handleLanded} x={i * spacing - offset} />
+          ))}
         </Canvas>
 
-        {/* Results Overlay */}
-        {phase === "RESULTS" && (
-          <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-20">
-            <div className="bg-white rounded-lg shadow-2xl w-[800px] overflow-hidden">
-              <div className="bg-gray-800 p-6 text-center">
-                <h2 className="text-3xl font-black text-white tracking-widest">RESULTS</h2>
-                <div className="mt-2 text-yellow-400 font-bold text-xl">
-                  WINNER: {determineWinner()}
-                </div>
+        {/* Live standings while they fly. */}
+        {phase === "LAUNCHING" && (
+          <div className="absolute top-4 left-4 bg-white/90 backdrop-blur rounded-lg shadow px-4 py-3 text-xs">
+            <div className="font-bold text-gray-700 mb-1.5">UCHISHDA</div>
+            {entrants.map((e) => (
+              <div key={e.name} className="flex items-center gap-2 py-0.5">
+                <span className="w-2.5 h-2.5 rounded-sm" style={{ background: e.colour }} />
+                <span className={e.isPlayer ? "font-bold text-gray-900" : "text-gray-600"}>{e.name}</span>
+                <span className="ml-auto font-mono text-gray-500">
+                  {landed.includes(e.name)
+                    ? `${e.analysis.totalFlightTimeS.toFixed(1)} s`
+                    : `${e.analysis.maxHeightM.toFixed(0)} m`}
+                </span>
               </div>
-              
-              <div className="p-6">
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="bg-gray-100 text-gray-600 text-sm border-b-2 border-gray-300">
-                      <th className="p-3">Metric</th>
-                      <th className="p-3">You (Student)</th>
-                      <th className="p-3">{bot.name}</th>
-                    </tr>
-                  </thead>
-                  <tbody className="text-sm font-medium">
-                    <tr className="border-b border-gray-200">
-                      <td className="p-3 text-gray-500">Spec Status</td>
-                      <td className={`p-3 ${playerAnalysis.specStatus === "IN_SPEC" ? "text-green-600" : "text-red-600"}`}>
-                        {playerAnalysis.specStatus}
-                      </td>
-                      <td className={`p-3 ${bot.analysis.specStatus === "IN_SPEC" ? "text-green-600" : "text-red-600"}`}>
-                        {bot.analysis.specStatus}
-                      </td>
-                    </tr>
-                    <tr className="border-b border-gray-200">
-                      <td className="p-3 text-gray-500">Deploy Status</td>
-                      <td className={`p-3 ${playerAnalysis.deployStatus === "Will Deploy" ? "text-green-600" : "text-red-600"}`}>
-                        {playerAnalysis.deployStatus}
-                      </td>
-                      <td className={`p-3 ${bot.analysis.deployStatus === "Will Deploy" ? "text-green-600" : "text-red-600"}`}>
-                        {bot.analysis.deployStatus}
-                      </td>
-                    </tr>
-                    <tr className="border-b border-gray-200">
-                      <td className="p-3 text-gray-500">Max Height (m)</td>
-                      <td className="p-3">{playerAnalysis.maxHeightM.toFixed(2)}</td>
-                      <td className="p-3">{bot.analysis.maxHeightM.toFixed(2)}</td>
-                    </tr>
-                    <tr className="border-b border-gray-200">
-                      <td className="p-3 text-gray-500">Burnout Velocity (m/s)</td>
-                      <td className="p-3">{playerAnalysis.burnoutVelocityMs.toFixed(2)}</td>
-                      <td className="p-3">{bot.analysis.burnoutVelocityMs.toFixed(2)}</td>
-                    </tr>
-                    <tr className="border-b border-gray-200">
-                      <td className="p-3 text-gray-500">Total Flight Time (s)</td>
-                      <td className="p-3">{playerAnalysis.totalFlightTimeS.toFixed(2)}</td>
-                      <td className="p-3">{bot.analysis.totalFlightTimeS.toFixed(2)}</td>
-                    </tr>
-                  </tbody>
-                </table>
+            ))}
+          </div>
+        )}
+
+        {phase === "RESULTS" && (
+          <div className="absolute inset-0 bg-black/55 flex items-center justify-center z-20 p-6">
+            <div className="bg-white rounded-lg shadow-2xl w-full max-w-3xl overflow-hidden">
+              <div className="bg-gray-800 p-5 text-center">
+                <h2 className="text-2xl font-black text-white tracking-widest">NATIJALAR</h2>
+                <div className="mt-1 text-yellow-400 font-bold text-lg">G&apos;OLIB: {ranked[0].name}</div>
               </div>
 
-              <div className="bg-gray-100 p-4 flex justify-end gap-4 border-t border-gray-300">
-                <button 
-                  onClick={() => setPhase("STAGING")}
-                  className="px-6 py-2 bg-gray-500 text-white rounded font-bold hover:bg-gray-600"
+              <div className="p-5 overflow-x-auto">
+                <table className="w-full text-left border-collapse text-sm">
+                  <thead>
+                    <tr className="bg-gray-100 text-gray-600 text-xs border-b-2 border-gray-300">
+                      <th className="p-2.5">#</th>
+                      <th className="p-2.5">Ishtirokchi</th>
+                      <th className={`p-2.5 ${scoreBy === "time" ? "bg-yellow-100 text-gray-800" : ""}`}>
+                        Uchish vaqti
+                      </th>
+                      <th className={`p-2.5 ${scoreBy === "height" ? "bg-yellow-100 text-gray-800" : ""}`}>
+                        Balandlik
+                      </th>
+                      <th className="p-2.5">Zapas</th>
+                      <th className="p-2.5">Parashyut</th>
+                      <th className="p-2.5">Narx</th>
+                      <th className="p-2.5">Holat</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {ranked.map((e, i) => (
+                      <tr key={e.name} className={`border-b border-gray-200 ${e.isPlayer ? "bg-amber-50 font-semibold" : ""}`}>
+                        <td className="p-2.5 font-bold text-gray-400">{i + 1}</td>
+                        <td className="p-2.5">{e.name}</td>
+                        <td className={`p-2.5 font-mono ${scoreBy === "time" ? "bg-yellow-50 font-bold" : ""}`}>
+                          {e.analysis.totalFlightTimeS.toFixed(2)} s
+                        </td>
+                        <td className={`p-2.5 font-mono ${scoreBy === "height" ? "bg-yellow-50 font-bold" : ""}`}>
+                          {e.analysis.maxHeightM.toFixed(1)} m
+                        </td>
+                        <td className={`p-2.5 font-mono ${e.analysis.stability === "STABLE" ? "text-green-600" : e.analysis.stability === "MARGINAL" ? "text-amber-600" : "text-red-600"}`}>
+                          {e.analysis.staticMarginCal.toFixed(2)}
+                        </td>
+                        <td className={`p-2.5 ${e.analysis.deployStatus === "Will Deploy" ? "text-green-600" : "text-red-600"}`}>
+                          {e.analysis.deployStatus === "Will Deploy" ? "ochildi" : "ochilmadi"}
+                        </td>
+                        <td className="p-2.5 font-mono">${e.analysis.designCostUsd.toFixed(2)}</td>
+                        <td className={`p-2.5 text-xs font-bold ${e.analysis.specStatus === "IN_SPEC" ? "text-green-600" : "text-red-600"}`}>
+                          {e.analysis.specStatus === "IN_SPEC" ? "OK" : "DISQ"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+
+                {store.analysis.specErrors.length > 0 && (
+                  <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded text-xs text-red-700">
+                    <b>Sizning dizayningizdagi muammolar:</b>
+                    <ul className="list-disc pl-5 mt-1">
+                      {store.analysis.specErrors.map((x, i) => <li key={i}>{x}</li>)}
+                    </ul>
+                  </div>
+                )}
+                {store.analysis.hints.length > 0 && (
+                  <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded text-xs text-amber-800">
+                    <b>Yaxshilash uchun:</b>
+                    <ul className="list-disc pl-5 mt-1">
+                      {store.analysis.hints.map((x, i) => <li key={i}>{x}</li>)}
+                    </ul>
+                  </div>
+                )}
+              </div>
+
+              <div className="bg-gray-100 p-4 flex justify-end gap-3 border-t border-gray-300">
+                <button
+                  onClick={() => { setPhase("STAGING"); setLanded([]); }}
+                  className="px-6 py-2 bg-gray-600 text-white rounded font-bold text-sm hover:bg-gray-700"
                 >
-                  CLOSE
+                  YOPISH
                 </button>
               </div>
             </div>

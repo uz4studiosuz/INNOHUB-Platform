@@ -1,6 +1,7 @@
 import { PlacedComponent, Wire, SimState, terminalKey } from "./types";
 import { COMPONENT_LIBRARY } from "./componentLibrary";
-import { ArduinoRuntime, Board, normPin } from "./arduino";
+import { findContacts } from "./geometry";
+import { ArduinoRuntime, Board, CompileResult, compile, normPin } from "./arduino";
 
 /** Simple union-find for building electrical nets. */
 class DSU {
@@ -17,7 +18,36 @@ class DSU {
   union(a: string, b: string) { this.parent.set(this.find(a), this.find(b)); }
 }
 
-type Bridge = { a: string; b: string; kind: "resistor" | "switch" };
+/** A conducting path inside a part. `oneWay` models a diode: current may only
+ *  travel a -> b, so the ground search has to walk the graph backwards. */
+type Bridge = { a: string; b: string; kind: "resistor" | "switch" | "wire"; oneWay?: boolean };
+
+/** Batteries: the + terminal is a source and the - terminal is the ground. */
+const BATTERIES: Record<string, number> = {
+  "battery-9v": 1,
+  "battery-aa": 1,
+  "coin-cell": 1,
+};
+
+/** Two-pin switches that close when their `closed` prop is set. */
+const SPST_SWITCHES = ["tilt-sensor", "reed-switch"];
+
+/** Two-pin parts that simply conduct, with or without limiting current. */
+const PASSIVE_BRIDGES: Record<string, { a: string; b: string; kind: Bridge["kind"] }> = {
+  resistor: { a: "a", b: "b", kind: "resistor" },
+  photoresistor: { a: "pin-0", b: "pin-1", kind: "resistor" },
+  "force-sensor": { a: "pin-0", b: "pin-1", kind: "resistor" },
+  inductor: { a: "pin-0", b: "pin-1", kind: "wire" },
+  // A capacitor blocks steady-state DC, so it deliberately has no bridge.
+};
+
+/** Parts whose named terminals report a 0..1023 reading to analogRead(). */
+const ANALOG_SOURCES: Record<string, { pins: string[]; def: number }> = {
+  potentiometer: { pins: ["wiper"], def: 512 },
+  photoresistor: { pins: ["pin-0", "pin-1"], def: 512 },
+  "force-sensor": { pins: ["pin-0", "pin-1"], def: 300 },
+  "temperature-sensor": { pins: ["vout"], def: 307 },
+};
 
 interface PinOut { digital: number; pwm: number | null; tone: number | null; }
 
@@ -81,6 +111,13 @@ export class Simulator {
     for (const w of this.wires) {
       this.dsu.union(terminalKey(w.from.compId, w.from.terminalId), terminalKey(w.to.compId, w.to.terminalId));
     }
+    // A leg pushed into a breadboard hole (or a board's header) is a connection
+    // just as much as a wire is, and it is the usual way a circuit is built.
+    // Nothing records it at placement time - it is read back off the current
+    // positions, so dragging a part off the board unplugs it.
+    for (const ct of findContacts(comps)) {
+      this.dsu.union(terminalKey(ct.lead.compId, ct.lead.term.id), terminalKey(ct.hole.compId, ct.hole.term.id));
+    }
     this.netOf.clear();
     for (const c of comps) {
       const def = COMPONENT_LIBRARY[c.type];
@@ -97,6 +134,9 @@ export class Simulator {
 
   // ---- electrical analysis ----------------------------------------------
   private computeElectrical() {
+    // Rebuild the netlist too: components can be added or removed while the
+    // sketch runs, and getState() has to be right before it ever starts.
+    this.buildNets();
     const comps = this.getComponents();
     this.bridges = [];
     const sources: { net: string; duty: number; tone: number | null }[] = [];
@@ -126,26 +166,51 @@ export class Simulator {
             }
           }
         }
-      } else if (c.type === "resistor") {
-        this.bridges.push({ a: this.net(c.id, "a"), b: this.net(c.id, "b"), kind: "resistor" });
+      } else if (BATTERIES[c.type]) {
+        sources.push({ net: this.net(c.id, "pos"), duty: BATTERIES[c.type], tone: null });
+        grounds.push(this.net(c.id, "neg"));
+      } else if (PASSIVE_BRIDGES[c.type]) {
+        const p = PASSIVE_BRIDGES[c.type];
+        this.bridges.push({ a: this.net(c.id, p.a), b: this.net(c.id, p.b), kind: p.kind });
       } else if (c.type === "potentiometer") {
         this.bridges.push({ a: this.net(c.id, "t1"), b: this.net(c.id, "t2"), kind: "resistor" });
       } else if (c.type === "pushbutton") {
         if (c.props.pressed) this.bridges.push({ a: this.net(c.id, "1a"), b: this.net(c.id, "2a"), kind: "switch" });
+      } else if (SPST_SWITCHES.includes(c.type)) {
+        if (c.props.closed) {
+          this.bridges.push({ a: this.net(c.id, "pin-1"), b: this.net(c.id, "pin-2"), kind: "switch" });
+        }
+      } else if (c.type === "toggle-switch") {
+        // SPDT: the common pin always sits on one throw or the other.
+        const throwPin = c.props.on ? "l1" : "l2";
+        this.bridges.push({ a: this.net(c.id, "com"), b: this.net(c.id, throwPin), kind: "switch" });
+      } else if (c.type === "diode" || c.type === "diode-zener") {
+        this.bridges.push({
+          a: this.net(c.id, "anode"), b: this.net(c.id, "cathode"), kind: "wire", oneWay: true,
+        });
       }
     }
 
-    // BFS reachability
-    const adj = new Map<string, { to: string; kind: Bridge["kind"] }[]>();
-    const addAdj = (a: string, b: string, kind: Bridge["kind"]) => {
-      if (!adj.has(a)) adj.set(a, []);
-      if (!adj.has(b)) adj.set(b, []);
-      adj.get(a)!.push({ to: b, kind });
-      adj.get(b)!.push({ to: a, kind });
+    // BFS reachability. Two adjacency maps rather than one, because a diode
+    // conducts in a single direction: power spreads forwards from a source,
+    // while "has a path to ground" has to be searched backwards from ground.
+    type Edge = { to: string; kind: Bridge["kind"] };
+    const fwd = new Map<string, Edge[]>();
+    const bwd = new Map<string, Edge[]>();
+    const link = (m: Map<string, Edge[]>, from: string, to: string, kind: Bridge["kind"]) => {
+      if (!m.has(from)) m.set(from, []);
+      m.get(from)!.push({ to, kind });
     };
-    for (const br of this.bridges) addAdj(br.a, br.b, br.kind);
+    for (const br of this.bridges) {
+      link(fwd, br.a, br.b, br.kind);
+      link(bwd, br.b, br.a, br.kind);
+      if (!br.oneWay) {
+        link(fwd, br.b, br.a, br.kind);
+        link(bwd, br.a, br.b, br.kind);
+      }
+    }
 
-    const reach = (starts: string[], noResistor: boolean): Set<string> => {
+    const reach = (starts: string[], noResistor: boolean, adj = fwd): Set<string> => {
       const seen = new Set<string>(starts);
       const q = [...starts];
       while (q.length) {
@@ -161,8 +226,8 @@ export class Simulator {
     const srcNets = sources.map((s) => s.net);
     this.energized = reach(srcNets, false);
     this.energizedNoR = reach(srcNets, true);
-    this.ground = reach(grounds, false);
-    this.groundNoR = reach(grounds, true);
+    this.ground = reach(grounds, false, bwd);
+    this.groundNoR = reach(grounds, true, bwd);
 
     // duty & tone per net (max over reaching sources)
     this.energizedDuty = new Map();
@@ -203,11 +268,11 @@ export class Simulator {
       this.ensure();
       const net = this.pinNet(pin);
       if (net == null) return 0;
-      // potentiometer wiper?
+      // a sensor or wiper sitting on this net reports its value directly
       for (const c of this.getComponents()) {
-        if (c.type === "potentiometer" && this.net(c.id, "wiper") === net) {
-          const v = Number(c.props.value ?? 512);
-          return Math.round(clamp(v, 0, 1023));
+        const src = ANALOG_SOURCES[c.type];
+        if (src && src.pins.some((p) => this.net(c.id, p) === net)) {
+          return Math.round(clamp(Number(c.props.value ?? src.def), 0, 1023));
         }
       }
       if (this.energized.has(net)) return Math.round((this.energizedDuty.get(net) ?? 1) * 1023);
@@ -250,7 +315,12 @@ export class Simulator {
   }
 
   // ---- lifecycle ---------------------------------------------------------
-  start(source: string): string | null {
+  /**
+   * Verify the sketch, then start it if it compiled. The result carries every
+   * diagnostic so the editor can list them; nothing runs when one is an error,
+   * the same way a failed verify blocks an upload.
+   */
+  start(source: string): CompileResult {
     this.stop();
     this.error = null;
     this.simTimeMs = 0;
@@ -260,19 +330,25 @@ export class Simulator {
     this.servoPin.clear();
     this.servoAngle.clear();
     this.pinReadCache.clear();
+
+    const result = compile(source);
+    if (!result.ok || !result.program) {
+      const first = result.diagnostics.find((d) => d.severity === "error");
+      this.error = first ? `${first.line}-satr: ${first.message}` : "Kompilyatsiya xatosi";
+      this.running = false;
+      return result;
+    }
     try {
-      this.buildNets();
-      this.runtime = new ArduinoRuntime(source, this.board);
+      this.runtime = new ArduinoRuntime(source, this.board, result.program);
       this.gen = this.runtime.run();
       this.pendingDelay = 0;
       this.dirty = true;
       this.running = true;
-      return null;
     } catch (e) {
       this.error = e instanceof Error ? e.message : String(e);
       this.running = false;
-      return this.error;
     }
+    return result;
   }
 
   stop() {
@@ -283,6 +359,30 @@ export class Simulator {
     this.pinOut.clear();
     this.servoAngle.clear();
     this.dirty = true;
+  }
+
+  /**
+   * Which character display each LiquidCrystal object is driving, matched the
+   * way a real one is: through the RS pin. An unwired display still shows its
+   * text (with a warning), because a blank screen and a broken screen look the
+   * same and one of them is a wiring lesson.
+   */
+  private lcdTargets(): { compId: string; objName: string; wired: boolean }[] {
+    if (!this.runtime) return [];
+    const states = this.runtime.getLcdStates();
+    const screens = this.getComponents().filter((c) => c.type === "lcd16x2");
+    const out: { compId: string; objName: string; wired: boolean }[] = [];
+    const taken = new Set<string>();
+    for (const [objName, st] of Object.entries(states)) {
+      const rsNet = this.pinNet(normPin(st.pins[0] ?? -1));
+      let match = screens.find((c) => !taken.has(c.id) && rsNet != null && this.net(c.id, "rs") === rsNet);
+      const wired = !!match;
+      if (!match) match = screens.find((c) => !taken.has(c.id));
+      if (!match) continue;
+      taken.add(match.id);
+      out.push({ compId: match.id, objName, wired });
+    }
+    return out;
   }
 
   /** Advance the sketch by up to dtMs of real time. */
@@ -326,7 +426,19 @@ export class Simulator {
     const rgb: Record<string, { r: number; g: number; b: number }> = {};
     const buzzer: Record<string, number> = {};
     const servo: Record<string, number> = {};
+    const motor: Record<string, number> = {};
     const warnings: Record<string, string> = {};
+    const lcd: SimState["lcd"] = {};
+
+    if (this.runtime) {
+      const states = this.runtime.getLcdStates();
+      for (const t of this.lcdTargets()) {
+        const st = states[t.objName];
+        if (!st) continue;
+        lcd[t.compId] = { rows: st.rows, cols: st.cols, on: st.on };
+        if (!t.wired) warnings[t.compId] = `RS pini (${st.pins[0]}) ekranga ulanmagan`;
+      }
+    }
 
     for (const c of this.getComponents()) {
       if (c.type === "led") {
@@ -358,6 +470,17 @@ export class Simulator {
           if (this.pinNet(pin) === sigNet) { angle = this.servoAngle.get(name) ?? 0; break; }
         }
         servo[c.id] = angle;
+      } else if (c.type === "dc-motor") {
+        // Either polarity turns it; reversing the leads reverses the shaft.
+        const p1 = this.net(c.id, "pin-1");
+        const p2 = this.net(c.id, "pin-2");
+        if (this.energized.has(p1) && this.ground.has(p2)) {
+          motor[c.id] = this.energizedDuty.get(p1) ?? 1;
+        } else if (this.energized.has(p2) && this.ground.has(p1)) {
+          motor[c.id] = -(this.energizedDuty.get(p2) ?? 1);
+        } else {
+          motor[c.id] = 0;
+        }
       }
     }
 
@@ -367,13 +490,14 @@ export class Simulator {
       rgb,
       buzzer,
       servo,
+      motor,
       warnings,
+      lcd,
       serial: [...this.serialBuf],
       timeMs: Math.floor(this.simTimeMs),
     };
   }
 
-  markDirty() { this.dirty = true; }
 }
 
 function clamp(x: number, lo: number, hi: number) { return Math.max(lo, Math.min(hi, x)); }

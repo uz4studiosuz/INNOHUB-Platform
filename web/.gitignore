@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# downloaded Fritzing sources used by scripts/gen-electronics-parts.py
+scripts/.fzcache/

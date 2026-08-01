@@ -2,17 +2,43 @@
 
 import React, { useMemo, useRef } from "react";
 import { useRocketStore } from "../../store/rocketStore";
+import {
+  BOTTLE_INFO, TUBE_STOCK, computeRocketMetrics, finGeometry, finOutline, RocketDesign,
+} from "../../lib/physics/rocketPhysics";
 import * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
+import {
+  makeBottleBody, makePetaloidBase, makeWaterGeometry, baseStartFraction,
+} from "./bottleGeometry";
+import { makeCheckerBallTexture, COMPONENT_MARKER_COLOURS } from "./markerTextures";
 
 const SCALE = 0.1; // 1mm = 0.1 units
+
+/** The fin colours the parts bin stocks, as the renderer needs them. */
+const FIN_COLOUR_HEX: Record<string, string> = {
+  "Royal Blue": "#2563eb",
+  Black: "#1f2937",
+  Yellow: "#facc15",
+  Red: "#dc2626",
+  White: "#f1f5f9",
+};
 
 /**
  * Animated Rocket Engine Exhaust Plume Shader Component
  */
-function ExhaustPlume({ active = true, scale = 1 }: { active?: boolean; scale?: number }) {
+/**
+ * The water burn lasts about 30 ms, which is a frame and a half - far too quick
+ * to read. So once the launch starts the flame is shown for `FLAME_S` and then
+ * faded out, which is what a spectator actually perceives. The fade runs off the
+ * render clock rather than React state so it costs no re-renders.
+ */
+const FLAME_S = 0.7;
+
+function ExhaustPlume({ active = true }: { active?: boolean }) {
+  const groupRef = useRef<THREE.Group>(null);
   const meshRef = useRef<THREE.Mesh>(null);
   const lightRef = useRef<THREE.PointLight>(null);
+  const startRef = useRef<number | null>(null);
 
   const uniforms = useMemo(() => ({
     u_time: { value: 0 },
@@ -78,19 +104,28 @@ function ExhaustPlume({ active = true, scale = 1 }: { active?: boolean; scale?: 
   `;
 
   useFrame((state, delta) => {
+    const g = groupRef.current;
+    if (!g) return;
+    if (!active) { startRef.current = null; g.visible = false; return; }
+    if (startRef.current === null) startRef.current = state.clock.elapsedTime;
+
+    const age = state.clock.elapsedTime - startRef.current;
+    const fade = Math.max(0, 1 - age / FLAME_S);
+    g.visible = fade > 0.01;
+    g.scale.setScalar(0.6 + 0.4 * fade);
+
     if (meshRef.current) {
       const mat = meshRef.current.material as THREE.ShaderMaterial;
       mat.uniforms.u_time.value += delta;
+      mat.uniforms.u_opacity.value = 0.85 * fade;
     }
     if (lightRef.current) {
-      lightRef.current.intensity = 3 + Math.sin(state.clock.elapsedTime * 30) * 1.5;
+      lightRef.current.intensity = (3 + Math.sin(state.clock.elapsedTime * 30) * 1.5) * fade;
     }
   });
 
-  if (!active) return null;
-
   return (
-    <group position={[0, -25 * SCALE, 0]}>
+    <group ref={groupRef} visible={false} position={[0, -25 * SCALE, 0]}>
       {/* Dynamic thrust light source */}
       <pointLight ref={lightRef} color="#f59e0b" intensity={4} distance={60 * SCALE} />
 
@@ -117,23 +152,43 @@ function ExhaustPlume({ active = true, scale = 1 }: { active?: boolean; scale?: 
   );
 }
 
-export function RocketModel({ designOverride, hideUI = false, isLaunching = false }: { designOverride?: any; hideUI?: boolean; isLaunching?: boolean }) {
+export function RocketModel({
+  designOverride, hideUI = false, isLaunching = false, showMarkers = false,
+}: {
+  designOverride?: RocketDesign;
+  hideUI?: boolean;
+  isLaunching?: boolean;
+  /** Draw the CG / CP rings that the stability panel talks about. */
+  showMarkers?: boolean;
+}) {
   const store = useRocketStore();
-  const source = designOverride || store;
+  const { propulsion: sp, recovery: sr, nose: sn, coneTube: sct, coneTransition: scr, fins: sf } = store;
+  const source: RocketDesign = useMemo(
+    () => designOverride ?? { propulsion: sp, recovery: sr, nose: sn, coneTube: sct, coneTransition: scr, fins: sf },
+    [designOverride, sp, sr, sn, sct, scr, sf]
+  );
   const visibility = hideUI ? {} : store.visibility;
+  const analysis = useMemo(() => computeRocketMetrics(source), [source]);
 
   const { propulsion, nose, coneTube, coneTransition, fins } = source;
   const groupRef = useRef<THREE.Group>(null);
 
-  // Geometry properties based on bottle size
+  // Bottle geometry comes from the same table the physics uses, so the model on
+  // screen is the rocket the numbers describe.
   const bottleProps = useMemo(() => {
-    switch (propulsion.bottleSize) {
-      case "1L": return { radius: 42 * SCALE, height: 200 * SCALE, color: "#1e3a8a", waterColor: "#3b82f6" };
-      case "2L_coke": return { radius: 55 * SCALE, height: 280 * SCALE, color: "#1e3a8a", waterColor: "#0284c7" };
-      case "2L_pepsi": return { radius: 55 * SCALE, height: 280 * SCALE, color: "#0ea5e9", waterColor: "#38bdf8" };
-      case "20oz_coke":
-      default: return { radius: 35 * SCALE, height: 160 * SCALE, color: "#1e3a8a", waterColor: "#60a5fa" };
-    }
+    const b = BOTTLE_INFO[propulsion.bottleSize] ?? BOTTLE_INFO["20oz_coke"];
+    const tint: Record<string, { color: string; waterColor: string }> = {
+      "20oz_coke": { color: "#1e3a8a", waterColor: "#60a5fa" },
+      "1L": { color: "#1e3a8a", waterColor: "#3b82f6" },
+      "2L_coke": { color: "#1e3a8a", waterColor: "#0284c7" },
+      "2L_pepsi": { color: "#0ea5e9", waterColor: "#38bdf8" },
+    };
+    return {
+      radius: (b.diameterMm / 2) * SCALE,
+      height: b.bodyLengthMm * SCALE,
+      volumeCm3: b.volumeCm3,
+      ...(tint[propulsion.bottleSize] ?? tint["20oz_coke"]),
+    };
   }, [propulsion.bottleSize]);
 
   // Dimensions
@@ -141,8 +196,10 @@ export function RocketModel({ designOverride, hideUI = false, isLaunching = fals
   const bottleH = bottleProps.height;
   const transL = coneTransition.transitionLengthMm * SCALE;
   const tubeL = coneTube.lengthMm * SCALE;
-  const tubeR = (coneTube.diameterMm / 2) * SCALE;
-  const noseL = 50 * SCALE;
+  // The payload tube's diameter comes from its stock, so the model changes
+  // shape when the material is switched - which is how the app explains it.
+  const tubeR = ((TUBE_STOCK[coneTube.material]?.diameterMm ?? coneTube.diameterMm ?? 42) / 2) * SCALE;
+  const noseL = nose.lengthMm * SCALE;
   const ballR = (nose.ballSizeMm / 2) * SCALE;
 
   // Materials with PBR Physical properties (Three.js Materials Skill)
@@ -194,12 +251,13 @@ export function RocketModel({ designOverride, hideUI = false, isLaunching = fals
     metalness: 0.8, // Machined aluminum nozzle
   }), []);
 
+  // Fin colour is a design choice, so the model paints the stock the student picked.
   const finMaterial = useMemo(() => new THREE.MeshStandardMaterial({
-    color: "#facc15",
-    roughness: 0.3,
+    color: FIN_COLOUR_HEX[fins.color] ?? "#2563eb",
+    roughness: 0.35,
     metalness: 0.1,
     side: THREE.DoubleSide,
-  }), []);
+  }), [fins.color]);
 
   // Positions (Y-axis up, starting from nozzle at Y=0)
   const bottleY = bottleH / 2;
@@ -208,27 +266,30 @@ export function RocketModel({ designOverride, hideUI = false, isLaunching = fals
   const noseY = bottleH + transL + tubeL + noseL / 2;
   const ballY = bottleH + transL + tubeL + noseL;
 
-  // Extruded Fin Geometry with Bevels (Three.js Geometry Skill)
-  const finGeometry = useMemo(() => {
+  // The fin is extruded straight from the outline the student drew. Its own
+  // coordinates are (span, station-from-tail), which is exactly the shape the
+  // editor shows, so the 3D fin and the 2D drawing can never disagree.
+  const finShape = useMemo(() => {
+    // finOutline flattens curved edges, so a curved fin extrudes as the same
+    // shape the editor draws and the physics measures.
+    const pts = finOutline(fins);
+    if (pts.length < 3) return null;
     const shape = new THREE.Shape();
-    const rootC = fins.rootChordMm * SCALE;
-    const tipC = fins.tipChordMm * SCALE;
-    const span = fins.spanMm * SCALE;
-    const sweep = fins.sweepMm * SCALE;
-
-    shape.moveTo(0, 0);
-    shape.lineTo(0, rootC);
-    shape.lineTo(span, rootC - sweep);
-    shape.lineTo(span, rootC - sweep - tipC);
+    pts.forEach((p, i) => {
+      const x = p.x * SCALE;      // outward from the body
+      const y = p.y * SCALE;      // up the body from the tail
+      if (i === 0) shape.moveTo(x, y);
+      else shape.lineTo(x, y);
+    });
     shape.closePath();
 
     return new THREE.ExtrudeGeometry(shape, {
-      depth: 2 * SCALE,
+      depth: Math.max(0.5, fins.thicknessMm) * SCALE,
       bevelEnabled: true,
-      bevelSegments: 3,
+      bevelSegments: 2,
       steps: 1,
-      bevelSize: 0.3 * SCALE,
-      bevelThickness: 0.3 * SCALE,
+      bevelSize: 0.25 * SCALE,
+      bevelThickness: 0.25 * SCALE,
     });
   }, [fins]);
 
@@ -244,40 +305,82 @@ export function RocketModel({ designOverride, hideUI = false, isLaunching = fals
     }
   });
 
-  // Calculate water height based on propulsion water fraction
-  const waterFraction = (propulsion.waterCapacityFraction || 40) / 100;
-  const waterH = bottleH * waterFraction;
+  // Water level from the volume the student actually dialled in. This used to
+  // read a `waterCapacityFraction` field that does not exist on the design, so
+  // the bottle sat frozen at 40% no matter what was set.
+  const waterFraction = Math.max(0, Math.min(1,
+    (propulsion.waterVolumeL * 1000) / bottleProps.volumeCm3
+  ));
+
+  // The bottle is generated once per size, the water column whenever the fill
+  // changes - both procedurally, so there is no model file to load.
+  const bottleShell = useMemo(
+    () => makeBottleBody(bottleR, bottleH, propulsion.bottleSize),
+    [bottleR, bottleH, propulsion.bottleSize]
+  );
+  const bottleBase = useMemo(() => makePetaloidBase(bottleR, bottleH), [bottleR, bottleH]);
+  // The marker balls' textures are drawn on a canvas once and reused.
+  const cgTexture = useMemo(() => makeCheckerBallTexture("#111827", "#f8fafc"), []);
+  const cpTexture = useMemo(() => makeCheckerBallTexture("#dc2626", "#f8fafc"), []);
+  const finGeo = useMemo(() => finGeometry(fins), [fins]);
+
+  /**
+   * The transition, lathed from the bottle's base up to the payload tube. In the
+   * hand-built rocket this cone is glued down over the petaloid base, so it
+   * starts where the base begins and swallows the feet. Slight overshoot at each
+   * end so there is no hairline gap against the bottle below or the tube above.
+   */
+  const transitionGeometry = useMemo(() => {
+    const yBottom = baseStartFraction(propulsion.bottleSize) * bottleH;
+    const yTop = bottleH + transL;
+    if (yTop <= yBottom) return new THREE.BufferGeometry();
+    const pts = [
+      new THREE.Vector2(bottleR * 1.005, yBottom),
+      new THREE.Vector2(bottleR * 0.92, yBottom + (yTop - yBottom) * 0.28),
+      new THREE.Vector2(tubeR * 1.35, yBottom + (yTop - yBottom) * 0.72),
+      new THREE.Vector2(tubeR * 1.02, yTop),
+    ];
+    const geo = new THREE.LatheGeometry(pts, 64);
+    geo.computeVertexNormals();
+    return geo;
+  }, [propulsion.bottleSize, bottleH, bottleR, tubeR, transL]);
+  const waterGeometry = useMemo(
+    () => makeWaterGeometry(bottleR, bottleH, propulsion.bottleSize, waterFraction),
+    [bottleR, bottleH, propulsion.bottleSize, waterFraction]
+  );
 
   return (
     <group ref={groupRef} rotation={[0, 0, 0]}>
       {/* Propulsion (Bottle) */}
       {visibility["propulsion"] !== false && (
         <group>
-          {/* Outer Translucent Bottle Mesh */}
-          <mesh position={[0, bottleY, 0]} material={bottleMaterial} castShadow receiveShadow>
-            <cylinderGeometry args={[bottleR, bottleR, bottleH, 32]} />
-          </mesh>
+          {/* A real lathed PET bottle, flown upside down: its neck and support
+              ring are at the tail because the mouth IS the nozzle. */}
+          <mesh geometry={bottleShell} material={bottleMaterial} castShadow receiveShadow />
 
-          {/* Inner Water Fill Level */}
-          <mesh position={[0, waterH / 2, 0]} material={waterMaterial}>
-            <cylinderGeometry args={[bottleR * 0.97, bottleR * 0.97, waterH, 32]} />
-          </mesh>
+          {/* The petaloid base, five feet - at the top, under the nose section. */}
+          <mesh geometry={bottleBase} material={bottleMaterial} castShadow receiveShadow />
 
-          {/* Machined Metal Nozzle */}
+          {/* Water follows the bottle's own inner wall, so its surface is always
+              the right diameter for the height it has reached. */}
+          {waterGeometry && <mesh geometry={waterGeometry} material={waterMaterial} />}
+
+          {/* Machined Metal Nozzle, clamped onto the neck at the tail */}
           <mesh position={[0, -10 * SCALE, 0]} material={nozzleMaterial} castShadow>
             <cylinderGeometry args={[11 * SCALE, 15 * SCALE, 20 * SCALE, 32]} />
           </mesh>
 
           {/* Animated Thrust Exhaust Plume */}
-          <ExhaustPlume active={isLaunching} scale={SCALE} />
+          <ExhaustPlume active={isLaunching} />
         </group>
       )}
 
-      {/* Cone Transition */}
+      {/* Cone Transition. In the hand-built rocket this cone is glued down over
+          the bottle's shoulder, so it starts at the full body diameter where the
+          shoulder begins and swallows the neck - it does not perch on top of it.
+          Its upper edge still lands exactly where the physics puts the tube. */}
       {visibility["conetransition"] !== false && (
-        <mesh position={[0, transY, 0]} material={transitionMaterial} castShadow receiveShadow>
-          <cylinderGeometry args={[tubeR, bottleR, transL, 32]} />
-        </mesh>
+        <mesh geometry={transitionGeometry} material={transitionMaterial} castShadow receiveShadow />
       )}
 
       {/* Cone Tube */}
@@ -301,16 +404,63 @@ export function RocketModel({ designOverride, hideUI = false, isLaunching = fals
         </group>
       )}
 
+      {/* Centre of gravity and centre of pressure, the two stations the
+          stability panel compares. The physics measures them from the nose tip,
+          while the model is built up from the nozzle, hence total - x. */}
+      {showMarkers && (() => {
+        const total = bottleH + transL + tubeL + noseL;
+        const station = (xMm: number) => total - xMm * SCALE;
+        const ballR = Math.max(bottleR, tubeR) * 0.34;
+        const offset = Math.max(bottleR, tubeR) * 1.5;
+        /** Where each component's own centre sits, for its station marker. */
+        const stations: { key: string; y: number }[] = [
+          { key: "propulsion", y: bottleY },
+          { key: "conetransition", y: transY },
+          { key: "conetube", y: tubeY },
+          { key: "recovery", y: tubeY },
+          { key: "nose", y: noseY },
+          { key: "fins", y: station(analysis.bodyLengthMm - finGeo.rootLeadingStationMm) },
+        ];
+        return (
+          <group>
+            {/* Component stations, colour-matched to the sidebar. */}
+            {stations.map((s) => (
+              <mesh key={s.key} position={[offset * 0.72, s.y, 0]}>
+                <sphereGeometry args={[ballR * 0.62, 20, 16]} />
+                <meshStandardMaterial
+                  color={COMPONENT_MARKER_COLOURS[s.key] ?? "#94a3b8"}
+                  roughness={0.25}
+                  metalness={0.35}
+                />
+              </mesh>
+            ))}
+
+            {/* Centre of gravity: the conventional quartered ball. */}
+            <mesh position={[offset, station(analysis.cgDryMm), 0]}>
+              <sphereGeometry args={[ballR, 32, 24]} />
+              <meshStandardMaterial map={cgTexture} roughness={0.4} />
+            </mesh>
+            {/* Centre of pressure: the same ball in red and white. */}
+            <mesh position={[offset, station(analysis.cpMm), 0]}>
+              <sphereGeometry args={[ballR, 32, 24]} />
+              <meshStandardMaterial map={cpTexture} roughness={0.4} />
+            </mesh>
+          </group>
+        );
+      })()}
+
       {/* Fins */}
-      {visibility["fins"] !== false && (
-        <group position={[0, bottleH * 0.2, 0]}>
-          {Array.from({ length: fins.count }).map((_, i) => {
-            const angle = (i * Math.PI * 2) / fins.count;
+      {visibility["fins"] !== false && finShape && (
+        // The outline's y is already measured from the tail, so the fin group
+        // sits at the tail and needs no offset of its own.
+        <group>
+          {Array.from({ length: Math.max(0, Math.round(fins.count)) }).map((_, i) => {
+            const angle = (i * Math.PI * 2) / Math.max(1, fins.count);
             return (
               <group key={i} rotation={[0, angle, 0]}>
                 <mesh
-                  position={[bottleR, 0, -1 * SCALE]}
-                  geometry={finGeometry}
+                  position={[bottleR * 0.94, 0, -(fins.thicknessMm / 2) * SCALE]}
+                  geometry={finShape}
                   material={finMaterial}
                   castShadow
                   receiveShadow

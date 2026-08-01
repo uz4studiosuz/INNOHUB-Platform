@@ -210,9 +210,12 @@ function getSkyTexture(): THREE.CanvasTexture {
   c.height = 256;
   const ctx = c.getContext("2d")!;
   const g = ctx.createLinearGradient(0, 0, 0, 256);
-  g.addColorStop(0, "#3f78c4"); // top (V=1 maps near the dome top)
-  g.addColorStop(0.55, "#7fb0e0");
-  g.addColorStop(1, "#d6e8f5"); // horizon
+  // Deeper than a midday sky: the earlier gradient ran to a near-white horizon
+  // (#d6e8f5), which is what made the arena read as blown out. A late-afternoon
+  // range keeps the sky bright without flattening everything under it.
+  g.addColorStop(0, "#2f5f9e"); // top (V=1 maps near the dome top)
+  g.addColorStop(0.55, "#6a9bcf");
+  g.addColorStop(1, "#b9d2e6"); // horizon
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, 4, 256);
   const t = new THREE.CanvasTexture(c);
@@ -220,13 +223,16 @@ function getSkyTexture(): THREE.CanvasTexture {
   return t;
 }
 
-/** A sky-gradient dome enclosing the arena (rendered back-face-in). */
+/** A sky-gradient dome enclosing the arena (rendered back-face-in).
+ * `fog={false}`: the scene fog exists to haze the mountains and the far side of
+ * the bowl, but the dome sits beyond the fog far plane - letting fog touch it
+ * would flatten the whole sky to one flat color. */
 function SkyDome({ radius }: { radius: number }) {
   const tex = getSkyTexture();
   return (
     <mesh>
       <sphereGeometry args={[radius * 22, 32, 20]} />
-      <meshBasicMaterial map={tex} side={THREE.BackSide} />
+      <meshBasicMaterial map={tex} side={THREE.BackSide} fog={false} />
     </mesh>
   );
 }
@@ -262,9 +268,11 @@ function FloodLight({ x, z, y, h }: { x: number; z: number; y: number; h: number
         <cylinderGeometry args={[0.08, 0.1, h, 8]} />
         <meshStandardMaterial color="#2b2f36" metalness={0.4} roughness={0.6} />
       </mesh>
+      {/* Daytime arena: the panels read as glass, not as lit lamps. At 0.9 they
+          glared as four white blocks on the skyline. */}
       <mesh position={[0, h, 0]} rotation={[Math.PI / 7, 0, 0]}>
         <boxGeometry args={[1.6, 0.9, 0.14]} />
-        <meshStandardMaterial color="#d8dde3" emissive="#fff7d6" emissiveIntensity={0.9} />
+        <meshStandardMaterial color="#c3cad2" emissive="#fff7d6" emissiveIntensity={0.35} roughness={0.35} metalness={0.1} />
       </mesh>
     </group>
   );
@@ -458,19 +466,45 @@ export default function TrussRally3D({ nodes, members, solved, truckProgress }: 
   }, [effectiveT, minX, maxX, deckY]);
 
   return (
-    <div className="flex-1 relative" style={{ background: "#8fb8e0" }}>
-      <Canvas shadows={{ type: THREE.PCFSoftShadowMap }} camera={{ position: [radius * 1.8, radius * 1.4, radius * 2], fov: 45 }}>
-        <ambientLight intensity={0.55} />
-        <hemisphereLight args={["#cfe3f5", "#6b4f2a", 0.55]} />
+    <div className="flex-1 relative" style={{ background: "#7ba5cf" }}>
+      <Canvas
+        shadows={{ type: THREE.PCFSoftShadowMap }}
+        camera={{ position: [radius * 1.8, radius * 1.4, radius * 2], fov: 45 }}
+        // Slightly under 1: the arena is lit by a sky dome plus four lights and
+        // was clipping to white on the deck and the truck's upper surfaces.
+        gl={{ toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 0.85 }}
+      >
+        {/* Aerial perspective. Without it the mountain ring and the far side of
+            the bowl sat at the same brightness as the bridge in the foreground,
+            which is the main reason the arena read as flat and over-lit. */}
+        <fog attach="fog" args={["#b9d2e6", radius * 5, radius * 17]} />
+
+        {/* Light budget: the earlier setup spent 1.10 on flat fill
+            (ambient 0.55 + hemi 0.55) against 1.70 of directional, so shadows
+            were washed out and every surface sat near the same value. Fill is
+            cut roughly in half and the key raised, which is what actually
+            produces shape and contrast. */}
+        <ambientLight intensity={0.22} />
+        <hemisphereLight args={["#bcd7ef", "#5c452a", 0.32]} />
         <directionalLight
           position={[radius * 2.5, radius * 3.5, radius * 1.5]}
-          intensity={1.35}
-          color="#fff4dd"
+          intensity={1.9}
+          color="#fff2d4"
           castShadow
-          shadow-mapSize-width={1024}
-          shadow-mapSize-height={1024}
+          shadow-mapSize-width={2048}
+          shadow-mapSize-height={2048}
+          shadow-bias={-0.0005}
+          // A directional light's shadow camera is orthographic and defaults to
+          // a 10-unit box - far smaller than this arena, so most of the scene
+          // fell outside it and cast no shadow at all. Fit it to the bowl.
+          shadow-camera-left={-radius * 4}
+          shadow-camera-right={radius * 4}
+          shadow-camera-top={radius * 4}
+          shadow-camera-bottom={-radius * 4}
+          shadow-camera-near={0.5}
+          shadow-camera-far={radius * 14}
         />
-        <directionalLight position={[-radius * 2, radius * 1.5, -radius * 2]} intensity={0.35} color="#cfe0ff" />
+        <directionalLight position={[-radius * 2, radius * 1.5, -radius * 2]} intensity={0.28} color="#c3d8f2" />
 
         <SkyDome radius={radius} />
         <MountainRing radius={radius} y={deckY - radius * 0.2} />

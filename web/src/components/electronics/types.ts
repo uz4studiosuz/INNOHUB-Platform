@@ -1,16 +1,11 @@
 // Core data model for the interactive electronics (Tinkercad-style) editor.
 
-export type ComponentType =
-  | "arduino-uno"
-  | "led"
-  | "rgb-led"
-  | "resistor"
-  | "pushbutton"
-  | "buzzer"
-  | "potentiometer"
-  | "servo"
-  | "breadboard" // full breadboard with hole-level nets
-  | "bb-node"; // simplified breadboard tie-point (all its holes share one net)
+/**
+ * A key into COMPONENT_LIBRARY. Left as a plain string because most of the
+ * library is generated from the Fritzing parts index (see generatedParts.ts)
+ * and a hand-maintained union would drift out of step with it.
+ */
+export type ComponentType = string;
 
 /** A connection point on a component, positioned relative to the component origin. */
 export interface Terminal {
@@ -24,12 +19,17 @@ export interface Terminal {
   pin?: string;
 }
 
+export type ComponentCategory =
+  | "boards" | "output" | "input" | "general" | "power" | "ics" | "breadboards";
+
 export interface ComponentDef {
   type: ComponentType;
   name: string;
-  category: "boards" | "output" | "input" | "general" | "breadboards";
+  category: ComponentCategory;
   width: number;
   height: number;
+  /** Filename under public/electronics/ holding this part's Fritzing artwork. */
+  art?: string;
   terminals: Terminal[];
   /** Groups of terminal ids that are internally the same electrical net (e.g. breadboard columns). */
   internalGroups?: string[][];
@@ -57,6 +57,12 @@ export interface Wire {
   from: WireEnd;
   to: WireEnd;
   color: string;
+  /**
+   * Bend points between the two ends, in canvas coordinates. A wire with none
+   * is a straight run; double-clicking one breaks it at that spot so the run
+   * can be routed around the board instead of cutting across it.
+   */
+  points?: { x: number; y: number }[];
 }
 
 /** Live per-frame simulation state, produced by the engine and consumed by the render layer. */
@@ -69,8 +75,12 @@ export interface SimState {
   buzzer: Record<string, number>;
   /** servo angle per component id (0..180). */
   servo: Record<string, number>;
+  /** DC motor speed per component id, -1..1; the sign is the direction. */
+  motor: Record<string, number>;
   /** short-circuit / over-current warnings, per component id. */
   warnings: Record<string, string>;
+  /** Text a LiquidCrystal sketch has written, per character-display component. */
+  lcd: Record<string, { rows: string[]; cols: number; on: boolean }>;
   serial: string[];
   timeMs: number;
 }

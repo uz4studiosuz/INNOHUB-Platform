@@ -2,7 +2,7 @@
 
 import React from "react";
 import { PlacedComponent, Terminal } from "./types";
-import { ART, COMPONENT_LIBRARY, LED_COLORS } from "./componentLibrary";
+import { ART, COMPONENT_LIBRARY, LED_COLORS, formatValue } from "./componentLibrary";
 import { BB } from "./breadboard";
 
 export interface CompVisual {
@@ -10,17 +10,41 @@ export interface CompVisual {
   rgb?: { r: number; g: number; b: number };
   servo?: number;
   buzzer?: number;
+  /** DC motor speed, -1..1; the sign is the direction of rotation. */
+  motor?: number;
+  /** Text a LiquidCrystal sketch has written to this display. */
+  lcd?: { rows: string[]; cols: number; on: boolean };
   warning?: string;
 }
+
+/**
+ * The character grid printed on lcd16x2.svg, read out of the artwork: 16 cells
+ * per row at 10.744 units of pitch, two rows, in the file's 72-units-per-inch
+ * space. Text is drawn into these cells so it lands on the printed windows
+ * rather than floating over the bezel.
+ */
+const LCD_GRID = (() => {
+  const u = 144 / 72;
+  return {
+    x0: 27.79 * u,
+    pitch: 10.744 * u,
+    cellW: 10.027 * u,
+    rowY: [34.154 * u, 51.37 * u],
+    cellH: 16.522 * u,
+  };
+})();
 
 interface Props {
   comp: PlacedComponent;
   selected: boolean;
   visual: CompVisual;
+  /** Canvas layer: sockets go under the parts plugged into them. */
+  z: number;
   onBodyPointerDown: (e: React.PointerEvent, id: string) => void;
   onTerminalPointerDown: (e: React.PointerEvent, compId: string, term: Terminal) => void;
   onTerminalPointerUp: (e: React.PointerEvent, compId: string, term: Terminal) => void;
-  pinToggle?: (id: string, pressed: boolean) => void;
+  /** Lets a part change its own state when clicked - a button, a switch. */
+  setProp?: (id: string, key: string, value: number | string) => void;
 }
 
 /**
@@ -37,7 +61,7 @@ function hex(v: number) {
 }
 
 export default function ComponentView({
-  comp, selected, visual, onBodyPointerDown, onTerminalPointerDown, onTerminalPointerUp, pinToggle,
+  comp, selected, visual, z, onBodyPointerDown, onTerminalPointerDown, onTerminalPointerUp, setProp,
 }: Props) {
   const def = COMPONENT_LIBRARY[comp.type];
   const w = def.width, h = def.height;
@@ -50,6 +74,9 @@ export default function ComponentView({
         top: comp.y,
         width: w,
         height: h,
+        // The rotation also makes this a stacking context, which is what keeps
+        // the terminal hit-targets below local to their own part.
+        zIndex: z,
         transform: `rotate(${comp.rotation}deg)`,
         transformOrigin: "center",
         cursor: "grab",
@@ -66,7 +93,7 @@ export default function ComponentView({
         onPointerDown={(e) => onBodyPointerDown(e, comp.id)}
         style={{ overflow: "visible" }}
       >
-        <Graphic comp={comp} visual={visual} selected={selected} pinToggle={pinToggle} />
+        <Graphic comp={comp} visual={visual} selected={selected} setProp={setProp} />
       </svg>
 
       {def.terminals.map((t) => (
@@ -108,8 +135,9 @@ function resistorBands(ohms: number): [string, string, string] {
   ];
 }
 
-function Graphic({ comp, visual, selected, pinToggle }: {
-  comp: PlacedComponent; visual: CompVisual; selected: boolean; pinToggle?: (id: string, p: boolean) => void;
+function Graphic({ comp, visual, selected, setProp }: {
+  comp: PlacedComponent; visual: CompVisual; selected: boolean;
+  setProp?: (id: string, key: string, value: number | string) => void;
 }) {
   const def = COMPONENT_LIBRARY[comp.type];
   const stroke = selected ? "#2563eb" : "#475569";
@@ -215,7 +243,7 @@ function Graphic({ comp, visual, selected, pinToggle }: {
             <rect x={30.582} y={0.588} opacity={0.5} fill="#FFFF33" width={0.976} height={2.25} />
             <rect x={30.582} y={1.088} opacity={0.5} fill="#FFFFFF" width={0.976} height={1.04} />
           </g>
-          {readout(ohms >= 1000 ? `${ohms / 1000}kΩ` : `${ohms}Ω`, true)}
+          {readout(formatValue("ohms", ohms), true)}
         </g>
       );
     }
@@ -231,9 +259,9 @@ function Graphic({ comp, visual, selected, pinToggle }: {
             fill="#000000"
             opacity={pressed ? 0.4 : 0}
             style={{ cursor: "pointer" }}
-            onPointerDown={(e) => { e.stopPropagation(); pinToggle?.(comp.id, true); }}
-            onPointerUp={(e) => { e.stopPropagation(); pinToggle?.(comp.id, false); }}
-            onPointerLeave={() => pinToggle?.(comp.id, false)}
+            onPointerDown={(e) => { e.stopPropagation(); setProp?.(comp.id, "pressed", 1); }}
+            onPointerUp={(e) => { e.stopPropagation(); setProp?.(comp.id, "pressed", 0); }}
+            onPointerLeave={() => setProp?.(comp.id, "pressed", 0)}
           />
         </g>
       );
@@ -288,6 +316,79 @@ function Graphic({ comp, visual, selected, pinToggle }: {
       );
     }
 
+    case "dc-motor": {
+      // Nothing on a side-on motor visibly turns, so the running state gets a
+      // spinner over the shaft plus the duty the simulation is feeding it.
+      const m = visual.motor ?? 0;
+      if (!m) return art("dc-motor.svg");
+      const cx = def.width - 20, cy = def.height / 2;
+      return (
+        <g>
+          {art("dc-motor.svg")}
+          <g transform={`translate(${cx} ${cy})`}>
+            <g
+              className="elec-spin"
+              style={{
+                animationDuration: `${(0.9 / Math.abs(m)).toFixed(2)}s`,
+                animationDirection: m < 0 ? "reverse" : "normal",
+              }}
+            >
+              <circle r={12} fill="none" stroke="#16a34a" strokeWidth={3.5} strokeDasharray="13 9" />
+            </g>
+          </g>
+          {readout(`${m > 0 ? "↻" : "↺"} ${Math.round(Math.abs(m) * 100)}%`, false)}
+        </g>
+      );
+    }
+
+    case "toggle-switch": {
+      // Clicking the body flips it, the same way the pushbutton reacts.
+      const on = !!Number(comp.props.on);
+      return (
+        <g style={{ cursor: "pointer" }} onPointerDown={(e) => { e.stopPropagation(); setProp?.(comp.id, "on", on ? 0 : 1); }}>
+          {art("toggle-switch.svg")}
+          {readout(on ? "L1" : "L2", true)}
+        </g>
+      );
+    }
+
+    case "lcd16x2": {
+      // The artwork already prints the character windows, so all that goes on
+      // top is the text itself - one glyph per printed cell, so a 16-character
+      // line fills the display exactly the way a real one does.
+      const l = visual.lcd;
+      const g = LCD_GRID;
+      return (
+        <g>
+          {art("lcd16x2.svg")}
+          {l?.on && l.rows.slice(0, g.rowY.length).map((row, r) => (
+            <g key={r}>
+              {[...row].slice(0, l.cols).map((ch, i) =>
+                ch === " " ? null : (
+                  <text
+                    key={i}
+                    x={g.x0 + i * g.pitch + g.cellW / 2}
+                    y={g.rowY[r] + g.cellH * 0.78}
+                    textAnchor="middle"
+                    fontFamily="ui-monospace, Consolas, monospace"
+                    fontSize={g.cellH * 0.82}
+                    fill="#0b1f10"
+                  >
+                    {ch}
+                  </text>
+                )
+              )}
+            </g>
+          ))}
+          {visual.warning && (
+            <text x={def.width / 2} y={-6} textAnchor="middle" fontSize={12} fill="#b45309">
+              ⚠️ {visual.warning}
+            </text>
+          )}
+        </g>
+      );
+    }
+
     case "bb-node":
       // Our own simplification of a breadboard column, so this one is drawn.
       return (
@@ -300,6 +401,10 @@ function Graphic({ comp, visual, selected, pinToggle }: {
       );
 
     default:
-      return <rect width={def.width} height={def.height} fill="#e2e8f0" stroke={stroke} />;
+      // Everything generated from the Fritzing index is just its artwork: the
+      // part already draws its own body, pins and markings.
+      return def.art
+        ? art(def.art)
+        : <rect width={def.width} height={def.height} fill="#e2e8f0" stroke={stroke} />;
   }
 }

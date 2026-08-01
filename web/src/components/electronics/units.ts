@@ -11,6 +11,12 @@
 export const PX_PER_INCH = 144;
 
 /**
+ * Tie-point pitch: 0.1in, the spacing every through-hole part and every
+ * breadboard hole shares. It is the grid a dragged part snaps onto.
+ */
+export const PITCH = PX_PER_INCH / 10;
+
+/**
  * Fritzing authored its SVGs at either 72 or 100 units per inch depending on
  * the part's age, so each one needs its own converter into canvas pixels.
  */

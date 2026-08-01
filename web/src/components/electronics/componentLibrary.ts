@@ -1,6 +1,7 @@
 import { ComponentDef, Terminal } from "./types";
 import { BREADBOARD_DEF } from "./breadboard";
-import { svgScale } from "./units";
+import { GENERATED_PARTS } from "./generatedParts";
+import { PITCH, svgScale } from "./units";
 
 // Every part below is drawn with the real Fritzing breadboard-view artwork we
 // serve out of public/electronics/ (see CREDITS.md), not a hand-drawn stand-in.
@@ -81,15 +82,19 @@ function bottomRow(): Terminal[] {
   ];
 }
 
-// The simplified 5-hole node is our own teaching aid rather than a real part,
-// so it stays hand-drawn - but on the breadboard's 0.1in pitch, so wires run
-// between the two without kinking.
-const PITCH = svgScale(72)(7.1995);
+// The simplified 5-hole node below is our own teaching aid rather than a real
+// part, so it stays hand-drawn - but on the breadboard's 0.1in PITCH, so a leg
+// seats in it exactly as it would in a real board.
 
-export const COMPONENT_LIBRARY: Record<string, ComponentDef> = {
+// Parts the simulation drives, or whose artwork needs live overlays, are
+// written out below; everything else is pulled straight from the Fritzing
+// index by scripts/gen-electronics-parts.py. Their `art` is what the palette
+// shows as a thumbnail - on canvas they are special-cased in ComponentView.
+const HAND_TUNED: Record<string, ComponentDef> = {
   "arduino-uno": {
     type: "arduino-uno",
     name: "Arduino Uno",
+    art: "arduino-uno.svg",
     category: "boards",
     width: uno(212.372),
     height: uno(151.2),
@@ -100,6 +105,7 @@ export const COMPONENT_LIBRARY: Record<string, ComponentDef> = {
   led: {
     type: "led",
     name: "LED",
+    art: "led-red.svg",
     category: "output",
     width: led(21.467),
     height: led(57),
@@ -115,6 +121,7 @@ export const COMPONENT_LIBRARY: Record<string, ComponentDef> = {
   "rgb-led": {
     type: "rgb-led",
     name: "RGB LED",
+    art: "rgb-led.svg",
     category: "output",
     width: rgb(23.76),
     height: rgb(44),
@@ -131,6 +138,7 @@ export const COMPONENT_LIBRARY: Record<string, ComponentDef> = {
   resistor: {
     type: "resistor",
     name: "Resistor",
+    art: "resistor.svg",
     category: "general",
     width: res(42.917),
     height: res(9.71),
@@ -145,6 +153,7 @@ export const COMPONENT_LIBRARY: Record<string, ComponentDef> = {
   pushbutton: {
     type: "pushbutton",
     name: "Pushbutton",
+    art: "pushbutton.svg",
     category: "input",
     width: btn(24.518),
     height: btn(33.002),
@@ -162,6 +171,7 @@ export const COMPONENT_LIBRARY: Record<string, ComponentDef> = {
   buzzer: {
     type: "buzzer",
     name: "Piezo Buzzer",
+    art: "piezo.svg",
     category: "output",
     width: pzo(78.585),
     height: pzo(78),
@@ -176,6 +186,7 @@ export const COMPONENT_LIBRARY: Record<string, ComponentDef> = {
   potentiometer: {
     type: "potentiometer",
     name: "Potentiometer",
+    art: "potentiometer.svg",
     category: "input",
     width: pot(42.539),
     height: pot(84.941),
@@ -191,6 +202,7 @@ export const COMPONENT_LIBRARY: Record<string, ComponentDef> = {
   servo: {
     type: "servo",
     name: "Servo Motor",
+    art: "servo-body.svg",
     category: "output",
     width: srv(113.976),
     height: srv(91.702),
@@ -223,18 +235,95 @@ export const COMPONENT_LIBRARY: Record<string, ComponentDef> = {
   breadboard: BREADBOARD_DEF,
 };
 
-export const PALETTE_ORDER: ComponentDef["type"][] = [
-  "breadboard",
+/**
+ * Editable values for the generated parts the simulation reads back. The
+ * generator only knows a part's geometry, so its behaviour knobs live here.
+ */
+const PART_DEFAULTS: Record<string, Record<string, number | string>> = {
+  photoresistor: { value: 512 },
+  "force-sensor": { value: 300 },
+  "temperature-sensor": { value: 307 },
+  "toggle-switch": { on: 0 },
+  "tilt-sensor": { closed: 0 },
+  "reed-switch": { closed: 0 },
+  capacitor: { uF: 0.1 },
+  "capacitor-polarized": { uF: 100 },
+};
+
+export const COMPONENT_LIBRARY: Record<string, ComponentDef> = {
+  ...HAND_TUNED,
+  ...Object.fromEntries(GENERATED_PARTS.map((p) => [
+    p.type,
+    PART_DEFAULTS[p.type] ? { ...p, defaults: PART_DEFAULTS[p.type] } : p,
+  ])),
+};
+
+/**
+ * Types the simulation actually models. Everything else can be placed and
+ * wired - the artwork and pins are real - but contributes nothing electrically,
+ * and the palette says so rather than letting it look broken.
+ */
+export const SIMULATED = new Set<string>([
+  "arduino-uno", "breadboard", "breadboard-mini", "bb-node",
+  "led", "rgb-led", "buzzer", "servo", "dc-motor",
+  "resistor", "potentiometer", "pushbutton", "inductor",
+  "photoresistor", "force-sensor", "temperature-sensor",
+  "toggle-switch", "tilt-sensor", "reed-switch",
+  "diode", "diode-zener", "capacitor", "capacitor-polarized",
+  "battery-9v", "battery-aa", "coin-cell",
+]);
+
+/** Order within each palette section; anything omitted falls in after. */
+const FEATURED: string[] = [
+  "breadboard", "breadboard-mini", "bb-node",
   "arduino-uno",
-  "led",
-  "rgb-led",
-  "resistor",
-  "pushbutton",
-  "potentiometer",
-  "buzzer",
-  "servo",
-  "bb-node",
+  "led", "rgb-led", "buzzer", "servo", "dc-motor",
+  "resistor", "capacitor", "capacitor-polarized", "diode",
+  "pushbutton", "potentiometer", "toggle-switch", "photoresistor",
+  "battery-9v", "battery-aa",
 ];
+
+export const PALETTE_ORDER: string[] = [
+  ...FEATURED,
+  ...Object.keys(COMPONENT_LIBRARY).filter((t) => !FEATURED.includes(t)),
+];
+
+/**
+ * Props edited as a number plus a unit, instead of one long figure. A part
+ * stores the plain base value (ohms in Ω, capacitance in µF) so the engine never
+ * has to think about prefixes - the multiplier only lives in the inspector, and
+ * switching it keeps the number and changes the value, the way a real parts bin
+ * works: 220 Ω becomes 220 kΩ, not 0.22 kΩ.
+ */
+export const PROP_UNITS: Record<string, { label: string; mult: number }[]> = {
+  ohms: [
+    { label: "Ω", mult: 1 },
+    { label: "kΩ", mult: 1e3 },
+    { label: "MΩ", mult: 1e6 },
+  ],
+  uF: [
+    { label: "pF", mult: 1e-6 },
+    { label: "nF", mult: 1e-3 },
+    { label: "µF", mult: 1 },
+  ],
+};
+
+/** The unit a stored value reads most naturally in - the inspector's default. */
+export function unitFor(key: string, value: number) {
+  const units = PROP_UNITS[key];
+  if (!units) return null;
+  let pick = units[0];
+  for (const u of units) if (Math.abs(value) >= u.mult) pick = u;
+  return pick;
+}
+
+/** The same value as the inspector shows it, for the on-canvas readout. */
+export function formatValue(key: string, value: number): string {
+  const u = unitFor(key, value);
+  if (!u) return String(value);
+  const n = value / u.mult;
+  return `${Number(n.toFixed(3))}${u.label}`;
+}
 
 /** Must stay in step with the led-<name>.svg files in public/electronics/. */
 export const LED_COLORS: Record<string, string> = {
