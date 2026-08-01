@@ -1,0 +1,102 @@
+{
+  "asset": {
+    "version": "2.0",
+    "generator": "LEGO Real 3D GLTF Generator"
+  },
+  "scenes": [
+    {
+      "nodes": [
+        0
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "mesh": 0
+    }
+  ],
+  "meshes": [
+    {
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 0,
+            "NORMAL": 1
+          },
+          "indices": 2,
+          "material": 0
+        }
+      ]
+    }
+  ],
+  "materials": [
+    {
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.79,
+          0.1,
+          0.04,
+          1
+        ],
+        "metallicFactor": 0.2,
+        "roughnessFactor": 0.4
+      }
+    }
+  ],
+  "accessors": [
+    {
+      "bufferView": 0,
+      "componentType": 5126,
+      "count": 24,
+      "type": "VEC3",
+      "max": [
+        3.9000000953674316,
+        3.9000000953674316,
+        7.800000190734863
+      ],
+      "min": [
+        -3.9000000953674316,
+        -3.9000000953674316,
+        -7.800000190734863
+      ]
+    },
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "count": 24,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "componentType": 5123,
+      "count": 36,
+      "type": "SCALAR"
+    }
+  ],
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteOffset": 0,
+      "byteLength": 288,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 288,
+      "byteLength": 288,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 576,
+      "byteLength": 72,
+      "target": 34963
+    }
+  ],
+  "buffers": [
+    {
+      "uri": "data:application/octet-stream;base64,mpl5QJqZeUCamflAmpl5QJqZeUCamfnAmpl5QJqZecCamflAmpl5QJqZecCamfnAmpl5wJqZeUCamfnAmpl5wJqZeUCamflAmpl5wJqZecCamfnAmpl5wJqZecCamflAmpl5wJqZeUCamfnAmpl5QJqZeUCamfnAmpl5wJqZeUCamflAmpl5QJqZeUCamflAmpl5wJqZecCamflAmpl5QJqZecCamflAmpl5wJqZecCamfnAmpl5QJqZecCamfnAmpl5wJqZeUCamflAmpl5QJqZeUCamflAmpl5wJqZecCamflAmpl5QJqZecCamflAmpl5QJqZeUCamfnAmpl5wJqZeUCamfnAmpl5QJqZecCamfnAmpl5wJqZecCamfnAAACAPwAAAAAAAAAAAACAPwAAAAAAAAAAAACAPwAAAAAAAAAAAACAPwAAAAAAAAAAAACAvwAAAAAAAAAAAACAvwAAAAAAAAAAAACAvwAAAAAAAAAAAACAvwAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgL8AAAAAAAAAAAAAgL8AAAAAAAAAAAAAgL8AAAAAAAAAAAAAgL8AAAAAAAAAAAAAAAAAAIA/AAAAAAAAAAAAAIA/AAAAAAAAAAAAAIA/AAAAAAAAAAAAAIA/AAAAAAAAAAAAAIC/AAAAAAAAAAAAAIC/AAAAAAAAAAAAAIC/AAAAAAAAAAAAAIC/AAACAAEAAgADAAEABAAGAAUABgAHAAUACAAKAAkACgALAAkADAAOAA0ADgAPAA0AEAASABEAEgATABEAFAAWABUAFgAXABUA",
+      "byteLength": 648
+    }
+  ]
+}

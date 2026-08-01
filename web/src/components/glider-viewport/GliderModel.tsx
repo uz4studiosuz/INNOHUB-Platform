@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef, useState, useMemo } from "react";
-import { useGliderStore } from "../../store/gliderStore";
+import { useGliderStore, GliderShape } from "../../store/gliderStore";
 import { Html } from "@react-three/drei";
 import { ThreeEvent, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
@@ -205,7 +205,7 @@ function DimensionLine({ start, end, label, color = "#f5a623", offset = 0 }: {
   );
 }
 
-export function GliderModel({ designOverride, hideUI = false }: { designOverride?: any; hideUI?: boolean }) {
+export function GliderModel({ designOverride, hideUI = false }: { designOverride?: GliderShape; hideUI?: boolean }) {
   const store = useGliderStore();
   const source = designOverride || store;
   const fuselage = source.fuselage;

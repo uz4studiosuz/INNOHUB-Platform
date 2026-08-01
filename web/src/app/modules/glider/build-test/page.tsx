@@ -26,8 +26,8 @@ export default function BuildTestPage() {
           <div className="bg-[#0a0e18] border border-[rgba(255,255,255,0.1)] rounded-xl p-6">
             <h3 className="text-lg font-bold mb-2 text-blue-400">Material List</h3>
             <ul className="list-disc list-inside text-slate-400 space-y-2">
-              <li>1x Balsa Wood Sheet (1/16" x 3" x 36")</li>
-              <li>1x Balsa Wood Stick (1/4" x 1/4" x 36")</li>
+              <li>1x Balsa Wood Sheet (1/16&quot; x 3&quot; x 36&quot;)</li>
+              <li>1x Balsa Wood Stick (1/4&quot; x 1/4&quot; x 36&quot;)</li>
               <li>Cyanoacrylate (CA) Glue</li>
               <li>Sandpaper (220 and 400 grit)</li>
               <li>Modeling Knife</li>

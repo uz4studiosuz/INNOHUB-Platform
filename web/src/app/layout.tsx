@@ -65,20 +65,8 @@ export default function RootLayout({
               <Link href="/modules/structures" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-[rgba(255,255,255,0.04)] text-gray-300 hover:text-white transition-all text-sm font-medium">
                 🏗️ Tuzilmalar (Structures)
               </Link>
-              <Link href="/modules/drone" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-[rgba(255,255,255,0.04)] text-gray-300 hover:text-white transition-all text-sm font-medium">
-                🚁 Dron (Drone)
-              </Link>
-              <Link href="/modules/rover" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-[rgba(255,255,255,0.04)] text-gray-300 hover:text-white transition-all text-sm font-medium">
-                🔴 Rover (Mars)
-              </Link>
-              <Link href="/modules/prosthetics" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-[rgba(255,255,255,0.04)] text-gray-300 hover:text-white transition-all text-sm font-medium">
-                🦾 Protez (Prosthetics)
-              </Link>
-              <Link href="/modules/physics-lab" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-[rgba(255,255,255,0.04)] text-gray-300 hover:text-white transition-all text-sm font-medium">
-                🔬 Fizika laboratoriyasi
-              </Link>
-              <Link href="/modules/microelectronics" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-[rgba(255,255,255,0.04)] text-gray-300 hover:text-white transition-all text-sm font-medium">
-                💾 Mikroelektronika
+              <Link href="/modules/hardware" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-[rgba(255,255,255,0.04)] text-gray-300 hover:text-white transition-all text-sm font-medium">
+                🧩 3D Konstruktor
               </Link>
             </nav>
 
@@ -91,7 +79,7 @@ export default function RootLayout({
                 </span>
                 <div>
                   <div className="text-xs font-semibold text-white">Engine Online</div>
-                  <div className="text-[9px] text-gray-500 font-mono">289/289 Tests Passed</div>
+                  <div className="text-[9px] text-gray-500 font-mono">5 ta simulyatsiya moduli</div>
                 </div>
               </div>
             </div>
@@ -107,7 +95,7 @@ export default function RootLayout({
               </div>
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-2 px-3 py-1 bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold rounded-full">
-                  <span>Python Integration Enabled</span>
+                  <span>Simulyatsiya dvigateli faol</span>
                 </div>
                 <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-gray-700 to-gray-800 flex items-center justify-center font-bold text-xs text-white border border-[rgba(255,255,255,0.1)]">
                   U

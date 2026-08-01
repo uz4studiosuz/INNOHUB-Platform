@@ -4,11 +4,11 @@ import React, { useState, useRef, useEffect, useMemo } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Sky, OrbitControls, PerspectiveCamera } from "@react-three/drei";
 import * as THREE from "three";
-import { useGliderStore } from "../../../../store/gliderStore";
+import { useGliderStore, GliderShape } from "../../../../store/gliderStore";
 import { GliderModel } from "../../../../components/glider-viewport/GliderModel";
 
 // Bot design generator
-function getBotDesign() {
+function getBotDesign(): GliderShape {
   return {
     fuselage: { noseHeight: 12, bodyHeight: 12, rearHeight: 10, length: 280 },
     wing: {
@@ -48,15 +48,23 @@ function useStripedTexture() {
 
 function Mountains() {
   const mountains = useMemo(() => {
+    // Scenery, so it only has to look unplanned - but it is generated during
+    // render, and Math.random() there makes the horizon jump on every re-render
+    // and disagree between server and client. A hash of the index gives the
+    // same scatter every time.
+    const scatter = (i: number, salt: number) => {
+      const h = Math.sin(i * 127.1 + salt * 311.7) * 43758.5453;
+      return h - Math.floor(h);
+    };
     const m = [];
     // Generate a ring of mountains in the distance
     for (let i = 0; i < 40; i++) {
       const angle = (i / 40) * Math.PI * 2;
-      const radius = 6000 + Math.random() * 2000;
+      const radius = 6000 + scatter(i, 1) * 2000;
       const x = Math.cos(angle) * radius;
       const z = Math.sin(angle) * radius;
-      const height = 800 + Math.random() * 1200;
-      m.push({ x, z, height, radius: 1000 + Math.random() * 800 });
+      const height = 800 + scatter(i, 2) * 1200;
+      m.push({ x, z, height, radius: 1000 + scatter(i, 3) * 800 });
     }
     return m;
   }, []);
@@ -163,7 +171,7 @@ function DesertEnvironment() {
 function SimulatedGlider({ 
   design, isBot, phase, flightTime, flightDistance 
 }: { 
-  design: any, isBot: boolean, phase: string, flightTime: number, flightDistance: number 
+  design: GliderShape, isBot: boolean, phase: string, flightTime: number, flightDistance: number 
 }) {
   const groupRef = useRef<THREE.Group>(null);
   const localStartRef = useRef<number | null>(null);

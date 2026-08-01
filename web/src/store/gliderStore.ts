@@ -9,14 +9,23 @@ import {
   computeAllMetrics
 } from '../lib/physics/gliderPhysics';
 
-export interface GliderDesign {
-  designId: string;
-  name: string;
+/**
+ * The four sections that describe an airframe, with none of the store around
+ * them. A bot opponent is exactly this and nothing more, so anything that only
+ * needs to draw or fly a glider should ask for a GliderShape rather than the
+ * whole store.
+ */
+export interface GliderShape {
   fuselage: FuselageParams;
   wing: WingParams;
   horizontalStabilizer: HStabParams;
   verticalStabilizer: VStabParams;
-  
+}
+
+export interface GliderDesign extends GliderShape {
+  designId: string;
+  name: string;
+
   // UI State
   activePanel: string | null;
   visibility: Record<string, boolean>;

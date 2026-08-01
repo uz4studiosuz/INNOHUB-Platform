@@ -1,0 +1,7056 @@
+[
+ {
+  "group": {
+   "uz": "Kontrollerlar (Controllers)",
+   "ru": "Контроллеры (Controllers)",
+   "en": "Controllers"
+  },
+  "items": [
+   {
+    "num": "arduino-uno",
+    "en": "Arduino Uno Platasi",
+    "uz": "Arduino Uno Platasi",
+    "category": "controller",
+    "specs": "Asosiy boshqaruv platasi (ATmega328P)",
+    "isCatalogType": true,
+    "starred": true
+   },
+   {
+    "num": "arduino-nano",
+    "en": "Arduino Nano Platasi",
+    "uz": "Arduino Nano Platasi",
+    "category": "controller",
+    "specs": "Kichik boshqaruv platasi",
+    "isCatalogType": true,
+    "starred": true
+   },
+   {
+    "num": "esp32",
+    "en": "ESP32 Kontroller",
+    "uz": "ESP32 Kontroller",
+    "category": "controller",
+    "specs": "WiFi va Bluetooth modulli kontroller",
+    "isCatalogType": true,
+    "starred": true
+   },
+   {
+    "num": "raspberry-pi4",
+    "en": "Raspberry Pi 4B",
+    "uz": "Raspberry Pi 4B",
+    "category": "controller",
+    "specs": "Linux kompyuter: 40 GPIO, USB, HDMI, kamera uchun CSI",
+    "isCatalogType": true,
+    "starred": true
+   }
+  ]
+ },
+ {
+  "group": {
+   "uz": "Motorlar (Motors)",
+   "ru": "Моторы (Motors)",
+   "en": "Motors"
+  },
+  "items": [
+   {
+    "num": "dc-tt-yellow",
+    "en": "DC Sariq TT motor",
+    "uz": "DC Sariq TT motor",
+    "category": "motor",
+    "specs": "3–6V, ~200rpm, reduktorli",
+    "isCatalogType": true,
+    "starred": true
+   },
+   {
+    "num": "n20-micro",
+    "en": "N20 mikro motor",
+    "uz": "N20 mikro motor",
+    "category": "motor",
+    "specs": "Kichik, reduktorli metall motor",
+    "isCatalogType": true,
+    "starred": true
+   },
+   {
+    "num": "stepper-28byj48",
+    "en": "Stepper 28BYJ-48",
+    "uz": "Stepper 28BYJ-48",
+    "category": "motor",
+    "specs": "5V, ULN2003 driver kerak",
+    "isCatalogType": true,
+    "starred": true
+   },
+   {
+    "num": "stepper-nema17",
+    "en": "Stepper NEMA17",
+    "uz": "Stepper NEMA17",
+    "category": "motor",
+    "specs": "12V, A4988/DRV8825 driver kerak",
+    "isCatalogType": true,
+    "starred": true
+   }
+  ]
+ },
+ {
+  "group": {
+   "uz": "Servolar (Servos)",
+   "ru": "Сервоприводы (Servos)",
+   "en": "Servos"
+  },
+  "items": [
+   {
+    "num": "sg90",
+    "en": "Servo SG90 9g",
+    "uz": "Servo SG90 9g",
+    "category": "servo",
+    "specs": "9g, ~1.8 kg/sm tortish",
+    "isCatalogType": true,
+    "starred": true
+   },
+   {
+    "num": "mg90s",
+    "en": "Servo MG90S (Metall)",
+    "uz": "Servo MG90S (Metall)",
+    "category": "servo",
+    "specs": "Metall tishli, ~2.2 kg/sm",
+    "isCatalogType": true,
+    "starred": true
+   },
+   {
+    "num": "mg995",
+    "en": "Servo MG995 Katta",
+    "uz": "Servo MG995 Katta",
+    "category": "servo",
+    "specs": "~10 kg/sm tortish kuchi",
+    "isCatalogType": true,
+    "starred": true
+   },
+   {
+    "num": "mg996r",
+    "en": "Servo MG996R",
+    "uz": "Servo MG996R",
+    "category": "servo",
+    "specs": "~11 kg/sm yuqori moment",
+    "isCatalogType": true,
+    "starred": true
+   },
+   {
+    "num": "ds3218",
+    "en": "Servo DS3218 20kg",
+    "uz": "Servo DS3218 20kg",
+    "category": "servo",
+    "specs": "~20 kg/sm suvga chidamli",
+    "isCatalogType": true,
+    "starred": true
+   }
+  ]
+ },
+ {
+  "group": {
+   "uz": "Drayverlar (Drivers)",
+   "ru": "Драйверы (Drivers)",
+   "en": "Drivers"
+  },
+  "items": [
+   {
+    "num": "tb6612fng",
+    "en": "TB6612FNG Drayver",
+    "uz": "TB6612FNG Drayver",
+    "category": "driver",
+    "specs": "Ixcham, yuqori samaradorlikli drayver",
+    "isCatalogType": true,
+    "starred": true
+   },
+   {
+    "num": "bts7960",
+    "en": "BTS7960 Drayver",
+    "uz": "BTS7960 Drayver",
+    "category": "driver",
+    "specs": "Yuqori tok (43A) uchun drayver",
+    "isCatalogType": true,
+    "starred": true
+   },
+   {
+    "num": "a4988",
+    "en": "A4988/DRV8825",
+    "uz": "A4988/DRV8825",
+    "category": "driver",
+    "specs": "NEMA17 qadamli motor uchun drayver",
+    "isCatalogType": true,
+    "starred": true
+   },
+   {
+    "num": "pca9685",
+    "en": "PCA9685 Drayver",
+    "uz": "PCA9685 Drayver",
+    "category": "driver",
+    "specs": "16 kanalli I2C servo drayver",
+    "isCatalogType": true,
+    "starred": true
+   }
+  ]
+ },
+ {
+  "group": {
+   "uz": "Sensorlar (Sensors)",
+   "ru": "Датчики (Sensors)",
+   "en": "Sensors"
+  },
+  "items": [
+   {
+    "num": "ultrasonic_sensor",
+    "en": "Ultrasonik Masofa Sensori (HC-SR04)",
+    "uz": "Ultrasonik Masofa Sensori (HC-SR04)",
+    "category": "sensor",
+    "specs": "Masofani o'lchash ultratovush sensori",
+    "isCatalogType": true,
+    "starred": true
+   },
+   {
+    "num": "hc-sr04",
+    "en": "HC-SR04 Sensori",
+    "uz": "HC-SR04 Sensori",
+    "category": "sensor",
+    "specs": "Ultrasonik masofa o'lchash sensori",
+    "isCatalogType": true,
+    "starred": true
+   },
+   {
+    "num": "mpu6050",
+    "en": "MPU6050 Sensori",
+    "uz": "MPU6050 Sensori",
+    "category": "sensor",
+    "specs": "6-o'qli giroskop va akselerometr",
+    "isCatalogType": true,
+    "starred": true
+   }
+  ]
+ },
+ {
+  "group": {
+   "uz": "Quvvat manbalari (Power)",
+   "ru": "Источники питания (Power)",
+   "en": "Power Supplies"
+  },
+  "items": [
+   {
+    "num": "battery-18650-4",
+    "en": "18650 Batareya Boksi (4 uyali)",
+    "uz": "18650 Batareya Boksi (4 uyali)",
+    "category": "power",
+    "specs": "4 × 18650 Li-Ion, ~14.8V ketma-ket yoki 3.7V parallel",
+    "isCatalogType": true,
+    "starred": true
+   }
+  ]
+ },
+ {
+  "group": {
+   "uz": "Shassi va Ramka",
+   "ru": "Шасси и Рама",
+   "en": "Chassis & Frame"
+  },
+  "items": [
+   {
+    "num": "robot-chassis",
+    "en": "Robot Shassisi (plita)",
+    "uz": "Robot Shassisi (plita)",
+    "category": "chassis",
+    "specs": "O'rnatish teshiklari bilan plita, o'lchami sozlanadi",
+    "isCatalogType": true,
+    "starred": true
+   }
+  ]
+ },
+ {
+  "group": {
+   "uz": "G'ildiraklar (Wheels)",
+   "ru": "Колеса (Wheels)",
+   "en": "Wheels"
+  },
+  "items": [
+   {
+    "num": "tt-wheel-65mm",
+    "en": "G'ildirak 65mm",
+    "uz": "G'ildirak 65mm",
+    "category": "wheel",
+    "specs": "TT motorga mos standart g'ildirak",
+    "isCatalogType": true,
+    "starred": true
+   },
+   {
+    "num": "tt-wheel-80mm",
+    "en": "G'ildirak 80mm",
+    "uz": "G'ildirak 80mm",
+    "category": "wheel",
+    "specs": "Katta TT motor g'ildiragi",
+    "isCatalogType": true,
+    "starred": true
+   },
+   {
+    "num": "mecanum-wheel",
+    "en": "Mecanum G'ildirak",
+    "uz": "Mecanum G'ildirak",
+    "category": "wheel",
+    "specs": "4-tomonlama (omni) harakat",
+    "isCatalogType": true,
+    "starred": true
+   },
+   {
+    "num": "caster-wheel",
+    "en": "Caster G'ildirak",
+    "uz": "Caster G'ildirak",
+    "category": "wheel",
+    "specs": "Erkin aylanuvchi tayanch g'ildirak, 25 mm",
+    "isCatalogType": true,
+    "starred": true
+   }
+  ]
+ },
+ {
+  "group": {
+   "uz": "Balkalar (Beams)",
+   "ru": "Балки (Beams)",
+   "en": "Beams"
+  },
+  "items": [
+   {
+    "num": "64179",
+    "en": "Beam 7 x 5 with Open Center 5 x 3",
+    "uz": "Katta ramka",
+    "starred": true
+   },
+   {
+    "num": "64178",
+    "en": "Beam 11 x 5 with Open Center 5 x 3",
+    "uz": "Kichik ramka",
+    "starred": true
+   },
+   {
+    "num": "60484",
+    "en": "Beam 3 x 3 T-shaped",
+    "uz": "T-shakl",
+    "starred": true
+   },
+   {
+    "num": "6629",
+    "en": "Beam 4 x 6 Liftarm Bent 53.13",
+    "uz": "Egik",
+    "starred": true
+   },
+   {
+    "num": "32009",
+    "en": "Beam 3 x 3.8 x 7 Liftarm Bent 45 Double",
+    "uz": "Egik 45°",
+    "starred": true
+   },
+   {
+    "num": "32140",
+    "en": "Beam 2 x 4 Liftarm Bent 90",
+    "uz": "Burchakli",
+    "starred": true
+   },
+   {
+    "num": "32526",
+    "en": "Beam 3 x 5 Bent 90",
+    "uz": "Burchakli 90°",
+    "starred": true
+   },
+   {
+    "num": "32278",
+    "en": "Beam 15",
+    "uz": "To'g'ri balka",
+    "starred": true
+   },
+   {
+    "num": "41239",
+    "en": "Beam 13",
+    "uz": "To'g'ri balka",
+    "starred": true
+   },
+   {
+    "num": "32525",
+    "en": "Beam 11",
+    "uz": "To'g'ri balka",
+    "starred": true
+   },
+   {
+    "num": "32524",
+    "en": "Beam 7",
+    "uz": "To'g'ri balka",
+    "starred": true
+   },
+   {
+    "num": "32316",
+    "en": "Beam 5",
+    "uz": "To'g'ri balka",
+    "starred": true
+   },
+   {
+    "num": "32523",
+    "en": "Beam 3",
+    "uz": "To'g'ri balka",
+    "starred": true
+   },
+   {
+    "num": "41677",
+    "en": "Beam 2 x 0.5 Liftarm",
+    "uz": "To'g'ri balka",
+    "starred": true
+   },
+   {
+    "num": "18654",
+    "en": "Beam 1",
+    "uz": "Balka 1"
+   },
+   {
+    "num": "41672",
+    "en": "Beam 1 x 3 x 7 with 4 Axleholes and 3 Holes",
+    "uz": "Balka 1 x 3"
+   },
+   {
+    "num": "41665",
+    "en": "Beam 1 x 4 x 7 with 5 Axleholes and 2 Holes and 1 Slot",
+    "uz": "Balka 1 x 4"
+   },
+   {
+    "num": "73507",
+    "en": "Beam 11 with Alternating Holes",
+    "uz": "Balka 11"
+   },
+   {
+    "num": "39794",
+    "en": "Beam 11 x 7 with Open Center 9 x 5",
+    "uz": "Balka 11 x 7"
+   },
+   {
+    "num": "4526",
+    "en": "Beam 13 x 3 with Two Open Areas 5 x 1",
+    "uz": "Balka 13 x 3"
+   },
+   {
+    "num": "71710",
+    "en": "Beam 15 with Alternating Holes",
+    "uz": "Balka 15"
+   },
+   {
+    "num": "39790",
+    "en": "Beam 15 x 11 with Open Center 13 x 9",
+    "uz": "Balka 15 x 11"
+   },
+   {
+    "num": "65817",
+    "en": "Beam 15 x 11 with Perforated Centre Plate 13 x 9",
+    "uz": "Balka 15 x 11"
+   },
+   {
+    "num": "79767",
+    "en": "Beam 15 x 5 with Open Center and 3 Truss Bars",
+    "uz": "Balka 15 x 5"
+   },
+   {
+    "num": "79766",
+    "en": "Beam 15 x 7 with Open Center and 3 Truss Bars",
+    "uz": "Balka 15 x 7"
+   },
+   {
+    "num": "79768",
+    "en": "Beam 16 x 7 Triangular with Diagonal Bars",
+    "uz": "Balka 16 x 7"
+   },
+   {
+    "num": "39369",
+    "en": "Beam 19 x 11 Baseplate",
+    "uz": "Balka 19 x 11"
+   },
+   {
+    "num": "67491",
+    "en": "Beam 19 x 3 with Three Open Areas 5 x 1",
+    "uz": "Balka 19 x 3"
+   },
+   {
+    "num": "43857",
+    "en": "Beam 2",
+    "uz": "Balka 2"
+   },
+   {
+    "num": "60483",
+    "en": "Beam 2 Liftarm",
+    "uz": "Balka 2"
+   },
+   {
+    "num": "50923",
+    "en": "Beam 2 Liftarm with Angled Ball Joint",
+    "uz": "Balka 2"
+   },
+   {
+    "num": "64276",
+    "en": "Beam 2 Liftarm with Straight Ball Joint",
+    "uz": "Balka 2"
+   },
+   {
+    "num": "85940",
+    "en": "Beam 2 with Angled Bar",
+    "uz": "Balka 2"
+   },
+   {
+    "num": "2502",
+    "en": "Beam 2 x 12 x 9 with Claw",
+    "uz": "Balka 2 x 12"
+   },
+   {
+    "num": "3167",
+    "en": "Beam 2 x 3 C-shaped",
+    "uz": "Balka 2 x 3"
+   },
+   {
+    "num": "71708",
+    "en": "Beam 2 x 3 Liftarm Bent 90 Quarter Ellipse",
+    "uz": "Balka 2 x 3"
+   },
+   {
+    "num": "80286",
+    "en": "Beam 2 x 5 Liftarm Bent 90 Quarter Ellipse",
+    "uz": "Balka 2 x 5"
+   },
+   {
+    "num": "50904",
+    "en": "Beam 2 x 8 x 2 Double Liftarm with 2 1 x 3 Beams",
+    "uz": "Balka 2 x 8"
+   },
+   {
+    "num": "7244",
+    "en": "Beam 2L with Perpendicular 1L Axle",
+    "uz": "Balka"
+   },
+   {
+    "num": "7229",
+    "en": "Beam 3 with Center Axle Hole",
+    "uz": "Balka 3"
+   },
+   {
+    "num": "61071",
+    "en": "Beam 3 with Panel Fairing Left",
+    "uz": "Balka 3"
+   },
+   {
+    "num": "61070",
+    "en": "Beam 3 with Panel Fairing Right",
+    "uz": "Balka 3"
+   },
+   {
+    "num": "41817",
+    "en": "Beam 3 with Pneumatic Hose and Bladder Attachments",
+    "uz": "Balka 3"
+   },
+   {
+    "num": "44225",
+    "en": "Beam 3 with Rotation Joint 3 Pin",
+    "uz": "Balka 3"
+   },
+   {
+    "num": "44224",
+    "en": "Beam 3 with Rotation Joint 3 Socket",
+    "uz": "Balka 3"
+   },
+   {
+    "num": "6632",
+    "en": "Beam 3 x 0.5 Liftarm",
+    "uz": "Balka 3 x 0.5"
+   },
+   {
+    "num": "33299a",
+    "en": "Beam 3 x 0.5 Liftarm with Boss and Pin with Closed Central Axle Hole",
+    "uz": "Balka 3 x 0.5"
+   },
+   {
+    "num": "33299b",
+    "en": "Beam 3 x 0.5 Liftarm with Boss and Pin with Open Central Axle Hole",
+    "uz": "Balka 3 x 0.5"
+   },
+   {
+    "num": "32056",
+    "en": "Beam 3 x 3 x 0.5 Liftarm Bent 90",
+    "uz": "Balka 3 x 3"
+   },
+   {
+    "num": "32249",
+    "en": "Beam 3 x 3 x 0.5 Liftarm Bent 90 Quarter Circle",
+    "uz": "Balka 3 x 3"
+   },
+   {
+    "num": "2477",
+    "en": "Beam 3 x 5 Bent 90 with Alternating Holes",
+    "uz": "Balka 3 x 5"
+   },
+   {
+    "num": "32250",
+    "en": "Beam 3 x 5 x 0.5 Liftarm Bent 90 Quarter Ellipse",
+    "uz": "Balka 3 x 5"
+   },
+   {
+    "num": "32271",
+    "en": "Beam 3 x 7 Liftarm Bent 53.13",
+    "uz": "Balka 3 x 7"
+   },
+   {
+    "num": "45803",
+    "en": "Beam 3 x 7 x 3 Bent 90 Double Chamfered",
+    "uz": "Balka 3 x 7"
+   },
+   {
+    "num": "3916",
+    "en": "Beam 3 x 9 Liftarm Bent 90 Quarter Ellipse",
+    "uz": "Balka 3 x 9"
+   },
+   {
+    "num": "41681",
+    "en": "Beam 3.8 x 1 Liftarm with Click Rotation Ring Socket",
+    "uz": "Balka 3.8 x 1"
+   },
+   {
+    "num": "32449",
+    "en": "Beam 4 x 0.5 Liftarm",
+    "uz": "Balka 4 x 0.5"
+   },
+   {
+    "num": "2825",
+    "en": "Beam 4 x 0.5 Liftarm with Boss",
+    "uz": "Balka 4 x 0.5"
+   },
+   {
+    "num": "41679",
+    "en": "Beam 4 x 0.5 Liftarm with Click Rotation Hinge Half",
+    "uz": "Balka 4 x 0.5"
+   },
+   {
+    "num": "43464",
+    "en": "Beam 4 x 3 Liftarm Triangle",
+    "uz": "Balka 4 x 3"
+   },
+   {
+    "num": "32348",
+    "en": "Beam 4 x 4 Liftarm Bent 53.13",
+    "uz": "Balka 4 x 4"
+   },
+   {
+    "num": "32017",
+    "en": "Beam 5 x 0.5",
+    "uz": "Balka 5 x 0.5"
+   },
+   {
+    "num": "11478",
+    "en": "Beam 5 x 0.5 Liftarm with Axle Holes at Both Ends",
+    "uz": "Balka 5 x 0.5"
+   },
+   {
+    "num": "14720",
+    "en": "Beam 5 x 3 H-shaped",
+    "uz": "Balka 5 x 3"
+   },
+   {
+    "num": "39370",
+    "en": "Beam 5 x 3 H-shaped with Ball Socket",
+    "uz": "Balka 5 x 3"
+   },
+   {
+    "num": "39370c01",
+    "en": "Beam 5 x 3 H-shaped with Ball Socket with White 19mm Ball",
+    "uz": "Balka 5 x 3"
+   },
+   {
+    "num": "2905",
+    "en": "Beam 5 x 3 x 0.5 Liftarm Triangle",
+    "uz": "Balka 5 x 3"
+   },
+   {
+    "num": "99773",
+    "en": "Beam 5 x 3 x 0.5 Liftarm Triangle Type 2",
+    "uz": "Balka 5 x 3"
+   },
+   {
+    "num": "32251",
+    "en": "Beam 5 x 7 x 0.5 Liftarm Bent 90 Quarter Ellipse",
+    "uz": "Balka 5 x 7"
+   },
+   {
+    "num": "32063",
+    "en": "Beam 6 x 0.5",
+    "uz": "Balka 6 x 0.5"
+   },
+   {
+    "num": "32311",
+    "en": "Beam 7 Offset Liftarm with 24 Tooth Gears",
+    "uz": "Balka 7"
+   },
+   {
+    "num": "2391",
+    "en": "Beam 7 with Alternating Holes",
+    "uz": "Balka 7"
+   },
+   {
+    "num": "32065",
+    "en": "Beam 7 x 0.5",
+    "uz": "Balka 7 x 0.5"
+   },
+   {
+    "num": "32177",
+    "en": "Beam 7 x 1 Liftarm with Ribs and Fan",
+    "uz": "Balka 7 x 1"
+   },
+   {
+    "num": "32308",
+    "en": "Beam 7 x 3 x 2 Liftarm Split",
+    "uz": "Balka 7 x 3"
+   },
+   {
+    "num": "40490",
+    "en": "Beam 9",
+    "uz": "Balka 9"
+   },
+   {
+    "num": "32079",
+    "en": "Beam 9 Liftarm Offset with Boss",
+    "uz": "Balka 9"
+   },
+   {
+    "num": "6612",
+    "en": "Beam 9 with Alternating Holes",
+    "uz": "Balka 9"
+   },
+   {
+    "num": "4586",
+    "en": "Beam 9 x 0.5 with 3 Holes",
+    "uz": "Balka 9 x 0.5"
+   },
+   {
+    "num": "80273",
+    "en": "Beam Propeller 5 Blade 9 Diameter with Square Hole",
+    "uz": "Balka 5"
+   }
+  ]
+ },
+ {
+  "group": {
+   "uz": "Shesternyalar (Gears)",
+   "ru": "Шестеренки (Gears)",
+   "en": "Gears"
+  },
+  "items": [
+   {
+    "num": "3743",
+    "en": "Gear Rack 1 x 4",
+    "uz": "Chiziqli reyka",
+    "starred": true
+   },
+   {
+    "num": "4716",
+    "en": "Worm Gear 2L",
+    "uz": "Chervyakli spiral",
+    "starred": true
+   },
+   {
+    "num": "62821",
+    "en": "Differential with One Gear 28 Tooth Bevel",
+    "uz": "Differensial",
+    "starred": true
+   },
+   {
+    "num": "6589",
+    "en": "Gear 12 Tooth Bevel",
+    "uz": "12 tishli burchak",
+    "starred": true
+   },
+   {
+    "num": "32498",
+    "en": "Gear 36 Tooth Double Bevel",
+    "uz": "36 tishli ikki burchak",
+    "starred": true
+   },
+   {
+    "num": "32269",
+    "en": "Gear 20 Tooth Double Bevel",
+    "uz": "20 tishli to'g'ri",
+    "starred": true
+   },
+   {
+    "num": "32270",
+    "en": "Gear 12 Tooth Double Bevel",
+    "uz": "12 tishli to'g'ri",
+    "starred": true
+   },
+   {
+    "num": "73071",
+    "en": "Differential",
+    "uz": "Shesternya"
+   },
+   {
+    "num": "65414",
+    "en": "Differential Casing for 5 Internal Gears",
+    "uz": "Shesternya"
+   },
+   {
+    "num": "6573",
+    "en": "Differential with Gear 16 Tooth and 24 Tooth",
+    "uz": "Shesternya 16 tishli"
+   },
+   {
+    "num": "65414c01",
+    "en": "Differential with Red 28 Tooth Drive Gear and Tan Satellites",
+    "uz": "Shesternya 28 tishli"
+   },
+   {
+    "num": "69778",
+    "en": "Gear 12 Tooth",
+    "uz": "Shesternya 12 tishli"
+   },
+   {
+    "num": "24014",
+    "en": "Gear 12 Tooth Double Bevel with Axle Extension",
+    "uz": "Shesternya 12 tishli"
+   },
+   {
+    "num": "3590",
+    "en": "Gear 12 Tooth with Clutch on One Side",
+    "uz": "Shesternya 12 tishli"
+   },
+   {
+    "num": "641",
+    "en": "Gear 14 Tooth",
+    "uz": "Shesternya 14 tishli"
+   },
+   {
+    "num": "4143",
+    "en": "Gear 14 Tooth Bevel",
+    "uz": "Shesternya 14 tishli"
+   },
+   {
+    "num": "69762",
+    "en": "Gear 14 Tooth Bevel",
+    "uz": "Shesternya 14 tishli"
+   },
+   {
+    "num": "570",
+    "en": "Gear 15 Large Tooth",
+    "uz": "Shesternya 15"
+   },
+   {
+    "num": "4019",
+    "en": "Gear 16 Tooth",
+    "uz": "Shesternya 16 tishli"
+   },
+   {
+    "num": "94925",
+    "en": "Gear 16 Tooth Reinforced",
+    "uz": "Shesternya 16 tishli"
+   },
+   {
+    "num": "6542a",
+    "en": "Gear 16 Tooth with Clutch",
+    "uz": "Shesternya 16 tishli"
+   },
+   {
+    "num": "18946",
+    "en": "Gear 16 Tooth with Clutch on Both Sides",
+    "uz": "Shesternya 16 tishli"
+   },
+   {
+    "num": "6542b",
+    "en": "Gear 16 Tooth with Clutch Smooth",
+    "uz": "Shesternya 16 tishli"
+   },
+   {
+    "num": "69779",
+    "en": "Gear 20 Tooth",
+    "uz": "Shesternya 20 tishli"
+   },
+   {
+    "num": "32198",
+    "en": "Gear 20 Tooth Bevel",
+    "uz": "Shesternya 20 tishli"
+   },
+   {
+    "num": "87407",
+    "en": "Gear 20 Tooth Bevel with Peghole",
+    "uz": "Shesternya 20 tishli"
+   },
+   {
+    "num": "18575",
+    "en": "Gear 20 Tooth Double Bevel Reinforced",
+    "uz": "Shesternya 20 tishli"
+   },
+   {
+    "num": "35185",
+    "en": "Gear 20 Tooth Double Bevel with Clutch on Both Sides",
+    "uz": "Shesternya 20 tishli"
+   },
+   {
+    "num": "81346",
+    "en": "Gear 20 Tooth with Clutch on Both Sides",
+    "uz": "Shesternya 20 tishli"
+   },
+   {
+    "num": "572",
+    "en": "Gear 21 Large Tooth",
+    "uz": "Shesternya 21"
+   },
+   {
+    "num": "642",
+    "en": "Gear 21 Large Tooth",
+    "uz": "Shesternya 21"
+   },
+   {
+    "num": "69761",
+    "en": "Gear 22 Tooth Bevel with Peghole",
+    "uz": "Shesternya 22 tishli"
+   },
+   {
+    "num": "76019",
+    "en": "Gear 24 Tooth Clutch with Dark Grey Centre",
+    "uz": "Shesternya 24 tishli"
+   },
+   {
+    "num": "76244",
+    "en": "Gear 24 Tooth Clutch with DkStone Centre",
+    "uz": "Shesternya 24 tishli"
+   },
+   {
+    "num": "3650a",
+    "en": "Gear 24 Tooth Crown Type 1",
+    "uz": "Shesternya 24 tishli"
+   },
+   {
+    "num": "3650b",
+    "en": "Gear 24 Tooth Crown Type 2",
+    "uz": "Shesternya 24 tishli"
+   },
+   {
+    "num": "3650c",
+    "en": "Gear 24 Tooth Crown Type 3",
+    "uz": "Shesternya 24 tishli"
+   },
+   {
+    "num": "3648a",
+    "en": "Gear 24 Tooth with 3 Axleholes",
+    "uz": "Shesternya 24 tishli"
+   },
+   {
+    "num": "2471",
+    "en": "Gear 24 Tooth with Clutch on Both Sides",
+    "uz": "Shesternya 24 tishli"
+   },
+   {
+    "num": "3648b",
+    "en": "Gear 24 Tooth with Single Axle Hole",
+    "uz": "Shesternya 24 tishli"
+   },
+   {
+    "num": "46372",
+    "en": "Gear 28 Tooth Double Bevel",
+    "uz": "Shesternya 28 tishli"
+   },
+   {
+    "num": "65413",
+    "en": "Gear 28 Tooth Double Bevel with Peghole",
+    "uz": "Shesternya 28 tishli"
+   },
+   {
+    "num": "643",
+    "en": "Gear 35 Large Tooth",
+    "uz": "Shesternya 35"
+   },
+   {
+    "num": "32072",
+    "en": "Gear 4 Knob",
+    "uz": "Shesternya 4"
+   },
+   {
+    "num": "5405",
+    "en": "Gear 4 Knob 45°",
+    "uz": "Shesternya 4"
+   },
+   {
+    "num": "3649",
+    "en": "Gear 40 Tooth",
+    "uz": "Shesternya 40 tishli"
+   },
+   {
+    "num": "644",
+    "en": "Gear 42 Large Tooth",
+    "uz": "Shesternya 42"
+   },
+   {
+    "num": "3647",
+    "en": "Gear 8 Tooth",
+    "uz": "Shesternya 8 tishli"
+   },
+   {
+    "num": "10928",
+    "en": "Gear 8 Tooth Reinforced",
+    "uz": "Shesternya 8 tishli"
+   },
+   {
+    "num": "11955",
+    "en": "Gear 8 Tooth Reinforced Sliding",
+    "uz": "Shesternya 8 tishli"
+   },
+   {
+    "num": "32060",
+    "en": "Gear 8 Tooth Timing Wheel",
+    "uz": "Shesternya 8 tishli"
+   },
+   {
+    "num": "569",
+    "en": "Gear 9 Large Tooth",
+    "uz": "Shesternya 9"
+   },
+   {
+    "num": "768",
+    "en": "Gear Block 2 x 4 x 3",
+    "uz": "Shesternya 2 x 4"
+   },
+   {
+    "num": "32167",
+    "en": "Gear Box Half with 4 Axle Stubs and 6 Pin Sockets",
+    "uz": "Shesternya"
+   },
+   {
+    "num": "6592",
+    "en": "Gear Rack 1 x 10 with Holes",
+    "uz": "Shesternya 1 x 10"
+   },
+   {
+    "num": "32132",
+    "en": "Gear Rack 1 x 12 with Holes",
+    "uz": "Shesternya 1 x 12"
+   },
+   {
+    "num": "64781",
+    "en": "Gear Rack 1 x 13 with Pegholes and Axleholes",
+    "uz": "Shesternya 1 x 13"
+   },
+   {
+    "num": "18942",
+    "en": "Gear Rack 1 x 14 with Bottom Beam",
+    "uz": "Shesternya 1 x 14"
+   },
+   {
+    "num": "18940",
+    "en": "Gear Rack 1 x 14 with Bottom Beam Housing",
+    "uz": "Shesternya 1 x 14"
+   },
+   {
+    "num": "32185",
+    "en": "Gear Rack 1 x 14 with Holes",
+    "uz": "Shesternya 1 x 14"
+   },
+   {
+    "num": "6574",
+    "en": "Gear Rack 1 x 2.4 with Towballs",
+    "uz": "Shesternya 1 x 2.4"
+   },
+   {
+    "num": "87761",
+    "en": "Gear Rack 1 x 7 with Pegholes and Axleholes",
+    "uz": "Shesternya 1 x 7"
+   },
+   {
+    "num": "6630",
+    "en": "Gear Rack 1 x 8 with Holes",
+    "uz": "Shesternya 1 x 8"
+   },
+   {
+    "num": "32170",
+    "en": "Gear Rack Double with Ball Joint",
+    "uz": "Shesternya"
+   },
+   {
+    "num": "24121",
+    "en": "Gear Ring Quarter 11 x 11 with 35 Teeth",
+    "uz": "Shesternya 11 x 11"
+   },
+   {
+    "num": "78442",
+    "en": "Gear Ring Quarter 6 x 6 with 15 Teeth",
+    "uz": "Shesternya 6 x 6"
+   },
+   {
+    "num": "2474a",
+    "en": "Gear Stepper with 8 Teeth",
+    "uz": "Shesternya"
+   },
+   {
+    "num": "6588",
+    "en": "Gearbox 2 x 4 x 3 & 1/3",
+    "uz": "Shesternya 2 x 4"
+   },
+   {
+    "num": "46224c01",
+    "en": "Gearbox 2 x 4 x 4 (Complete)",
+    "uz": "Shesternya 2 x 4"
+   },
+   {
+    "num": "170c01",
+    "en": "Gearbox 20:1 Reduction (Complete Assembly)",
+    "uz": "Shesternya 20"
+   },
+   {
+    "num": "45360c01",
+    "en": "Gearbox 3 x 3 x 1.667 Corner (Complete)",
+    "uz": "Shesternya 3 x 3"
+   },
+   {
+    "num": "45337",
+    "en": "Gearbox 3 x 4 x 1.667 T-shaped (Complete)",
+    "uz": "Shesternya 3 x 4"
+   },
+   {
+    "num": "6585",
+    "en": "Gearbox 4 x 4 x 1.667",
+    "uz": "Shesternya 4 x 4"
+   },
+   {
+    "num": "18590",
+    "en": "Gearwheel with Pin Holes and Short Shaft",
+    "uz": "Shesternya"
+   },
+   {
+    "num": "27938",
+    "en": "Worm Gear 1L",
+    "uz": "Shesternya"
+   },
+   {
+    "num": "32905",
+    "en": "Worm Gear 2L with Axle Hole Two-toothed Sliding",
+    "uz": "Shesternya"
+   },
+   {
+    "num": "15457",
+    "en": "Worm Gear 3L with Bush Ends",
+    "uz": "Shesternya"
+   },
+   {
+    "num": "73763",
+    "en": "Worm Gear 6L",
+    "uz": "Shesternya"
+   }
+  ]
+ },
+ {
+  "group": {
+   "uz": "O'qlar va Vtulkalar",
+   "ru": "Оси и Втулки",
+   "en": "Axles & Bushings"
+  },
+  "items": [
+   {
+    "num": "43093",
+    "en": "Axle Pin with Friction",
+    "uz": "O'q-shtift",
+    "starred": true
+   },
+   {
+    "num": "3713",
+    "en": "Bush with Two Flanges",
+    "uz": "To'liq vtulka",
+    "starred": true
+   },
+   {
+    "num": "87083",
+    "en": "Axle 4 with Stop",
+    "uz": "Cheklovchili o'q",
+    "starred": true
+   },
+   {
+    "num": "3708",
+    "en": "Axle 12",
+    "uz": "O'q 12",
+    "starred": true
+   },
+   {
+    "num": "3737",
+    "en": "Axle 10",
+    "uz": "O'q 10",
+    "starred": true
+   },
+   {
+    "num": "3707",
+    "en": "Axle 8",
+    "uz": "O'q 8",
+    "starred": true
+   },
+   {
+    "num": "44294",
+    "en": "Axle 7",
+    "uz": "O'q 7",
+    "starred": true
+   },
+   {
+    "num": "3706",
+    "en": "Axle 6",
+    "uz": "O'q 6",
+    "starred": true
+   },
+   {
+    "num": "32073",
+    "en": "Axle 5",
+    "uz": "O'q 5",
+    "starred": true
+   },
+   {
+    "num": "3705",
+    "en": "Axle 4",
+    "uz": "O'q 4",
+    "starred": true
+   },
+   {
+    "num": "4519",
+    "en": "Axle 3",
+    "uz": "O'q 3",
+    "starred": true
+   },
+   {
+    "num": "32062",
+    "en": "Axle 2 Notched",
+    "uz": "O'q 2",
+    "starred": true
+   },
+   {
+    "num": "3737c01",
+    "en": "Axle 10 Threaded",
+    "uz": "O'q 10"
+   },
+   {
+    "num": "23948",
+    "en": "Axle 11",
+    "uz": "O'q 11"
+   },
+   {
+    "num": "50451",
+    "en": "Axle 16",
+    "uz": "O'q 16"
+   },
+   {
+    "num": "3704",
+    "en": "Axle 2",
+    "uz": "O'q 2"
+   },
+   {
+    "num": "24316",
+    "en": "Axle 3 with Stop",
+    "uz": "O'q 3"
+   },
+   {
+    "num": "6587",
+    "en": "Axle 3 with Stud",
+    "uz": "O'q 3"
+   },
+   {
+    "num": "50450",
+    "en": "Axle 32",
+    "uz": "O'q 32"
+   },
+   {
+    "num": "27940",
+    "en": "Axle 3L with Middle Perpendicular Pin Hole",
+    "uz": "O'q"
+   },
+   {
+    "num": "5713",
+    "en": "Axle 3L with Perpendicular Pin Hole",
+    "uz": "O'q"
+   },
+   {
+    "num": "3705c01",
+    "en": "Axle 4 Threaded",
+    "uz": "O'q 4"
+   },
+   {
+    "num": "99008",
+    "en": "Axle 4 with Middle Cylindrical Stop",
+    "uz": "O'q 4"
+   },
+   {
+    "num": "15462",
+    "en": "Axle 5 with Stop",
+    "uz": "O'q 5"
+   },
+   {
+    "num": "32209",
+    "en": "Axle 5.5 with Stop Type 1",
+    "uz": "O'q 5.5"
+   },
+   {
+    "num": "59426",
+    "en": "Axle 5.5 with Stop Type 2",
+    "uz": "O'q 5.5"
+   },
+   {
+    "num": "55013",
+    "en": "Axle 8 with Stop",
+    "uz": "O'q 8"
+   },
+   {
+    "num": "60485",
+    "en": "Axle 9",
+    "uz": "O'q 9"
+   },
+   {
+    "num": "u1208b",
+    "en": "Axle Adapter Metal Long",
+    "uz": "O'q"
+   },
+   {
+    "num": "u1208a",
+    "en": "Axle Adapter Metal Short",
+    "uz": "O'q"
+   },
+   {
+    "num": "10197",
+    "en": "Axle and Pin Connector Hub with 2 Axles at 90 Degrees",
+    "uz": "O'q"
+   },
+   {
+    "num": "11272",
+    "en": "Axle Connector 2 x 3 Quadruple",
+    "uz": "O'q 2 x 3"
+   },
+   {
+    "num": "32199",
+    "en": "Axle Flexible 11",
+    "uz": "O'q 11"
+   },
+   {
+    "num": "32200",
+    "en": "Axle Flexible 12",
+    "uz": "O'q 12"
+   },
+   {
+    "num": "32201",
+    "en": "Axle Flexible 14",
+    "uz": "O'q 14"
+   },
+   {
+    "num": "32202",
+    "en": "Axle Flexible 16",
+    "uz": "O'q 16"
+   },
+   {
+    "num": "32235",
+    "en": "Axle Flexible 19",
+    "uz": "O'q 19"
+   },
+   {
+    "num": "72892",
+    "en": "Axle Flexible 26 with Axle 4.8L and Axle 2L on Ends",
+    "uz": "O'q 26"
+   },
+   {
+    "num": "32580",
+    "en": "Axle Flexible 7",
+    "uz": "O'q 7"
+   },
+   {
+    "num": "24122",
+    "en": "Axle Hole with 2 Perpendicular Bar Tubes",
+    "uz": "O'q"
+   },
+   {
+    "num": "6538a",
+    "en": "Axle Joiner",
+    "uz": "O'q"
+   },
+   {
+    "num": "21755",
+    "en": "Axle Joiner 2L Hilt",
+    "uz": "O'q"
+   },
+   {
+    "num": "44852",
+    "en": "Axle Joiner 3 x 2 with Axial Torsion Spring",
+    "uz": "O'q 3 x 2"
+   },
+   {
+    "num": "26287",
+    "en": "Axle Joiner 3L",
+    "uz": "O'q"
+   },
+   {
+    "num": "18948",
+    "en": "Axle Joiner 3L with Ridges for Driving Ring",
+    "uz": "O'q"
+   },
+   {
+    "num": "42195",
+    "en": "Axle Joiner 3L with Two Flat Sides",
+    "uz": "O'q"
+   },
+   {
+    "num": "45590",
+    "en": "Axle Joiner Double Flexible",
+    "uz": "O'q"
+   },
+   {
+    "num": "59443",
+    "en": "Axle Joiner Inline Smooth",
+    "uz": "O'q"
+   },
+   {
+    "num": "6538b",
+    "en": "Axle Joiner Offset",
+    "uz": "O'q"
+   },
+   {
+    "num": "53586",
+    "en": "Axle Joiner Perpendicular with Extension",
+    "uz": "O'q"
+   },
+   {
+    "num": "4698",
+    "en": "Axle Nut",
+    "uz": "O'q"
+   },
+   {
+    "num": "3749",
+    "en": "Axle Pin",
+    "uz": "O'q"
+   },
+   {
+    "num": "18651",
+    "en": "Axle Pin Long with Friction with 2L Axle",
+    "uz": "O'q"
+   },
+   {
+    "num": "11214",
+    "en": "Axle Pin Long with Friction with 2L Pin",
+    "uz": "O'q"
+   },
+   {
+    "num": "65249",
+    "en": "Axle Pin Long without Friction with 2L Axle",
+    "uz": "O'q"
+   },
+   {
+    "num": "2736",
+    "en": "Axle Towball",
+    "uz": "O'q"
+   },
+   {
+    "num": "7222",
+    "en": "Axle with 4 Wheel Pins",
+    "uz": "O'q 4"
+   },
+   {
+    "num": "22961",
+    "en": "Axle with Perpendicular Pin Hole",
+    "uz": "O'q"
+   },
+   {
+    "num": "32123a",
+    "en": "Bush 1/2 Smooth with Axle Hole Reduced",
+    "uz": "O'q 1"
+   },
+   {
+    "num": "32123ac01",
+    "en": "Bush 1/2 Smooth with Axle Hole Reduced with Black Tyre 4/ 80 x 8 Single Smooth Type 2",
+    "uz": "O'q 80 x 8"
+   },
+   {
+    "num": "32123b",
+    "en": "Bush 1/2 Smooth with Axle Hole Semi-Reduced",
+    "uz": "O'q 1"
+   },
+   {
+    "num": "4265a",
+    "en": "Bush 1/2 Type 1",
+    "uz": "O'q 1"
+   },
+   {
+    "num": "4265ac02",
+    "en": "Bush 1/2 Type 1 with Black Tyre 4/ 80 x 8 Single Smooth",
+    "uz": "O'q 80 x 8"
+   },
+   {
+    "num": "4265ac01",
+    "en": "Bush 1/2 Type 1 with Black Tyre 8/ 75 x 8 Offset Tread",
+    "uz": "O'q 75 x 8"
+   },
+   {
+    "num": "6577",
+    "en": "Bush 1/2 Type 2",
+    "uz": "O'q 1"
+   },
+   {
+    "num": "6577c01",
+    "en": "Bush 1/2 Type 2 with Black Tyre 6/ 50 x 8 Offset Tread",
+    "uz": "O'q 50 x 8"
+   },
+   {
+    "num": "584",
+    "en": "Bush with One Flange",
+    "uz": "O'q"
+   },
+   {
+    "num": "57585",
+    "en": "Bush with Three Axles",
+    "uz": "O'q"
+   },
+   {
+    "num": "585",
+    "en": "Bush with Three Flanges",
+    "uz": "O'q"
+   },
+   {
+    "num": "6536",
+    "en": "Cross Block 1 x 2 (Axle/Pin)",
+    "uz": "O'q 1 x 2"
+   },
+   {
+    "num": "32068",
+    "en": "Cross Block 1 x 3 (Axle/None/Pin)",
+    "uz": "O'q 1 x 3"
+   },
+   {
+    "num": "32184",
+    "en": "Cross Block 1 x 3 (Axle/Pin/Axle)",
+    "uz": "O'q 1 x 3"
+   },
+   {
+    "num": "42003",
+    "en": "Cross Block 1 x 3 (Axle/Pin/Pin)",
+    "uz": "O'q 1 x 3"
+   },
+   {
+    "num": "90630",
+    "en": "Cross Block 1 x 3 (Pin/Dimple/Pin) with 2 Pins and 2 Ball Joints",
+    "uz": "O'q 1 x 3"
+   },
+   {
+    "num": "2393",
+    "en": "Cross Block 1 x 3 (Pin/Pin/Pin) with 2 Pins",
+    "uz": "O'q 1 x 3"
+   },
+   {
+    "num": "48989",
+    "en": "Cross Block 1 x 3 (Pin/Pin/Pin) with 4 Pins",
+    "uz": "O'q 1 x 3"
+   },
+   {
+    "num": "65489",
+    "en": "Cross Block 1 x 3 (Pin/Pin/Pin) with 4 Pins Rectangular Centre Hole",
+    "uz": "O'q 1 x 3"
+   },
+   {
+    "num": "32291",
+    "en": "Cross Block 2 x 2 (Axle/Twin Pin)",
+    "uz": "O'q 2 x 2"
+   },
+   {
+    "num": "44809",
+    "en": "Cross Block 2 x 2 Bent 90 (Pin/Pin/Pin)",
+    "uz": "O'q 2 x 2"
+   },
+   {
+    "num": "41678",
+    "en": "Cross Block 2 x 2 Split (Axle/Twin Pin)",
+    "uz": "O'q 2 x 2"
+   },
+   {
+    "num": "69819",
+    "en": "Cross Block 2 x 2 Split Reinforced (Axle/Twin Pin)",
+    "uz": "O'q 2 x 2"
+   },
+   {
+    "num": "92907",
+    "en": "Cross Block 2 x 2 x 2 Bent 90 Split (Pin/Twin Axle)",
+    "uz": "O'q 2 x 2"
+   },
+   {
+    "num": "32557",
+    "en": "Cross Block 2 x 3 (Pin/Pin/Twin Pin)",
+    "uz": "O'q 2 x 3"
+   },
+   {
+    "num": "53533",
+    "en": "Cross Block 2 x 3 Split (Pin/Pin/Pin) with Pin",
+    "uz": "O'q 2 x 3"
+   },
+   {
+    "num": "98989",
+    "en": "Cross Block 2 x 4 (Axle/Pin/Pin/Twin Pin)",
+    "uz": "O'q 2 x 4"
+   },
+   {
+    "num": "80910",
+    "en": "Cross Block 2 x 4 Split (Pin/Axle/Axle/Pin)",
+    "uz": "O'q 2 x 4"
+   },
+   {
+    "num": "7660",
+    "en": "Cross Block 2 x 5 (Axle/Pin) with Perpendicular Hole for Worm Gear 6L",
+    "uz": "O'q 2 x 5"
+   },
+   {
+    "num": "63869",
+    "en": "Cross Block 3 x 2 (Axle/Triple Pin)",
+    "uz": "O'q 3 x 2"
+   }
+  ]
+ },
+ {
+  "group": {
+   "uz": "Shtiftlar va Konnektorlar",
+   "ru": "Штифты и Соединители",
+   "en": "Pins & Connectors"
+  },
+  "items": [
+   {
+    "num": "89678",
+    "en": "Pin 1/2 with Friction",
+    "uz": "Yarim shtift",
+    "starred": true
+   },
+   {
+    "num": "32054",
+    "en": "Pin Long with Stop Bush",
+    "uz": "Uzun ko'k shtift",
+    "starred": true
+   },
+   {
+    "num": "3673",
+    "en": "Pin",
+    "uz": "Kulrang shtift",
+    "starred": true
+   },
+   {
+    "num": "2780",
+    "en": "Pin with Friction and Slots",
+    "uz": "Qora shtift",
+    "starred": true
+   },
+   {
+    "num": "6553",
+    "en": "Connector (Axle) with Axle 1.5",
+    "uz": "Shtift"
+   },
+   {
+    "num": "32039",
+    "en": "Connector (Axle/Bush) Type 1",
+    "uz": "Shtift"
+   },
+   {
+    "num": "42135",
+    "en": "Connector (Axle/Bush) Type 2",
+    "uz": "Shtift"
+   },
+   {
+    "num": "3651",
+    "en": "Connector (Pin/Bush) with 2 Studs",
+    "uz": "Shtift"
+   },
+   {
+    "num": "47501",
+    "en": "Connector 1 x 2 with Two Pins and Stepped Wedge",
+    "uz": "Shtift 1 x 2"
+   },
+   {
+    "num": "47326p01",
+    "en": "Connector 2 x 3 with Ball/Axle Socket with Rubber Black Insert",
+    "uz": "Shtift 2 x 3"
+   },
+   {
+    "num": "47326p03",
+    "en": "Connector 2 x 3 with Ball/Axle Socket with Rubber Light Bluish Grey Insert",
+    "uz": "Shtift 2 x 3"
+   },
+   {
+    "num": "47326p02",
+    "en": "Connector 2 x 3 with Ball/Axle Socket with Rubber White Insert",
+    "uz": "Shtift 2 x 3"
+   },
+   {
+    "num": "90634",
+    "en": "Connector 3 x 1 with Two Pins and Three Ball Joints on Axle 5L",
+    "uz": "Shtift 3 x 1"
+   },
+   {
+    "num": "15461",
+    "en": "Connector 3 x 1 x 2 with Peghole and Two Pins (Inline Slits)",
+    "uz": "Shtift 3 x 1"
+   },
+   {
+    "num": "46189",
+    "en": "Connector 3 x 1 x 2 with Peghole and Two Pins (Perpendicular Slits)",
+    "uz": "Shtift 3 x 1"
+   },
+   {
+    "num": "47994",
+    "en": "Connector 3 x 1 x 3 with 2 Clips and 2 Pins with Round Inside",
+    "uz": "Shtift 3 x 1"
+   },
+   {
+    "num": "19159",
+    "en": "Connector 3 x 1 x 3 with 2 Clips and 2 Pins with Squared Inside",
+    "uz": "Shtift 3 x 1"
+   },
+   {
+    "num": "47973",
+    "en": "Connector 3 x 1 x 3 with Two Pins and Click Hinge",
+    "uz": "Shtift 3 x 1"
+   },
+   {
+    "num": "47972",
+    "en": "Connector 3 x 1 x 3 with Two Pins and Towball",
+    "uz": "Shtift 3 x 1"
+   },
+   {
+    "num": "30624",
+    "en": "Connector 3 x 1 x 4 with Two Pins and Click Hinge",
+    "uz": "Shtift 3 x 1"
+   },
+   {
+    "num": "32576",
+    "en": "Connector 3 x 4.5 x 2.333 with Pin (Needs Work)",
+    "uz": "Shtift 3 x 4.5"
+   },
+   {
+    "num": "72008",
+    "en": "Connector Block 2 x 2 with 1 x 1 Cutout",
+    "uz": "Shtift 2 x 2"
+   },
+   {
+    "num": "32137",
+    "en": "Connector Block 3 x 2 x 2",
+    "uz": "Shtift 3 x 2"
+   },
+   {
+    "num": "32175",
+    "en": "Connector Block 3 x 3 Triangular",
+    "uz": "Shtift 3 x 3"
+   },
+   {
+    "num": "58177",
+    "en": "Connector Block 3 x 3 Triangular with Axlehole",
+    "uz": "Shtift 3 x 3"
+   },
+   {
+    "num": "39793",
+    "en": "Connector Block 3 x 3 with 9 Perpendicular Holes",
+    "uz": "Shtift 3 x 3"
+   },
+   {
+    "num": "32172",
+    "en": "Connector Block 3 x 3 with Ball Socket",
+    "uz": "Shtift 3 x 3"
+   },
+   {
+    "num": "47330",
+    "en": "Connector Block 3 x 3 x 1 with Two Ball Joints",
+    "uz": "Shtift 3 x 3"
+   },
+   {
+    "num": "67139",
+    "en": "Connector Block 3 x 5 x 1 with Cutout",
+    "uz": "Shtift 3 x 5"
+   },
+   {
+    "num": "32310",
+    "en": "Connector Block 3 x 5 x 1.333",
+    "uz": "Shtift 3 x 5"
+   },
+   {
+    "num": "32307",
+    "en": "Connector Block 3 x 6 with 6 Axleholes and Groove",
+    "uz": "Shtift 3 x 6"
+   },
+   {
+    "num": "32165",
+    "en": "Connector Block 3 x 6 x 1.667",
+    "uz": "Shtift 3 x 6"
+   },
+   {
+    "num": "32166",
+    "en": "Connector Block 3 x 6 x 1.667 Gearbox",
+    "uz": "Shtift 3 x 6"
+   },
+   {
+    "num": "44137",
+    "en": "Connector Block 4 x 4 x 2",
+    "uz": "Shtift 4 x 4"
+   },
+   {
+    "num": "32489",
+    "en": "Connector Block 4 x 5 x 7.667",
+    "uz": "Shtift 4 x 5"
+   },
+   {
+    "num": "32305",
+    "en": "Connector Block 7 x 4 x 3",
+    "uz": "Shtift 7 x 4"
+   },
+   {
+    "num": "98585",
+    "en": "Connector Circular with 2 Pin Holes and 3 Axle Holes",
+    "uz": "Shtift"
+   },
+   {
+    "num": "87408",
+    "en": "Connector Toggle Joint Double with Axle and Pin Holes",
+    "uz": "Shtift"
+   },
+   {
+    "num": "32126",
+    "en": "Connector Toggle Joint Smooth",
+    "uz": "Shtift"
+   },
+   {
+    "num": "48496",
+    "en": "Connector Toggle Joint Smooth Double with 2 Pins",
+    "uz": "Shtift"
+   },
+   {
+    "num": "4273b",
+    "en": "Connector Toggle Joint Toothed",
+    "uz": "Shtift"
+   },
+   {
+    "num": "4273a",
+    "en": "Connector Toggle Joint Toothed With No Slots",
+    "uz": "Shtift"
+   },
+   {
+    "num": "4274",
+    "en": "Pin 1/2",
+    "uz": "Shtift 1"
+   },
+   {
+    "num": "61184",
+    "en": "Pin 1/2 with Bar 2L",
+    "uz": "Shtift 1"
+   },
+   {
+    "num": "49731",
+    "en": "Pin 1/2 with Button",
+    "uz": "Shtift 1"
+   },
+   {
+    "num": "65826",
+    "en": "Pin 1/2 with Stud Tube",
+    "uz": "Shtift 1"
+   },
+   {
+    "num": "32002",
+    "en": "Pin 3/4",
+    "uz": "Shtift 3"
+   },
+   {
+    "num": "32138",
+    "en": "Pin 3L Double with Axlehole",
+    "uz": "Shtift"
+   },
+   {
+    "num": "65098",
+    "en": "Pin 3L Double with Axlehole and Pins with Rectangular Holes",
+    "uz": "Shtift"
+   },
+   {
+    "num": "49130",
+    "en": "Pin Connector Perpendicular 3 x 3 Bent 90 with 4 Pins, Slots Across Beam",
+    "uz": "Shtift 3 x 3"
+   },
+   {
+    "num": "55615",
+    "en": "Pin Connector Perpendicular 3 x 3 Bent 90 with 4 Pins, Slots Along Beam",
+    "uz": "Shtift 3 x 3"
+   },
+   {
+    "num": "90202",
+    "en": "Pin Connector Round with 4 Clips",
+    "uz": "Shtift"
+   },
+   {
+    "num": "15646",
+    "en": "Pin Connector Round with 4 Thick C-Clips",
+    "uz": "Shtift"
+   },
+   {
+    "num": "32529",
+    "en": "Pin Joiner Plate 1 x 2 x 1 & 1/2",
+    "uz": "Shtift 1 x 2"
+   },
+   {
+    "num": "75535",
+    "en": "Pin Joiner Round",
+    "uz": "Shtift"
+   },
+   {
+    "num": "87745",
+    "en": "Pin Joiner Round Curved with Fin and Hole",
+    "uz": "Shtift"
+   },
+   {
+    "num": "62462",
+    "en": "Pin Joiner Round with Slot",
+    "uz": "Shtift"
+   },
+   {
+    "num": "41732",
+    "en": "Pin Joiner Round with Slot, Bar and Pivot",
+    "uz": "Shtift"
+   },
+   {
+    "num": "77765",
+    "en": "Pin Long with End Stop",
+    "uz": "Shtift"
+   },
+   {
+    "num": "6558",
+    "en": "Pin Long with Friction and Slot",
+    "uz": "Shtift"
+   },
+   {
+    "num": "42924",
+    "en": "Pin Long with Friction Type 2",
+    "uz": "Shtift"
+   },
+   {
+    "num": "87082",
+    "en": "Pin Long with Pin Hole Type 1",
+    "uz": "Shtift"
+   },
+   {
+    "num": "44874",
+    "en": "Pin Long with Pin Hole Type 2",
+    "uz": "Shtift"
+   },
+   {
+    "num": "65304",
+    "en": "Pin Long with Stop Bush Type 2",
+    "uz": "Shtift"
+   },
+   {
+    "num": "39888",
+    "en": "Pin Long without Friction Type 2",
+    "uz": "Shtift"
+   },
+   {
+    "num": "32556b",
+    "en": "Pin Long without Friction with Dual Slots",
+    "uz": "Shtift"
+   },
+   {
+    "num": "32556a",
+    "en": "Pin Long without Friction with Single Slot",
+    "uz": "Shtift"
+   },
+   {
+    "num": "6628",
+    "en": "Pin Towball with Friction",
+    "uz": "Shtift"
+   },
+   {
+    "num": "61483",
+    "en": "Pin with 2 Wheel Pins",
+    "uz": "Shtift 2"
+   },
+   {
+    "num": "4459",
+    "en": "Pin with Friction",
+    "uz": "Shtift"
+   },
+   {
+    "num": "80477",
+    "en": "Pin with Friction and Towball on 1L Bar",
+    "uz": "Shtift"
+   },
+   {
+    "num": "61332",
+    "en": "Pin with Friction Type 2",
+    "uz": "Shtift"
+   },
+   {
+    "num": "47455",
+    "en": "Pin with Friction with Click Rotation Pin",
+    "uz": "Shtift"
+   },
+   {
+    "num": "41680",
+    "en": "Pin with Friction with Click Rotation Ring",
+    "uz": "Shtift"
+   },
+   {
+    "num": "15100",
+    "en": "Pin with Friction with Perpendicular Pin Hole Type 1",
+    "uz": "Shtift"
+   },
+   {
+    "num": "65487",
+    "en": "Pin with Friction with Perpendicular Pin Hole Type 2",
+    "uz": "Shtift"
+   },
+   {
+    "num": "61903",
+    "en": "Universal Joint 3L (Complete)",
+    "uz": "Shtift"
+   },
+   {
+    "num": "62519",
+    "en": "Universal Joint 3L Centre",
+    "uz": "Shtift"
+   },
+   {
+    "num": "62520",
+    "en": "Universal Joint 3L End",
+    "uz": "Shtift"
+   },
+   {
+    "num": "3712",
+    "en": "Universal Joint 4L End with Bush End",
+    "uz": "Shtift"
+   },
+   {
+    "num": "575",
+    "en": "Universal Joint 4L End with Slotted End",
+    "uz": "Shtift"
+   },
+   {
+    "num": "3712c03",
+    "en": "Universal Joint 4L with Bush Ends with Centre Type 1 (Complete)",
+    "uz": "Shtift"
+   },
+   {
+    "num": "3712c01",
+    "en": "Universal Joint 4L with Bush Ends with Centre Type 2 (Complete)",
+    "uz": "Shtift"
+   },
+   {
+    "num": "3712c02",
+    "en": "Universal Joint 4L with Bush Ends with Milky White Centre Type 1 (Complete)",
+    "uz": "Shtift"
+   },
+   {
+    "num": "575c01",
+    "en": "Universal Joint 4L with Slotted Ends with Milky White Centre Type 1 (Complete)",
+    "uz": "Shtift"
+   },
+   {
+    "num": "3326a",
+    "en": "Universal Joint Centre Type 1",
+    "uz": "Shtift"
+   },
+   {
+    "num": "3326b",
+    "en": "Universal Joint Centre Type 2",
+    "uz": "Shtift"
+   }
+  ]
+ },
+ {
+  "group": {
+   "uz": "Ramka va Panellar",
+   "ru": "Рамки и Панели",
+   "en": "Frames & Panels"
+  },
+  "items": [
+   {
+    "num": "3894",
+    "en": "Brick 1 x 6 with Holes",
+    "uz": "Teshikli plita",
+    "starred": true
+   },
+   {
+    "num": "87086",
+    "en": "Panel Fairing Smooth #2 (Short)",
+    "uz": "Korpus panel",
+    "starred": true
+   },
+   {
+    "num": "87080",
+    "en": "Panel Fairing Smooth #1 (Short)",
+    "uz": "Korpus panel",
+    "starred": true
+   },
+   {
+    "num": "73230",
+    "en": "Brick 1 x 1 with Axlehole",
+    "uz": "Panel 1 x 1"
+   },
+   {
+    "num": "6541",
+    "en": "Brick 1 x 1 with Hole",
+    "uz": "Panel 1 x 1"
+   },
+   {
+    "num": "2730",
+    "en": "Brick 1 x 10 with Holes",
+    "uz": "Panel 1 x 10"
+   },
+   {
+    "num": "3895",
+    "en": "Brick 1 x 12 with Holes",
+    "uz": "Panel 1 x 12"
+   },
+   {
+    "num": "32018",
+    "en": "Brick 1 x 14 with Holes",
+    "uz": "Panel 1 x 14"
+   },
+   {
+    "num": "3703",
+    "en": "Brick 1 x 16 with Holes",
+    "uz": "Panel 1 x 16"
+   },
+   {
+    "num": "2991",
+    "en": "Brick 1 x 2 Double Angled with Bumper Holder",
+    "uz": "Panel 1 x 2"
+   },
+   {
+    "num": "32064c",
+    "en": "Brick 1 x 2 with Axlehole with Open Sides and Bottom Stud",
+    "uz": "Panel 1 x 2"
+   },
+   {
+    "num": "32064a",
+    "en": "Brick 1 x 2 with Axlehole with Open Sides and Stud Blocker",
+    "uz": "Panel 1 x 2"
+   },
+   {
+    "num": "4790c02",
+    "en": "Brick 1 x 2 with Brown Boat Ship Wheel with Unslotted Pin",
+    "uz": "Panel 1 x 2"
+   },
+   {
+    "num": "3700",
+    "en": "Brick 1 x 2 with Hole",
+    "uz": "Panel 1 x 2"
+   },
+   {
+    "num": "389",
+    "en": "Brick 1 x 2 with Hole and Thin Top",
+    "uz": "Panel 1 x 2"
+   },
+   {
+    "num": "32000",
+    "en": "Brick 1 x 2 with Holes",
+    "uz": "Panel 1 x 2"
+   },
+   {
+    "num": "73109",
+    "en": "Brick 1 x 2 with Plate 1 x 2",
+    "uz": "Panel 1 x 2"
+   },
+   {
+    "num": "4790c04",
+    "en": "Brick 1 x 2 with Reddish Brown Boat Ship Wheel with Unslotted Pin",
+    "uz": "Panel 1 x 2"
+   },
+   {
+    "num": "32064b",
+    "en": "Brick 1 x 2 with Reduced Axlehole",
+    "uz": "Panel 1 x 2"
+   },
+   {
+    "num": "32064d",
+    "en": "Brick 1 x 2 with Semi-Reduced Axlehole",
+    "uz": "Panel 1 x 2"
+   },
+   {
+    "num": "85943",
+    "en": "Brick 1 x 2 with Two Liftarms",
+    "uz": "Panel 1 x 2"
+   },
+   {
+    "num": "80431",
+    "en": "Brick 1 x 2 x 1.333 with Hole and Rotation Joint Socket",
+    "uz": "Panel 1 x 2"
+   },
+   {
+    "num": "5565",
+    "en": "Brick 1 x 3 with Holes",
+    "uz": "Panel 1 x 3"
+   },
+   {
+    "num": "4790c03",
+    "en": "Brick 1 x 4 with Brown Boat Ship Wheel with Unslotted Pin",
+    "uz": "Panel 1 x 4"
+   },
+   {
+    "num": "3701",
+    "en": "Brick 1 x 4 with Holes",
+    "uz": "Panel 1 x 4"
+   },
+   {
+    "num": "2989",
+    "en": "Brick 1 x 4 with Holes and Bumper Holder",
+    "uz": "Panel 1 x 4"
+   },
+   {
+    "num": "2743",
+    "en": "Brick 1 x 4 x 1.667 Wing Front",
+    "uz": "Panel 1 x 4"
+   },
+   {
+    "num": "2744",
+    "en": "Brick 1 x 6 x 1.667 Wing Back",
+    "uz": "Panel 1 x 6"
+   },
+   {
+    "num": "3702",
+    "en": "Brick 1 x 8 with Holes",
+    "uz": "Panel 1 x 8"
+   },
+   {
+    "num": "65803",
+    "en": "Brick 16 x 16 x 1.333",
+    "uz": "Panel 16 x 16"
+   },
+   {
+    "num": "47452",
+    "en": "Brick 2 x 2 w/ Hole, Click Rot. Hinge (H) and Socket",
+    "uz": "Panel 2 x 2"
+   },
+   {
+    "num": "47431",
+    "en": "Brick 2 x 2 with Axlehole, Click Rotation Hinge (V) and Fist",
+    "uz": "Panel 2 x 2"
+   },
+   {
+    "num": "48169",
+    "en": "Brick 2 x 2 with Hole and Rotation Joint Socket",
+    "uz": "Panel 2 x 2"
+   },
+   {
+    "num": "48172",
+    "en": "Brick 2 x 2 with Hole and Two Rotation Joint Sockets",
+    "uz": "Panel 2 x 2"
+   },
+   {
+    "num": "48170",
+    "en": "Brick 2 x 2 with Hole, Half Rotation Joint Ball Horiz",
+    "uz": "Panel 2 x 2"
+   },
+   {
+    "num": "48171",
+    "en": "Brick 2 x 2 with Hole, Half Rotation Joint Ball Vert",
+    "uz": "Panel 2 x 2"
+   },
+   {
+    "num": "2904",
+    "en": "Brick 2 x 2 with Motorcycle Steering Head",
+    "uz": "Panel 2 x 2"
+   },
+   {
+    "num": "47454",
+    "en": "Brick 2 x 3 w/ Holes, Click Rot. Hinge (H) and Socket",
+    "uz": "Panel 2 x 3"
+   },
+   {
+    "num": "47432",
+    "en": "Brick 2 x 3 w/ Holes, Click Rot. Hinge (V) and Socket",
+    "uz": "Panel 2 x 3"
+   },
+   {
+    "num": "18585",
+    "en": "Brick 2 x 4 with Holes and Launcher",
+    "uz": "Panel 2 x 4"
+   },
+   {
+    "num": "32324",
+    "en": "Brick 4 x 4 with Open Centre 2 x 2",
+    "uz": "Panel 4 x 4"
+   },
+   {
+    "num": "43123",
+    "en": "Brick 4 x 6 with Open Center 2 x 4 Dual Pins on End",
+    "uz": "Panel 4 x 6"
+   },
+   {
+    "num": "32531a",
+    "en": "Brick 4 x 6 with Open Centre 2 x 4 with Cross Underside Studs",
+    "uz": "Panel 4 x 6"
+   },
+   {
+    "num": "32531b",
+    "en": "Brick 4 x 6 with Open Centre 2 x 4 with Round Underside Studs",
+    "uz": "Panel 4 x 6"
+   },
+   {
+    "num": "32333",
+    "en": "Brick 5 x 3 x 1 with 8 Pegholes and 2 Studs",
+    "uz": "Panel 5 x 3"
+   },
+   {
+    "num": "32555",
+    "en": "Brick 5 x 5 Corner with Holes",
+    "uz": "Panel 5 x 5"
+   },
+   {
+    "num": "52668",
+    "en": "Brick 6 x 8 with Open Centre 4 x 6 Dual Pins both Ends and One Long Side",
+    "uz": "Panel 6 x 8"
+   },
+   {
+    "num": "32532a",
+    "en": "Brick 6 x 8 with Open Centre 4 x 6 with Cross Underside Studs",
+    "uz": "Panel 6 x 8"
+   },
+   {
+    "num": "32532b",
+    "en": "Brick 6 x 8 with Open Centre 4 x 6 with Round Underside Studs",
+    "uz": "Panel 6 x 8"
+   },
+   {
+    "num": "6614",
+    "en": "Frame 5 x 3 Engine Holder",
+    "uz": "Panel 5 x 3"
+   },
+   {
+    "num": "2509",
+    "en": "Panel 11 x 2 x 5 Mudguard Arched #32",
+    "uz": "Panel 11 x 2"
+   },
+   {
+    "num": "3538",
+    "en": "Panel 11 x 2 x 5 Mudguard Arched with Rounded Top #43",
+    "uz": "Panel 11 x 2"
+   },
+   {
+    "num": "42545",
+    "en": "Panel 13 x 2 x 5 Mudguard Arched #31",
+    "uz": "Panel 13 x 2"
+   },
+   {
+    "num": "71689",
+    "en": "Panel 13 x 2 x 5 Mudguard Arched Extension",
+    "uz": "Panel 13 x 2"
+   },
+   {
+    "num": "69911",
+    "en": "Panel 13 x 2 x 5 Mudguard Arched with Rounded Top",
+    "uz": "Panel 13 x 2"
+   },
+   {
+    "num": "80284",
+    "en": "Panel 13 x 2 x 5 Mudguard Arched with Rounded Top and Pointed Bottom",
+    "uz": "Panel 13 x 2"
+   },
+   {
+    "num": "24118",
+    "en": "Panel 15 x 2 x 5 Mudguard Arched",
+    "uz": "Panel 15 x 2"
+   },
+   {
+    "num": "67141",
+    "en": "Panel 15 x 2 x 5 Mudguard Arched with Rounded Top",
+    "uz": "Panel 15 x 2"
+   },
+   {
+    "num": "46882",
+    "en": "Panel 15 x 2 x 7 Mudguard with Trapezoidal Arch",
+    "uz": "Panel 15 x 2"
+   },
+   {
+    "num": "15458",
+    "en": "Panel 3 x 11",
+    "uz": "Panel 3 x 11"
+   },
+   {
+    "num": "18944",
+    "en": "Panel 3 x 13 Curved",
+    "uz": "Panel 3 x 13"
+   },
+   {
+    "num": "4527",
+    "en": "Panel 3 x 13 Curved #52 Tapered Left",
+    "uz": "Panel 3 x 13"
+   },
+   {
+    "num": "5426",
+    "en": "Panel 3 x 13 Curved #53 Tapered Right",
+    "uz": "Panel 3 x 13"
+   },
+   {
+    "num": "80285",
+    "en": "Panel 3 x 2 x 5",
+    "uz": "Panel 3 x 2"
+   },
+   {
+    "num": "71709",
+    "en": "Panel 3 x 7",
+    "uz": "Panel 3 x 7"
+   },
+   {
+    "num": "5427",
+    "en": "Panel 3 x 9 x 2 Curved",
+    "uz": "Panel 3 x 9"
+   },
+   {
+    "num": "64782",
+    "en": "Panel 5 x 11",
+    "uz": "Panel 5 x 11"
+   },
+   {
+    "num": "18945",
+    "en": "Panel 5 x 11 Trapezium",
+    "uz": "Panel 5 x 11"
+   },
+   {
+    "num": "67142",
+    "en": "Panel 5 x 13 Curved #50 Tapered Left",
+    "uz": "Panel 5 x 13"
+   },
+   {
+    "num": "68196",
+    "en": "Panel 5 x 13 Curved #51 Tapered Right",
+    "uz": "Panel 5 x 13"
+   },
+   {
+    "num": "2438",
+    "en": "Panel 5 x 3 x 2 Corner Left",
+    "uz": "Panel 5 x 3"
+   },
+   {
+    "num": "2442",
+    "en": "Panel 5 x 3 x 2 Corner Right",
+    "uz": "Panel 5 x 3"
+   },
+   {
+    "num": "42531",
+    "en": "Panel 9 x 2 x 3 Mudguard Arched #30",
+    "uz": "Panel 9 x 2"
+   },
+   {
+    "num": "2459",
+    "en": "Panel 9 x 2 x 3 Mudguard Arched with Rounded Top #42",
+    "uz": "Panel 9 x 2"
+   },
+   {
+    "num": "24116",
+    "en": "Panel Bent 4 x 5 x 3",
+    "uz": "Panel 4 x 5"
+   },
+   {
+    "num": "80271",
+    "en": "Panel Bent 4 x 5 x 5 Tapered Left #70",
+    "uz": "Panel 4 x 5"
+   },
+   {
+    "num": "80272",
+    "en": "Panel Bent 4 x 5 x 5 Tapered Right #71",
+    "uz": "Panel 4 x 5"
+   },
+   {
+    "num": "89679",
+    "en": "Panel Curved 1 x 2 x 1",
+    "uz": "Panel 1 x 2"
+   },
+   {
+    "num": "71682",
+    "en": "Panel Curved 3 x 2 x 1",
+    "uz": "Panel 3 x 2"
+   },
+   {
+    "num": "2457",
+    "en": "Panel Curved 3 x 2 x 1 Angled #3",
+    "uz": "Panel 3 x 2"
+   },
+   {
+    "num": "3251",
+    "en": "Panel Cylinder D=15 60°",
+    "uz": "Panel"
+   },
+   {
+    "num": "32190",
+    "en": "Panel Fairing #1",
+    "uz": "Panel"
+   },
+   {
+    "num": "32191",
+    "en": "Panel Fairing #2",
+    "uz": "Panel"
+   },
+   {
+    "num": "44350",
+    "en": "Panel Fairing #20",
+    "uz": "Panel"
+   },
+   {
+    "num": "44351",
+    "en": "Panel Fairing #21",
+    "uz": "Panel"
+   },
+   {
+    "num": "44352",
+    "en": "Panel Fairing #22",
+    "uz": "Panel"
+   },
+   {
+    "num": "44353",
+    "en": "Panel Fairing #23",
+    "uz": "Panel"
+   },
+   {
+    "num": "47712",
+    "en": "Panel Fairing #24",
+    "uz": "Panel"
+   },
+   {
+    "num": "47713",
+    "en": "Panel Fairing #25",
+    "uz": "Panel"
+   },
+   {
+    "num": "32188",
+    "en": "Panel Fairing #3",
+    "uz": "Panel"
+   },
+   {
+    "num": "32189",
+    "en": "Panel Fairing #4",
+    "uz": "Panel"
+   },
+   {
+    "num": "32527",
+    "en": "Panel Fairing #5",
+    "uz": "Panel"
+   },
+   {
+    "num": "32534",
+    "en": "Panel Fairing #7",
+    "uz": "Panel"
+   },
+   {
+    "num": "32535",
+    "en": "Panel Fairing #8",
+    "uz": "Panel"
+   },
+   {
+    "num": "32528",
+    "en": "Panel Fairing 6#",
+    "uz": "Panel 6"
+   },
+   {
+    "num": "2403",
+    "en": "Panel Fairing Smooth #10 (Medium Triangle)",
+    "uz": "Panel"
+   },
+   {
+    "num": "64394",
+    "en": "Panel Fairing Smooth #13 (Wide Medium)",
+    "uz": "Panel"
+   },
+   {
+    "num": "64680",
+    "en": "Panel Fairing Smooth #14 (Wide Medium)",
+    "uz": "Panel"
+   },
+   {
+    "num": "64392",
+    "en": "Panel Fairing Smooth #17 (Wide Long)",
+    "uz": "Panel"
+   },
+   {
+    "num": "64682",
+    "en": "Panel Fairing Smooth #18 (Wide Long)",
+    "uz": "Panel"
+   },
+   {
+    "num": "11946",
+    "en": "Panel Fairing Smooth #21 (Thin Short)",
+    "uz": "Panel"
+   },
+   {
+    "num": "11947",
+    "en": "Panel Fairing Smooth #22 (Thin Short)",
+    "uz": "Panel"
+   },
+   {
+    "num": "64683",
+    "en": "Panel Fairing Smooth #3 (Medium)",
+    "uz": "Panel"
+   },
+   {
+    "num": "64391",
+    "en": "Panel Fairing Smooth #4 (Medium)",
+    "uz": "Panel"
+   },
+   {
+    "num": "64681",
+    "en": "Panel Fairing Smooth #5 (Long)",
+    "uz": "Panel"
+   },
+   {
+    "num": "64393",
+    "en": "Panel Fairing Smooth #6 (Long)",
+    "uz": "Panel"
+   },
+   {
+    "num": "2387",
+    "en": "Panel Fairing Smooth #7 (Thin Very Short)",
+    "uz": "Panel"
+   },
+   {
+    "num": "2389",
+    "en": "Panel Fairing Smooth #8 (Thin Very Short)",
+    "uz": "Panel"
+   },
+   {
+    "num": "2395",
+    "en": "Panel Fairing Smooth #9 (Medium Triangle)",
+    "uz": "Panel"
+   },
+   {
+    "num": "6609",
+    "en": "Panel Fairing Smooth Concave #42",
+    "uz": "Panel"
+   },
+   {
+    "num": "6606",
+    "en": "Panel Fairing Smooth Concave #43",
+    "uz": "Panel"
+   },
+   {
+    "num": "80267",
+    "en": "Panel Fairing Smooth Left #61 (Wide Medium Parallelogram)",
+    "uz": "Panel"
+   },
+   {
+    "num": "80278",
+    "en": "Panel Fairing Smooth Left #63 (Wide Medium Triangle)",
+    "uz": "Panel"
+   },
+   {
+    "num": "80268",
+    "en": "Panel Fairing Smooth Right #60 (Wide Medium Parallelogram)",
+    "uz": "Panel"
+   },
+   {
+    "num": "80274",
+    "en": "Panel Fairing Smooth Right #62 (Wide Medium Triangle)",
+    "uz": "Panel"
+   },
+   {
+    "num": "61069",
+    "en": "Panel Side Flaring Intake 4 x 6.5",
+    "uz": "Panel 4 x 6.5"
+   },
+   {
+    "num": "62531",
+    "en": "Panel Smooth 11 x 2 x 3",
+    "uz": "Panel 11 x 2"
+   },
+   {
+    "num": "11954",
+    "en": "Panel Smooth 11 x 2 x 3 with 10 Front Pin Holes",
+    "uz": "Panel 11 x 2"
+   },
+   {
+    "num": "24119",
+    "en": "Panel Smooth 7 x 2 x 3",
+    "uz": "Panel 7 x 2"
+   },
+   {
+    "num": "4500",
+    "en": "Panel Smooth Inverted 7 x 3 x 2",
+    "uz": "Panel 7 x 3"
+   },
+   {
+    "num": "2719",
+    "en": "Plate 1 x 10 with Holes",
+    "uz": "Panel 1 x 10"
+   },
+   {
+    "num": "4263",
+    "en": "Plate 1 x 4 with Holes",
+    "uz": "Panel 1 x 4"
+   },
+   {
+    "num": "4262",
+    "en": "Plate 1 x 6 with Holes",
+    "uz": "Panel 1 x 6"
+   },
+   {
+    "num": "4442",
+    "en": "Plate 1 x 8 with Holes",
+    "uz": "Panel 1 x 8"
+   },
+   {
+    "num": "3709b",
+    "en": "Plate 2 x 4 with Holes",
+    "uz": "Panel 2 x 4"
+   },
+   {
+    "num": "6631",
+    "en": "Plate 2 x 6 with 2 Position Gear Shift Gate",
+    "uz": "Panel 2 x 6"
+   },
+   {
+    "num": "32001",
+    "en": "Plate 2 x 6 with Holes",
+    "uz": "Panel 2 x 6"
+   },
+   {
+    "num": "3738",
+    "en": "Plate 2 x 8 with Holes",
+    "uz": "Panel 2 x 8"
+   },
+   {
+    "num": "6543",
+    "en": "Plate 4 x 6 with 4 Position Gear Shift Gate",
+    "uz": "Panel 4 x 6"
+   },
+   {
+    "num": "32530",
+    "en": "Tile 1 x 2 with Two Holes",
+    "uz": "Panel 1 x 2"
+   }
+  ]
+ },
+ {
+  "group": {
+   "uz": "G'ildiraklar va Shinalar",
+   "ru": "Колеса и Шины",
+   "en": "Wheels & Tires"
+  },
+  "items": [
+   {
+    "num": "11209",
+    "en": "Tyre 10/ 32 x 14",
+    "uz": "Shina 32 x 14"
+   },
+   {
+    "num": "3634",
+    "en": "Tyre 10/130 x 17 Offset Tread",
+    "uz": "Shina 130 x 17"
+   },
+   {
+    "num": "574",
+    "en": "Tyre 10/130 x 17 Offset Tread for Technic Gear 9 Tooth",
+    "uz": "Shina 130 x 17"
+   },
+   {
+    "num": "18977",
+    "en": "Tyre 11.2/ 28 x 17.6 Intermediate",
+    "uz": "Shina 28 x 17.6"
+   },
+   {
+    "num": "56897",
+    "en": "Tyre 11/ 65 x 18 Offset",
+    "uz": "Shina 65 x 18"
+   },
+   {
+    "num": "2696",
+    "en": "Tyre 12.7/ 51 x 30",
+    "uz": "Shina 51 x 30"
+   },
+   {
+    "num": "6015",
+    "en": "Tyre 12/ 40 x 11 Wide",
+    "uz": "Shina 40 x 11"
+   },
+   {
+    "num": "87697",
+    "en": "Tyre 12/ 40 x 11 Wide with Centre Band",
+    "uz": "Shina 40 x 11"
+   },
+   {
+    "num": "2346",
+    "en": "Tyre 12/ 50 x 16 Offset Tread",
+    "uz": "Shina 50 x 16"
+   },
+   {
+    "num": "56890",
+    "en": "Tyre 12/ 61 x 11 Balloon",
+    "uz": "Shina 61 x 11"
+   },
+   {
+    "num": "7860",
+    "en": "Tyre 13/ 75 x 56",
+    "uz": "Shina 75 x 56"
+   },
+   {
+    "num": "6596",
+    "en": "Tyre 14 / 66 x 61 Z Racing",
+    "uz": "Shina 66 x 61"
+   },
+   {
+    "num": "32076",
+    "en": "Tyre 14/ 20 x 60",
+    "uz": "Shina 20 x 60"
+   },
+   {
+    "num": "30648",
+    "en": "Tyre 14/ 25 x 17 Shallow Staggered Treads",
+    "uz": "Shina 25 x 17"
+   },
+   {
+    "num": "89201",
+    "en": "Tyre 14/ 25 x 17 Shallow Staggered Treads with Middle Band",
+    "uz": "Shina 25 x 17"
+   },
+   {
+    "num": "6578",
+    "en": "Tyre 14/ 36 x 20 VR",
+    "uz": "Shina 36 x 20"
+   },
+   {
+    "num": "6578c01",
+    "en": "Tyre 14/ 36 x 20 VR (Deformed to 10/ 67 x 24)",
+    "uz": "Shina 36 x 20"
+   },
+   {
+    "num": "30699",
+    "en": "Tyre 14/ 43 x 30 with Grooved Tread",
+    "uz": "Shina 43 x 30"
+   },
+   {
+    "num": "56898",
+    "en": "Tyre 14/ 43 x 30 with Offset Tread",
+    "uz": "Shina 43 x 30"
+   },
+   {
+    "num": "30391",
+    "en": "Tyre 14/ 50 x 17",
+    "uz": "Shina 50 x 17"
+   },
+   {
+    "num": "58090",
+    "en": "Tyre 14/ 50 x 17 VR",
+    "uz": "Shina 50 x 17"
+   },
+   {
+    "num": "92402",
+    "en": "Tyre 14/ 50 x 17 with Centre Band",
+    "uz": "Shina 50 x 17"
+   },
+   {
+    "num": "70490",
+    "en": "Tyre 14/ 68 x 30",
+    "uz": "Shina 68 x 30"
+   },
+   {
+    "num": "35578",
+    "en": "Tyre 14/ 70 x 17",
+    "uz": "Shina 70 x 17"
+   },
+   {
+    "num": "2902",
+    "en": "Tyre 17/ 70 x 62 Motorcycle Offroad",
+    "uz": "Shina 70 x 62"
+   },
+   {
+    "num": "56891",
+    "en": "Tyre 18/ 56 x 17 Off-Road with Offset Centre",
+    "uz": "Shina 56 x 17"
+   },
+   {
+    "num": "11957",
+    "en": "Tyre 19/ 67 x 75 Motorcycle with Motocross Tread",
+    "uz": "Shina 67 x 75"
+   },
+   {
+    "num": "80542",
+    "en": "Tyre 20 / 33 x 62 Motorcycle",
+    "uz": "Shina 33 x 62"
+   },
+   {
+    "num": "6581",
+    "en": "Tyre 20/ 40 x 33 Off Road",
+    "uz": "Shina 40 x 33"
+   },
+   {
+    "num": "2857",
+    "en": "Tyre 20/ 46 x 30 Off Road",
+    "uz": "Shina 46 x 30"
+   },
+   {
+    "num": "15413",
+    "en": "Tyre 20/ 48 x 30",
+    "uz": "Shina 48 x 30"
+   },
+   {
+    "num": "32019",
+    "en": "Tyre 20/ 64 x 37 S",
+    "uz": "Shina 64 x 37"
+   },
+   {
+    "num": "4267",
+    "en": "Tyre 20/ 83 x 30 Offset Tread",
+    "uz": "Shina 83 x 30"
+   },
+   {
+    "num": "88516",
+    "en": "Tyre 21/ 48 x 75 Motorcycle with Racing Tread",
+    "uz": "Shina 48 x 75"
+   },
+   {
+    "num": "55978",
+    "en": "Tyre 22/ 14 x 30 ZR",
+    "uz": "Shina 14 x 30"
+   },
+   {
+    "num": "44308",
+    "en": "Tyre 22/ 30 x 30 H",
+    "uz": "Shina 30 x 30"
+   },
+   {
+    "num": "44309",
+    "en": "Tyre 22/ 30 x 30 ZR",
+    "uz": "Shina 30 x 30"
+   },
+   {
+    "num": "67140",
+    "en": "Tyre 23/ 41 x 75 Motorcycle with Racing Tread",
+    "uz": "Shina 41 x 75"
+   },
+   {
+    "num": "32003",
+    "en": "Tyre 24/ 65 x 41",
+    "uz": "Shina 65 x 41"
+   },
+   {
+    "num": "3740",
+    "en": "Tyre 24/ 80 x 43 Offset Tread",
+    "uz": "Shina 80 x 43"
+   },
+   {
+    "num": "61481",
+    "en": "Tyre 26/ 24 x 30 Sand Racing",
+    "uz": "Shina 24 x 30"
+   },
+   {
+    "num": "6579",
+    "en": "Tyre 26/ 36 x 22 Off Road",
+    "uz": "Shina 36 x 22"
+   },
+   {
+    "num": "70695",
+    "en": "Tyre 26/ 49 x 30 Tractor",
+    "uz": "Shina 49 x 30"
+   },
+   {
+    "num": "55976",
+    "en": "Tyre 26/ 52 x 30 Off Road",
+    "uz": "Shina 52 x 30"
+   },
+   {
+    "num": "71721",
+    "en": "Tyre 27/ 48 x 107 Motorcycle with Racing Tread",
+    "uz": "Shina 48 x 107"
+   },
+   {
+    "num": "52985",
+    "en": "Tyre 27/ 48 x 43",
+    "uz": "Shina 48 x 43"
+   },
+   {
+    "num": "32078",
+    "en": "Tyre 28/ 21 x 57",
+    "uz": "Shina 21 x 57"
+   },
+   {
+    "num": "41897",
+    "en": "Tyre 28/ 23 x 43 ZR Street",
+    "uz": "Shina 23 x 43"
+   },
+   {
+    "num": "6594",
+    "en": "Tyre 28/ 38 x 28 VR",
+    "uz": "Shina 38 x 28"
+   },
+   {
+    "num": "69909",
+    "en": "Tyre 28/ 57 x 43 Off Road",
+    "uz": "Shina 57 x 43"
+   },
+   {
+    "num": "451b",
+    "en": "Tyre 3/100 x 8 Double Smooth",
+    "uz": "Shina 100 x 8"
+   },
+   {
+    "num": "32180",
+    "en": "Tyre 30/ 42 x 28 R Balloon",
+    "uz": "Shina 42 x 28"
+   },
+   {
+    "num": "32196",
+    "en": "Tyre 32/ 33 x 61 Racing Wet",
+    "uz": "Shina 33 x 61"
+   },
+   {
+    "num": "61480",
+    "en": "Tyre 34/ 37 x 43 Off Road",
+    "uz": "Shina 37 x 43"
+   },
+   {
+    "num": "2997",
+    "en": "Tyre 34/ 38 x 56 ZR",
+    "uz": "Shina 38 x 56"
+   },
+   {
+    "num": "56907",
+    "en": "Tyre 35/ 42 x 56 Racing",
+    "uz": "Shina 42 x 56"
+   },
+   {
+    "num": "44771",
+    "en": "Tyre 35/ 46 x 56 ZR",
+    "uz": "Shina 46 x 56"
+   },
+   {
+    "num": "69912",
+    "en": "Tyre 35/ 55 x 43 R Tractor",
+    "uz": "Shina 55 x 43"
+   },
+   {
+    "num": "41893",
+    "en": "Tyre 36/ 36 x 43 H Off-Road",
+    "uz": "Shina 36 x 43"
+   },
+   {
+    "num": "4455",
+    "en": "Tyre 36/ 43 x 56 All-Terrain",
+    "uz": "Shina 43 x 56"
+   },
+   {
+    "num": "71722",
+    "en": "Tyre 37/ 38 x 107 Motorcycle with Racing Tread",
+    "uz": "Shina 38 x 107"
+   },
+   {
+    "num": "46335",
+    "en": "Tyre 38/ 26 x 75",
+    "uz": "Shina 26 x 75"
+   },
+   {
+    "num": "45982",
+    "en": "Tyre 38/ 50 x 43 Off Road",
+    "uz": "Shina 50 x 43"
+   },
+   {
+    "num": "92912",
+    "en": "Tyre 38/ 76 x 56",
+    "uz": "Shina 76 x 56"
+   },
+   {
+    "num": "3139b",
+    "en": "Tyre 4/ 80 x 8 Single Smooth Type 1",
+    "uz": "Shina 80 x 8"
+   },
+   {
+    "num": "59895",
+    "en": "Tyre 4/ 80 x 8 Single Smooth Type 2",
+    "uz": "Shina 80 x 8"
+   },
+   {
+    "num": "2995",
+    "en": "Tyre 40/ 48 x 30 Off Road",
+    "uz": "Shina 48 x 30"
+   },
+   {
+    "num": "80279",
+    "en": "Tyre 44/ 15 x 75",
+    "uz": "Shina 15 x 75"
+   },
+   {
+    "num": "23799",
+    "en": "Tyre 44/ 22 x 62 ZR",
+    "uz": "Shina 22 x 62"
+   },
+   {
+    "num": "4410",
+    "en": "Tyre 44/ 30 x 56 Smooth Racing",
+    "uz": "Shina 30 x 56"
+   },
+   {
+    "num": "54120",
+    "en": "Tyre 44/ 44 x 56 Off Road",
+    "uz": "Shina 44 x 56"
+   },
+   {
+    "num": "23798",
+    "en": "Tyre 44/ 58 x 56 R Tractor",
+    "uz": "Shina 58 x 56"
+   },
+   {
+    "num": "18450",
+    "en": "Tyre 44/ 91 x 43 R",
+    "uz": "Shina 91 x 43"
+   },
+   {
+    "num": "32296",
+    "en": "Tyre 50/ 29 x 54 Technic Racing",
+    "uz": "Shina 29 x 54"
+   },
+   {
+    "num": "51011",
+    "en": "Tyre 6.4/ 75 x 8 Shallow Offset Tread",
+    "uz": "Shina 75 x 8"
+   },
+   {
+    "num": "92409",
+    "en": "Tyre 6.4/ 75 x 8 Shallow Offset Tread with Centre Band",
+    "uz": "Shina 75 x 8"
+   },
+   {
+    "num": "50951",
+    "en": "Tyre 6/ 30 x 11",
+    "uz": "Shina 30 x 11"
+   },
+   {
+    "num": "3641",
+    "en": "Tyre 6/ 50 x 8 Offset Tread",
+    "uz": "Shina 50 x 8"
+   },
+   {
+    "num": "87414",
+    "en": "Tyre 6/ 50 x 8 Offset Tread with Centre Band",
+    "uz": "Shina 50 x 8"
+   },
+   {
+    "num": "50861",
+    "en": "Tyre 6/ 58 x 14 Offset Tread",
+    "uz": "Shina 58 x 14"
+   },
+   {
+    "num": "32298",
+    "en": "Tyre 61/ 41 x 54 Off Road",
+    "uz": "Shina 41 x 54"
+   },
+   {
+    "num": "u9131",
+    "en": "Tyre 7.2/ 45 x 8.8",
+    "uz": "Shina 45 x 8.8"
+   },
+   {
+    "num": "61254",
+    "en": "Tyre 7/ 45 x 17 Offset Tread with Middle Band",
+    "uz": "Shina 45 x 17"
+   },
+   {
+    "num": "36",
+    "en": "Tyre 7/ 50 x 36",
+    "uz": "Shina 50 x 36"
+   },
+   {
+    "num": "3483",
+    "en": "Tyre 7/ 56 x 17 Offset Tread",
+    "uz": "Shina 56 x 17"
+   },
+   {
+    "num": "44799",
+    "en": "Tyre 7/ 86 x 17 with Centre Groove",
+    "uz": "Shina 86 x 17"
+   },
+   {
+    "num": "30028b",
+    "en": "Tyre 8/ 40 x 8 Slick Smooth",
+    "uz": "Shina 40 x 8"
+   },
+   {
+    "num": "4084",
+    "en": "Tyre 8/ 75 x 8 Offset Tread",
+    "uz": "Shina 75 x 8"
+   },
+   {
+    "num": "458c01",
+    "en": "Tyre for Electric Train 12V Motor Conically Deformed",
+    "uz": "Shina"
+   },
+   {
+    "num": "458",
+    "en": "Tyre for Train Wheel for Electric Train Motor 12V",
+    "uz": "Shina"
+   },
+   {
+    "num": "72206p01",
+    "en": "Wheel 11 x 24 with Integral Rubber Black Tyre",
+    "uz": "G'ildirak 11 x 24"
+   },
+   {
+    "num": "55889",
+    "en": "Wheel 12 x 18 Smooth",
+    "uz": "G'ildirak 12 x 18"
+   },
+   {
+    "num": "2994",
+    "en": "Wheel 12 x 20 with Technic Axle Hole and 6 Pegholes",
+    "uz": "G'ildirak 12 x 20"
+   },
+   {
+    "num": "4288",
+    "en": "Wheel 13 x 20 Solid Rubber with Axle Hole",
+    "uz": "G'ildirak 13 x 20"
+   },
+   {
+    "num": "105162",
+    "en": "Wheel 13.4 x 24 with Integral Smooth Racing Tyre",
+    "uz": "G'ildirak 13.4 x 24"
+   },
+   {
+    "num": "32193",
+    "en": "Wheel 14 x 21 Solid Rubber with Axlehole",
+    "uz": "G'ildirak 14 x 21"
+   },
+   {
+    "num": "44293",
+    "en": "Wheel 14 x 29 Smooth with Black Tyre (Complete)",
+    "uz": "G'ildirak 14 x 29"
+   },
+   {
+    "num": "32146",
+    "en": "Wheel 14 x 30 Smooth",
+    "uz": "G'ildirak 14 x 30"
+   },
+   {
+    "num": "65834p01",
+    "en": "Wheel 14 x 35 with 4 Spokes with Integral Medium Azure Tyre",
+    "uz": "G'ildirak 14 x 35"
+   },
+   {
+    "num": "65834",
+    "en": "Wheel 14 x 35 with 4 Spokes with Integral Tyre",
+    "uz": "G'ildirak 14 x 35"
+   },
+   {
+    "num": "39367p02",
+    "en": "Wheel 14 x 48 with 4 Spokes with Integral Black Tyre",
+    "uz": "G'ildirak 14 x 48"
+   },
+   {
+    "num": "39367p01",
+    "en": "Wheel 14 x 48 with 4 Spokes with Integral Medium Azure Tyre",
+    "uz": "G'ildirak 14 x 48"
+   },
+   {
+    "num": "39367",
+    "en": "Wheel 14 x 48 with 4 Spokes with Integral Tyre",
+    "uz": "G'ildirak 14 x 48"
+   },
+   {
+    "num": "49295p02",
+    "en": "Wheel 14 x 80 with 4 Spokes with Integral Black Tyre",
+    "uz": "G'ildirak 14 x 80"
+   },
+   {
+    "num": "49295p01",
+    "en": "Wheel 14 x 80 with 4 Spokes with Integral Medium Azure Tyre",
+    "uz": "G'ildirak 14 x 80"
+   },
+   {
+    "num": "49295",
+    "en": "Wheel 14 x 80 with 4 Spokes with Integral Tyre",
+    "uz": "G'ildirak 14 x 80"
+   },
+   {
+    "num": "110100",
+    "en": "Wheel 14.9 x 24 with Integral Smooth Racing Tyre",
+    "uz": "G'ildirak 14.9 x 24"
+   },
+   {
+    "num": "3486",
+    "en": "Wheel 16 x 37 Hard-Plastic with 4 Studs",
+    "uz": "G'ildirak 16 x 37"
+   },
+   {
+    "num": "68327",
+    "en": "Wheel 16 x 40 with 7 Pin Holes",
+    "uz": "G'ildirak 16 x 40"
+   },
+   {
+    "num": "46334",
+    "en": "Wheel 16 x 75 Motorcycle Solid",
+    "uz": "G'ildirak 16 x 75"
+   },
+   {
+    "num": "46334c01",
+    "en": "Wheel 17 x 75 Motorcycle Solid with Tyre 21/ 48 x 75 Motorcycle with Racing Tread",
+    "uz": "G'ildirak 17 x 75"
+   },
+   {
+    "num": "88517",
+    "en": "Wheel 17 x 75 Motorcycle with Holes in Rim",
+    "uz": "G'ildirak 17 x 75"
+   },
+   {
+    "num": "88517c01",
+    "en": "Wheel 17 x 75 Motorcycle with Holes in Rim w Tyre 19/ 67 x 75",
+    "uz": "G'ildirak 17 x 75"
+   },
+   {
+    "num": "88517c03",
+    "en": "Wheel 17 x 75 Motorcycle with Holes in Rim with Tyre 21/ 48 x 75 Motorcycle with Racing Tread",
+    "uz": "G'ildirak 17 x 75"
+   },
+   {
+    "num": "88517c02",
+    "en": "Wheel 17 x 75 Motorcycle with Holes in Rim with Tyre 23/ 41 x 75 Motorcycle with Racing Tread",
+    "uz": "G'ildirak 17 x 75"
+   },
+   {
+    "num": "32004bc01",
+    "en": "Wheel 18 x 41 Model Team with Tyre 68.8 x 24S",
+    "uz": "G'ildirak 18 x 41"
+   },
+   {
+    "num": "80441",
+    "en": "Wheel 2 x 21 with Technic Pin Hole with Integral Rubber Tyre",
+    "uz": "G'ildirak 2 x 21"
+   },
+   {
+    "num": "2470",
+    "en": "Wheel 2.8 x 27 with 8 Spokes",
+    "uz": "G'ildirak 2.8 x 27"
+   },
+   {
+    "num": "4489b",
+    "en": "Wheel 2.8 x 34 with 8 Spokes with Notched Hole for Wheel Holding Pin",
+    "uz": "G'ildirak 2.8 x 34"
+   },
+   {
+    "num": "4489a",
+    "en": "Wheel 2.8 x 34 with 8 Spokes with Round Hole for Wheel Holding Pin",
+    "uz": "G'ildirak 2.8 x 34"
+   },
+   {
+    "num": "84772",
+    "en": "Wheel 20 x 62 Motorcycle Solid",
+    "uz": "G'ildirak 20 x 62"
+   },
+   {
+    "num": "64711",
+    "en": "Wheel 20 x 64 with Spikes and 13 Pegholes",
+    "uz": "G'ildirak 20 x 64"
+   },
+   {
+    "num": "22410",
+    "en": "Wheel 21 x 37 Hard-Plastic with 7 Pin Holes",
+    "uz": "G'ildirak 21 x 37"
+   },
+   {
+    "num": "55817",
+    "en": "Wheel 21 x 56 with 8 Spokes Armoured",
+    "uz": "G'ildirak 21 x 56"
+   },
+   {
+    "num": "44556",
+    "en": "Wheel 22 x 172 with Fins and Inner 168 Tooth Gear",
+    "uz": "G'ildirak 22 x 172"
+   },
+   {
+    "num": "105645",
+    "en": "Wheel 22 x 50 with Integral Smooth Racing Tyre",
+    "uz": "G'ildirak 22 x 50"
+   },
+   {
+    "num": "6118",
+    "en": "Wheel 23 x 24 with Tread on Sidewall",
+    "uz": "G'ildirak 23 x 24"
+   },
+   {
+    "num": "71720",
+    "en": "Wheel 24 x 107 Motorcycle with 7 Spokes",
+    "uz": "G'ildirak 24 x 107"
+   },
+   {
+    "num": "71720c01",
+    "en": "Wheel 24 x 107 Motorcycle with 7 Spokes with Tyre 27/ 48 x 107 Motorcycle with Racing Tread",
+    "uz": "G'ildirak 24 x 107"
+   },
+   {
+    "num": "3739",
+    "en": "Wheel 24 x 43 Technic",
+    "uz": "G'ildirak 24 x 43"
+   },
+   {
+    "num": "3739c01",
+    "en": "Wheel 24 x 43 Technic with Tyre 24/ 80 x 43 Offset Tread",
+    "uz": "G'ildirak 24 x 43"
+   },
+   {
+    "num": "22253",
+    "en": "Wheel 25 x 28 VR with 35mm Diameter Rear Rim and Complete Cross Axle Hole",
+    "uz": "G'ildirak 25 x 28"
+   },
+   {
+    "num": "22253c02",
+    "en": "Wheel 25 x 28 VR with 35mm Diameter Rear Rim and Complete Cross Axle Hole with Tyre 28/ 38 x 28 VR",
+    "uz": "G'ildirak 25 x 28"
+   },
+   {
+    "num": "22253c01",
+    "en": "Wheel 25 x 28 VR with 35mm Diameter Rear Rim and Complete Cross Axle Hole with Tyre 30/ 42 x 28 R Balloon",
+    "uz": "G'ildirak 25 x 28"
+   },
+   {
+    "num": "6595",
+    "en": "Wheel 25 x 28 VR with 35mm Diameter Rear Rim and Partial Cross Axle Hole",
+    "uz": "G'ildirak 25 x 28"
+   },
+   {
+    "num": "6595c02",
+    "en": "Wheel 25 x 28 VR with 35mm Diameter Rear Rim and Partial Cross Axle Hole with Tyre 28/ 38 x 28 VR",
+    "uz": "G'ildirak 25 x 28"
+   },
+   {
+    "num": "6595c01",
+    "en": "Wheel 25 x 28 VR with 35mm Diameter Rear Rim and Partial Cross Axle Hole with Tyre 30/ 42 x 28 R Balloon",
+    "uz": "G'ildirak 25 x 28"
+   },
+   {
+    "num": "59521",
+    "en": "Wheel 28 x 158 with 3 Spokes",
+    "uz": "G'ildirak 28 x 158"
+   },
+   {
+    "num": "33211",
+    "en": "Wheel 3.2 x 43 with 10 Spokes Wooden",
+    "uz": "G'ildirak 3.2 x 43"
+   },
+   {
+    "num": "33212",
+    "en": "Wheel 3.2 x 56 with 10 Spokes Wooden",
+    "uz": "G'ildirak 3.2 x 56"
+   },
+   {
+    "num": "2593",
+    "en": "Wheel 30 x 35 with Tread on Sidewall",
+    "uz": "G'ildirak 30 x 35"
+   },
+   {
+    "num": "110638",
+    "en": "Wheel 30 x 50 with Integral Smooth Racing Tyre",
+    "uz": "G'ildirak 30 x 50"
+   },
+   {
+    "num": "11094",
+    "en": "Wheel 30 x 64 with 7 Pin Holes and 6 Small Holes",
+    "uz": "G'ildirak 30 x 64"
+   },
+   {
+    "num": "2515b",
+    "en": "Wheel 32 x 56 Hard-Plastic with Inner Supports",
+    "uz": "G'ildirak 32 x 56"
+   },
+   {
+    "num": "2515a",
+    "en": "Wheel 32 x 56 Hard-Plastic without Inner Supports",
+    "uz": "G'ildirak 32 x 56"
+   },
+   {
+    "num": "64712",
+    "en": "Wheel 32 x 64 Conical with Spikes and Inner 48 Tooth Gear",
+    "uz": "G'ildirak 32 x 64"
+   },
+   {
+    "num": "100942",
+    "en": "Wheel 37 x 45 Hard-Plastic with 6 Curved Spokes",
+    "uz": "G'ildirak 37 x 45"
+   },
+   {
+    "num": "27254",
+    "en": "Wheel 37 x 62 with Rocky Spikes and 7 Pegholes",
+    "uz": "G'ildirak 37 x 62"
+   },
+   {
+    "num": "u9167",
+    "en": "Wheel 4 x 19 with Stub Axles",
+    "uz": "G'ildirak 4 x 19"
+   },
+   {
+    "num": "6600",
+    "en": "Wheel 4 x 21 with Three Spokes and Integral Rubber Tyre",
+    "uz": "G'ildirak 4 x 21"
+   },
+   {
+    "num": "2573",
+    "en": "Wheel 48 x 76 with Tread on Sidewall",
+    "uz": "G'ildirak 48 x 76"
+   },
+   {
+    "num": "47576",
+    "en": "Wheel 5 x 17.5 with Solid Spokes and Axlehole",
+    "uz": "G'ildirak 5 x 17.5"
+   },
+   {
+    "num": "22969a",
+    "en": "Wheel 56 x 46 Technic Racing",
+    "uz": "G'ildirak 56 x 46"
+   },
+   {
+    "num": "22969ac01",
+    "en": "Wheel 56 x 46 Technic Racing with Tyre 61/ 41 x 54 Off Road",
+    "uz": "G'ildirak 56 x 46"
+   },
+   {
+    "num": "22969ac02",
+    "en": "Wheel 56 x 46 Technic Racing with Tyre 61/ 41 x 54 Power Puller",
+    "uz": "G'ildirak 56 x 46"
+   },
+   {
+    "num": "50862",
+    "en": "Wheel 6 x 14 Spoked with Stub Axles",
+    "uz": "G'ildirak 6 x 14"
+   },
+   {
+    "num": "50862c01",
+    "en": "Wheel 6 x 14 Spoked with Stub Axles with Tyre 6/ 58 x 14 Offset Tread",
+    "uz": "G'ildirak 6 x 14"
+   },
+   {
+    "num": "74214p01",
+    "en": "Wheel 7 x 24 with Fake Bolts and 6 Spokes with Integral Rubber Black Tyre",
+    "uz": "G'ildirak 7 x 24"
+   },
+   {
+    "num": "74214",
+    "en": "Wheel 7 x 24 with Fake Bolts and 6 Spokes with Integral Rubber Tyre",
+    "uz": "G'ildirak 7 x 24"
+   },
+   {
+    "num": "u9163",
+    "en": "Wheel 8 x 19 with Integral Axle",
+    "uz": "G'ildirak 8 x 19"
+   },
+   {
+    "num": "35",
+    "en": "Wheel 8 x 35 with 12 Spokes (Complete)",
+    "uz": "G'ildirak 8 x 35"
+   },
+   {
+    "num": "35c01",
+    "en": "Wheel 8 x 35 with 12 Spokes with Black Tyre 7/ 50 x 36",
+    "uz": "G'ildirak 8 x 35"
+   },
+   {
+    "num": "51377c01",
+    "en": "Wheel Centre Large Wide 8 Spokes with Tyre Shallow Staggered",
+    "uz": "G'ildirak"
+   },
+   {
+    "num": "51377c02",
+    "en": "Wheel Centre Large Wide with 8 Spokes with Tyre 30.4 x 14",
+    "uz": "G'ildirak 30.4 x 14"
+   },
+   {
+    "num": "30190c01",
+    "en": "Wheel Centre Wide with Stub Axles with Tyre 12/ 40 x 11 Wide",
+    "uz": "G'ildirak 40 x 11"
+   },
+   {
+    "num": "3464b",
+    "en": "Wheel Centre with Stub Axles",
+    "uz": "G'ildirak"
+   },
+   {
+    "num": "3464c02",
+    "en": "Wheel Centre with Stub Axles with Tyre 4/ 80 x 8 Single Smooth Type 1",
+    "uz": "G'ildirak 80 x 8"
+   },
+   {
+    "num": "3464c03",
+    "en": "Wheel Centre with Stub Axles with Tyre 4/ 80 x 8 Single Smooth Type 2",
+    "uz": "G'ildirak 80 x 8"
+   },
+   {
+    "num": "3464c01",
+    "en": "Wheel Centre with Stub Axles with Tyre 6/ 50 x 8 Offset Tread",
+    "uz": "G'ildirak 50 x 8"
+   },
+   {
+    "num": "37195",
+    "en": "Wheel Cover 28 Spoke for Wheel 20 x 30",
+    "uz": "G'ildirak 20 x 30"
+   },
+   {
+    "num": "54086",
+    "en": "Wheel Cover 5 Spoke for Wheel 20 x 30",
+    "uz": "G'ildirak 20 x 30"
+   },
+   {
+    "num": "50965",
+    "en": "Wheel Cover 5 Spoke for Wheel 34 x 56",
+    "uz": "G'ildirak 34 x 56"
+   },
+   {
+    "num": "19215",
+    "en": "Wheel Cover 5 Spoke Thick with Edge Bolts",
+    "uz": "G'ildirak 5"
+   },
+   {
+    "num": "62359",
+    "en": "Wheel Cover 7 Spoke for Wheel 14 x 18",
+    "uz": "G'ildirak 14 x 18"
+   },
+   {
+    "num": "58088",
+    "en": "Wheel Cover 7 Spoke Forked for Wheel 34 x 56",
+    "uz": "G'ildirak 34 x 56"
+   },
+   {
+    "num": "62701",
+    "en": "Wheel Cover 9 Spoke for Wheel 14 x 17",
+    "uz": "G'ildirak 14 x 17"
+   },
+   {
+    "num": "30324",
+    "en": "Wheel Hard with Treads",
+    "uz": "G'ildirak"
+   },
+   {
+    "num": "11208",
+    "en": "Wheel Rim 10 x 14 with Fake Bolts and 6 Spokes",
+    "uz": "G'ildirak 10 x 14"
+   },
+   {
+    "num": "11208c01",
+    "en": "Wheel Rim 10 x 14 with Fake Bolts and 6 Spokes with Tyre 10/ 32 x 14",
+    "uz": "G'ildirak 10 x 14"
+   },
+   {
+    "num": "4259",
+    "en": "Wheel Rim 10 x 17.4 with 4 Studs and Freestyle Pinhole",
+    "uz": "G'ildirak 10 x 17.4"
+   },
+   {
+    "num": "6248",
+    "en": "Wheel Rim 10 x 17.4 with 4 Studs and Technic Peghole",
+    "uz": "G'ildirak 10 x 17.4"
+   },
+   {
+    "num": "18978b",
+    "en": "Wheel Rim 11 x 18 Front with 10 Angled Spokes",
+    "uz": "G'ildirak 11 x 18"
+   },
+   {
+    "num": "24308a",
+    "en": "Wheel Rim 11 x 18 Front with 10 Parallel Spokes",
+    "uz": "G'ildirak 11 x 18"
+   },
+   {
+    "num": "18979b",
+    "en": "Wheel Rim 11 x 18 Front with 10 Spokes",
+    "uz": "G'ildirak 11 x 18"
+   },
+   {
+    "num": "24308b",
+    "en": "Wheel Rim 11 x 18 Front with 10 Y-Spokes",
+    "uz": "G'ildirak 11 x 18"
+   },
+   {
+    "num": "1872",
+    "en": "Wheel Rim 11 x 18 Front with 36 Spokes and Knock-off Hub Nut",
+    "uz": "G'ildirak 11 x 18"
+   },
+   {
+    "num": "29117b",
+    "en": "Wheel Rim 11 x 18 Front with 5 Split Spokes",
+    "uz": "G'ildirak 11 x 18"
+   },
+   {
+    "num": "18978a",
+    "en": "Wheel Rim 11 x 18 Front with 5 Spokes",
+    "uz": "G'ildirak 11 x 18"
+   },
+   {
+    "num": "29117a",
+    "en": "Wheel Rim 11 x 18 Front with 5 Wide Spokes",
+    "uz": "G'ildirak 11 x 18"
+   },
+   {
+    "num": "18979a",
+    "en": "Wheel Rim 11 x 18 Front with 7 Y-Shaped Spokes",
+    "uz": "G'ildirak 11 x 18"
+   },
+   {
+    "num": "49098",
+    "en": "Wheel Rim 11 x 18 Side with Tyre Widener",
+    "uz": "G'ildirak 11 x 18"
+   },
+   {
+    "num": "66727",
+    "en": "Wheel Rim 11 x 18 with Drilled Disc Brake",
+    "uz": "G'ildirak 11 x 18"
+   },
+   {
+    "num": "66727c01",
+    "en": "Wheel Rim 11 x 18 with Drilled Disc Brake with Tyre 11.2/ 28 x 17.6 Intermediate",
+    "uz": "G'ildirak 11 x 18"
+   },
+   {
+    "num": "18976",
+    "en": "Wheel Rim 11 x 18 with Vented Disc Brake",
+    "uz": "G'ildirak 11 x 18"
+   },
+   {
+    "num": "18976c01",
+    "en": "Wheel Rim 11 x 18 with Vented Disc Brake with Tyre 11.2/ 28 x 17.6 Intermediate",
+    "uz": "G'ildirak 11 x 18"
+   },
+   {
+    "num": "72210a",
+    "en": "Wheel Rim 11 x 24 Front with 5 Spokes",
+    "uz": "G'ildirak 11 x 24"
+   },
+   {
+    "num": "72210b",
+    "en": "Wheel Rim 11 x 24 Front with 9 Spokes",
+    "uz": "G'ildirak 11 x 24"
+   },
+   {
+    "num": "30190",
+    "en": "Wheel Rim 11.2 x 10.4 with Stub Axles",
+    "uz": "G'ildirak 11.2 x 10.4"
+   },
+   {
+    "num": "6014b",
+    "en": "Wheel Rim 12 x 11 with Notched Hole",
+    "uz": "G'ildirak 12 x 11"
+   },
+   {
+    "num": "6014bc01",
+    "en": "Wheel Rim 12 x 11 with Notched Hole with Tyre 12/ 40 x 11 Wide",
+    "uz": "G'ildirak 12 x 11"
+   },
+   {
+    "num": "6014bc02",
+    "en": "Wheel Rim 12 x 11 with Notched Hole with Tyre 12/ 40 x 11 Wide with Centre Band",
+    "uz": "G'ildirak 12 x 11"
+   },
+   {
+    "num": "6014bc03",
+    "en": "Wheel Rim 12 x 11 with Notched Hole with Tyre 12/ 61 x 11 Balloon",
+    "uz": "G'ildirak 12 x 11"
+   },
+   {
+    "num": "6014a",
+    "en": "Wheel Rim 12 x 11 with Round Hole",
+    "uz": "G'ildirak 12 x 11"
+   },
+   {
+    "num": "6014ac01",
+    "en": "Wheel Rim 12 x 11 with Round Hole with Tyre 12/ 40 x 11 Wide",
+    "uz": "G'ildirak 12 x 11"
+   },
+   {
+    "num": "2695",
+    "en": "Wheel Rim 12.7 x 30 Stepped",
+    "uz": "G'ildirak 12.7 x 30"
+   },
+   {
+    "num": "2695c01",
+    "en": "Wheel Rim 12.7 x 30 Stepped with Tyre 12.7/ 51 x 30",
+    "uz": "G'ildirak 12.7 x 30"
+   },
+   {
+    "num": "7877",
+    "en": "Wheel Rim 13 x 56 with 12 Spokes and Axlehole",
+    "uz": "G'ildirak 13 x 56"
+   },
+   {
+    "num": "51377",
+    "en": "Wheel Rim 14 x 18 with 8 Spokes",
+    "uz": "G'ildirak 14 x 18"
+   },
+   {
+    "num": "55982",
+    "en": "Wheel Rim 14 x 18 with Axlehole",
+    "uz": "G'ildirak 14 x 18"
+   },
+   {
+    "num": "55981",
+    "en": "Wheel Rim 14 x 18 with Holes on Both Sides (Needs Work)",
+    "uz": "G'ildirak 14 x 18"
+   },
+   {
+    "num": "55981c06",
+    "en": "Wheel Rim 14 x 18 with Holes on Both Sides with Tyre 14.3/ 27 x 6.4 Shallow Staggered Treads",
+    "uz": "G'ildirak 14 x 18"
+   },
+   {
+    "num": "55981c05",
+    "en": "Wheel Rim 14 x 18 with Holes on Both Sides with Tyre 14/ 26 x 18 Shallow Staggered Treads with Middle Band",
+    "uz": "G'ildirak 14 x 18"
+   },
+   {
+    "num": "55981c01",
+    "en": "Wheel Rim 14 x 18 with Holes on Both Sides with Tyre 14/ 50 x 17 with Centre Band",
+    "uz": "G'ildirak 14 x 18"
+   },
+   {
+    "num": "55981c03",
+    "en": "Wheel Rim 14 x 18 with Holes on Both Sides with Tyre 14/ 54 x 15 VR",
+    "uz": "G'ildirak 14 x 18"
+   },
+   {
+    "num": "55981c02",
+    "en": "Wheel Rim 14 x 18 with Holes on Both Sides with Tyre 14/ 70 x 17",
+    "uz": "G'ildirak 14 x 18"
+   },
+   {
+    "num": "55981c04",
+    "en": "Wheel Rim 14 x 18 with Holes on Both Sides with Tyre 18/ 56 x 17 Off-Road with Offset Centre",
+    "uz": "G'ildirak 14 x 18"
+   },
+   {
+    "num": "56904",
+    "en": "Wheel Rim 14 x 30 with 6 Spokes and No Pegholes",
+    "uz": "G'ildirak 14 x 30"
+   },
+   {
+    "num": "56904c01",
+    "en": "Wheel Rim 14 x 30 with 6 Spokes and No Pegholes with Tyre 14/ 43 x 30",
+    "uz": "G'ildirak 14 x 30"
+   },
+   {
+    "num": "32057",
+    "en": "Wheel Rim 14 x 60 with 3 Spokes and 3 Pegholes",
+    "uz": "G'ildirak 14 x 60"
+   },
+   {
+    "num": "32057c01",
+    "en": "Wheel Rim 14 x 60 with 3 Spokes and 3 Pegholes with Tyre 14/ 20 x 60",
+    "uz": "G'ildirak 14 x 60"
+   },
+   {
+    "num": "2903",
+    "en": "Wheel Rim 14 x 62 Motorcycle",
+    "uz": "G'ildirak 14 x 62"
+   },
+   {
+    "num": "2903c01",
+    "en": "Wheel Rim 14 x 62 Motorcycle with Tyre 17/ 70 x 62 Motorcycle Offroad",
+    "uz": "G'ildirak 14 x 62"
+   },
+   {
+    "num": "30285",
+    "en": "Wheel Rim 14.8 x 16.8 with Centre Groove",
+    "uz": "G'ildirak 14.8 x 16.8"
+   },
+   {
+    "num": "60208",
+    "en": "Wheel Rim 16 x 31 with 6 Pegholes",
+    "uz": "G'ildirak 16 x 31"
+   },
+   {
+    "num": "32020",
+    "en": "Wheel Rim 18 x 37 with 6 Pegholes and Long Axle Bush",
+    "uz": "G'ildirak 18 x 37"
+   },
+   {
+    "num": "32020c01",
+    "en": "Wheel Rim 18 x 37 with 6 Pegholes and Long Axle Bush with Rubber Black Tyre 20/ 64 x 37 S",
+    "uz": "G'ildirak 18 x 37"
+   },
+   {
+    "num": "86652",
+    "en": "Wheel Rim 18 x 37 with 6 Pegholes and Short Axle Bush",
+    "uz": "G'ildirak 18 x 37"
+   },
+   {
+    "num": "86652c01",
+    "en": "Wheel Rim 18 x 37 with 6 Pegholes and Short Axle Bush with Rubber Black Tyre 20/ 64 x 37 S",
+    "uz": "G'ildirak 18 x 37"
+   },
+   {
+    "num": "32004b",
+    "en": "Wheel Rim 18 x 41 Model Team Type 2",
+    "uz": "G'ildirak 18 x 41"
+   },
+   {
+    "num": "42716",
+    "en": "Wheel Rim 20 x 30 \"Torq Thrust\" with 5 Spokes and External Ribs",
+    "uz": "G'ildirak 20 x 30"
+   },
+   {
+    "num": "42716c01",
+    "en": "Wheel Rim 20 x 30 \"Torq Thrust\" with 5 Spokes and External Ribs with Tyre 20/ 48 x 30",
+    "uz": "G'ildirak 20 x 30"
+   },
+   {
+    "num": "4266",
+    "en": "Wheel Rim 20 x 30 Smooth with 6 Pinholes",
+    "uz": "G'ildirak 20 x 30"
+   },
+   {
+    "num": "4266c02",
+    "en": "Wheel Rim 20 x 30 Smooth with 6 Pinholes with Tyre 20/ 46 x 30 Off Road",
+    "uz": "G'ildirak 20 x 30"
+   },
+   {
+    "num": "4266c01",
+    "en": "Wheel Rim 20 x 30 Smooth with 6 Pinholes with Tyre 20/ 83 x 30 Offset Tread",
+    "uz": "G'ildirak 20 x 30"
+   },
+   {
+    "num": "66155",
+    "en": "Wheel Rim 20 x 30 with 3 Dual Angled Spokes and 4L Hub",
+    "uz": "G'ildirak 20 x 30"
+   },
+   {
+    "num": "66155c01",
+    "en": "Wheel Rim 20 x 30 with 3 Dual Angled Spokes and 4L Hub with Tyre 26/ 24 x 30 Sand Racing",
+    "uz": "G'ildirak 20 x 30"
+   },
+   {
+    "num": "44292",
+    "en": "Wheel Rim 20 x 30 with 3 Pegholes",
+    "uz": "G'ildirak 20 x 30"
+   },
+   {
+    "num": "5650",
+    "en": "Wheel Rim 20 x 30 with 5 Holes",
+    "uz": "G'ildirak 20 x 30"
+   },
+   {
+    "num": "56145",
+    "en": "Wheel Rim 20 x 30 with 6 Dual Spokes and External Ribs",
+    "uz": "G'ildirak 20 x 30"
+   },
+   {
+    "num": "54087",
+    "en": "Wheel Rim 20 x 30 with 6 Spokes and No Pegholes",
+    "uz": "G'ildirak 20 x 30"
+   },
+   {
+    "num": "56145c02",
+    "en": "Wheel Rim 20 x 30, 6 Spokes, Ribs with Tyre 22/ 30 x 30 ZR",
+    "uz": "G'ildirak 20 x 30"
+   },
+   {
+    "num": "56145c03",
+    "en": "Wheel Rim 20 x 30, 6 Spokes, Ribs with Tyre 26/ 52 x 30 Off Road",
+    "uz": "G'ildirak 20 x 30"
+   },
+   {
+    "num": "56145c01",
+    "en": "Wheel Rim 20 x 30, 6 Spokes, Ribs with Tyre 43.2 x 26 Balloon Small",
+    "uz": "G'ildirak 20 x 30"
+   },
+   {
+    "num": "6582",
+    "en": "Wheel Rim 20 x 33 with 6 Pinholes",
+    "uz": "G'ildirak 20 x 33"
+   },
+   {
+    "num": "6582c01",
+    "en": "Wheel Rim 20 x 33 with 6 Pinholes with Tyre 20/ 40 x 33 Off Road",
+    "uz": "G'ildirak 20 x 33"
+   },
+   {
+    "num": "51378",
+    "en": "Wheel Rim 20 x 75 with 6 Double Spokes",
+    "uz": "G'ildirak 20 x 75"
+   },
+   {
+    "num": "6580ac01",
+    "en": "Wheel Rim 23 x 22 Off Road with Axlehole with Tyre 26/ 36 x 22 Off Road",
+    "uz": "G'ildirak 23 x 22"
+   },
+   {
+    "num": "6580bc01",
+    "en": "Wheel Rim 23 x 22 Off Road with Split Axlehole with Tyre 26/ 36 x 22 Off Road",
+    "uz": "G'ildirak 23 x 22"
+   },
+   {
+    "num": "6580a",
+    "en": "Wheel Rim 23 x 22 Offroad with Axlehole",
+    "uz": "G'ildirak 23 x 22"
+   },
+   {
+    "num": "6580b",
+    "en": "Wheel Rim 23 x 22 Offroad with Split Axlehole",
+    "uz": "G'ildirak 23 x 22"
+   },
+   {
+    "num": "41896c01",
+    "en": "Wheel Rim 26 x 43 with 6 Spokes 3 Pegholes with Tyre 28/ 23 x 43 ZR Street",
+    "uz": "G'ildirak 26 x 43"
+   },
+   {
+    "num": "41896",
+    "en": "Wheel Rim 26 x 43 with 6 Spokes and 3 Pegholes",
+    "uz": "G'ildirak 26 x 43"
+   },
+   {
+    "num": "56908",
+    "en": "Wheel Rim 26 x 43 with 6 Spokes and 6 Pegholes",
+    "uz": "G'ildirak 26 x 43"
+   },
+   {
+    "num": "56908c03",
+    "en": "Wheel Rim 26 x 43 with 6 Spokes and 6 Pegholes with Tyre 28/ 23 x 43 ZR Street",
+    "uz": "G'ildirak 26 x 43"
+   },
+   {
+    "num": "56908c01",
+    "en": "Wheel Rim 26 x 43 with 6 Spokes and 6 Pegholes with Tyre 38/ 50 x 43 Off Road",
+    "uz": "G'ildirak 26 x 43"
+   },
+   {
+    "num": "56908c02",
+    "en": "Wheel Rim 26 x 43 with 6 Spokes and 6 Pegholes with Tyre 44/ 91 x 43 R",
+    "uz": "G'ildirak 26 x 43"
+   },
+   {
+    "num": "u9081c01",
+    "en": "Wheel Rim 26 x 7 with Rip Cord Gear Axle [494] and Tyre [16]",
+    "uz": "G'ildirak 26 x 7"
+   },
+   {
+    "num": "32077",
+    "en": "Wheel Rim 28 x 60 with 3 Spokes and 3 Pegholes",
+    "uz": "G'ildirak 28 x 60"
+   },
+   {
+    "num": "2996",
+    "en": "Wheel Rim 30 x 30 with 40mm Diameter Rear Rim",
+    "uz": "G'ildirak 30 x 30"
+   },
+   {
+    "num": "2996c01",
+    "en": "Wheel Rim 30 x 30 with 40mm Diameter Rear Rim with Tyre 40/ 48 x 30 Off Road",
+    "uz": "G'ildirak 30 x 30"
+   },
+   {
+    "num": "32197",
+    "en": "Wheel Rim 30 x 61 with 3 Spokes Swirled",
+    "uz": "G'ildirak 30 x 61"
+   },
+   {
+    "num": "2998",
+    "en": "Wheel Rim 32 x 56 with Peghole and 6 Spokes with Pegholes",
+    "uz": "G'ildirak 32 x 56"
+   },
+   {
+    "num": "49294",
+    "en": "Wheel Rim 34 x 56 with 6 Double Spokes and 6 Pegholes",
+    "uz": "G'ildirak 34 x 56"
+   },
+   {
+    "num": "49294c01",
+    "en": "Wheel Rim 34 x 56 with 6 Double Spokes and 6 Pegholes with Tyre 35/ 42 x 56 Racing",
+    "uz": "G'ildirak 34 x 56"
+   },
+   {
+    "num": "44772",
+    "en": "Wheel Rim 34 x 56 with 6 Spokes and 3 Pegholes",
+    "uz": "G'ildirak 34 x 56"
+   },
+   {
+    "num": "44772c01",
+    "en": "Wheel Rim 34 x 56 with 6 Spokes and 3 Pegholes with Tyre 44/ 44 x 56 Off Road",
+    "uz": "G'ildirak 34 x 56"
+   },
+   {
+    "num": "44772c02",
+    "en": "Wheel Rim 34 x 56 with 6 Spokes and 3 Pegholes with Tyre 44/ 58 x 56 R Tractor",
+    "uz": "G'ildirak 34 x 56"
+   },
+   {
+    "num": "15038",
+    "en": "Wheel Rim 34 x 56 with 6 Spokes and 6 Pegholes",
+    "uz": "G'ildirak 34 x 56"
+   },
+   {
+    "num": "15038c01",
+    "en": "Wheel Rim 34 x 56 with 6 Spokes and 6 Pegholes with Tyre 44/ 58 x 56 R Tractor",
+    "uz": "G'ildirak 34 x 56"
+   },
+   {
+    "num": "5428",
+    "en": "Wheel Rim 41 x 75 with 10 Spokes and 3 Pins",
+    "uz": "G'ildirak 41 x 75"
+   },
+   {
+    "num": "73398",
+    "en": "Wheel Rim 41 x 75 with 5 Spokes and 3 Pins #1 (Left)",
+    "uz": "G'ildirak 41 x 75"
+   },
+   {
+    "num": "73389",
+    "en": "Wheel Rim 41 x 75 with 5 Spokes and 3 Pins #2 (Right)",
+    "uz": "G'ildirak 41 x 75"
+   },
+   {
+    "num": "23800",
+    "en": "Wheel Rim 42 x 62 with 10 Spokes and 3 Pegholes",
+    "uz": "G'ildirak 42 x 62"
+   },
+   {
+    "num": "23800c01",
+    "en": "Wheel Rim 42 x 62 with 10 Spokes and 3 Pegholes with Tyre 44/ 22 x 62 ZR",
+    "uz": "G'ildirak 42 x 62"
+   },
+   {
+    "num": "37383",
+    "en": "Wheel Rim 42 x 62 with 10 Spokes and 3 Pins",
+    "uz": "G'ildirak 42 x 62"
+   },
+   {
+    "num": "37383c01",
+    "en": "Wheel Rim 42 x 62 with 10 Spokes and 3 Pins with Tyre 44/ 22 x 62 ZR",
+    "uz": "G'ildirak 42 x 62"
+   },
+   {
+    "num": "68577",
+    "en": "Wheel Rim 42 x 62 with 20 Spokes and 3 Pins",
+    "uz": "G'ildirak 42 x 62"
+   },
+   {
+    "num": "68577c01",
+    "en": "Wheel Rim 42 x 62 with 20 Spokes and 3 Pins with Tyre 44/ 22 x 62 ZR",
+    "uz": "G'ildirak 42 x 62"
+   },
+   {
+    "num": "50944",
+    "en": "Wheel Rim 6.4 x 11 with 5 Spokes",
+    "uz": "G'ildirak 6.4 x 11"
+   },
+   {
+    "num": "50944c01",
+    "en": "Wheel Rim 6.4 x 11 with 5 Spokes with Tyre 6.4/ 75 x 8 Shallow Offset Tread",
+    "uz": "G'ildirak 6.4 x 11"
+   },
+   {
+    "num": "50944c02",
+    "en": "Wheel Rim 6.4 x 11 with 5 Spokes with Tyre 6/ 30 x 11",
+    "uz": "G'ildirak 6.4 x 11"
+   },
+   {
+    "num": "30838",
+    "en": "Wheel Rim 6.4 x 11 with 7 Spokes",
+    "uz": "G'ildirak 6.4 x 11"
+   },
+   {
+    "num": "93593",
+    "en": "Wheel Rim 6.4 x 11 with 8 Straight Spokes",
+    "uz": "G'ildirak 6.4 x 11"
+   },
+   {
+    "num": "93595",
+    "en": "Wheel Rim 6.4 x 11 with 8 Y-Shaped Spokes",
+    "uz": "G'ildirak 6.4 x 11"
+   },
+   {
+    "num": "93595c01",
+    "en": "Wheel Rim 6.4 x 11 with 8 Y-Shaped Spokes with Tyre 6.4/ 75 x 8 Shallow Offset Tread with Centre Band",
+    "uz": "G'ildirak 6.4 x 11"
+   },
+   {
+    "num": "93594",
+    "en": "Wheel Rim 6.4 x 11 without Spokes",
+    "uz": "G'ildirak 6.4 x 11"
+   },
+   {
+    "num": "4624",
+    "en": "Wheel Rim 6.4 x 8",
+    "uz": "G'ildirak 6.4 x 8"
+   },
+   {
+    "num": "34337",
+    "en": "Wheel Rim 6.4 x 8 with Slot",
+    "uz": "G'ildirak 6.4 x 8"
+   },
+   {
+    "num": "4624c03",
+    "en": "Wheel Rim 6.4 x 8 with Tyre 4/ 80 x 8 Single Smooth Type 1",
+    "uz": "G'ildirak 6.4 x 8"
+   },
+   {
+    "num": "4624c05",
+    "en": "Wheel Rim 6.4 x 8 with Tyre 4/ 80 x 8 Single Smooth Type 2",
+    "uz": "G'ildirak 6.4 x 8"
+   },
+   {
+    "num": "4624c01",
+    "en": "Wheel Rim 6.4 x 8 with Tyre 6/ 50 x 8 Offset Tread",
+    "uz": "G'ildirak 6.4 x 8"
+   },
+   {
+    "num": "4624c02",
+    "en": "Wheel Rim 6.4 x 8 with Tyre 6/ 50 x 8 Offset Tread with Centre Band",
+    "uz": "G'ildirak 6.4 x 8"
+   },
+   {
+    "num": "4624c04",
+    "en": "Wheel Rim 6.4 x 8 with Tyre 8/ 75 x 8 Offset Tread",
+    "uz": "G'ildirak 6.4 x 8"
+   },
+   {
+    "num": "42610",
+    "en": "Wheel Rim 8 x 11.2 with Centre Groove",
+    "uz": "G'ildirak 8 x 11.2"
+   },
+   {
+    "num": "42610c01",
+    "en": "Wheel Rim 8 x 11.2 with Centre Groove and Peghole with Tyre 6.4/ 75 x 8 Shallow Offset Tread",
+    "uz": "G'ildirak 8 x 11.2"
+   },
+   {
+    "num": "42610c03",
+    "en": "Wheel Rim 8 x 11.2 with Centre Groove and Peghole with Tyre 6.4/ 75 x 8 Shallow Offset Tread with Centre Band",
+    "uz": "G'ildirak 8 x 11.2"
+   },
+   {
+    "num": "42610c02",
+    "en": "Wheel Rim 8 x 11.2 with Centre Groove and Peghole with Tyre 6/ 30 x 11",
+    "uz": "G'ildirak 8 x 11.2"
+   },
+   {
+    "num": "3482",
+    "en": "Wheel Rim 8 x 17.5 with Axlehole",
+    "uz": "G'ildirak 8 x 17.5"
+   },
+   {
+    "num": "3482c02",
+    "en": "Wheel Rim 8 x 17.5 with Axlehole with Black Tyre 10/130 x 17",
+    "uz": "G'ildirak 8 x 17.5"
+   },
+   {
+    "num": "3482c01",
+    "en": "Wheel Rim 8 x 17.5 with Axlehole with Black Tyre 7/ 56 x 17 Offset Tread",
+    "uz": "G'ildirak 8 x 17.5"
+   },
+   {
+    "num": "3482c03",
+    "en": "Wheel Rim 8 x 17.5 with Axlehole with Black Tyre 7/ 86 x 17 with Centre Groove",
+    "uz": "G'ildirak 8 x 17.5"
+   },
+   {
+    "num": "3482c04",
+    "en": "Wheel Rim 8 x 17.5 with Axlehole with Rubber Black Tyre 12/ 50 x 16 Offset Tread",
+    "uz": "G'ildirak 8 x 17.5"
+   },
+   {
+    "num": "3482c05",
+    "en": "Wheel Rim 8 x 17.5 with Axlehole with Rubber Light Grey Tyre 12/ 50 x 16 Offset Tread",
+    "uz": "G'ildirak 8 x 17.5"
+   },
+   {
+    "num": "30155",
+    "en": "Wheel Rim 8 x 18 with 12 Spokes and Peghole",
+    "uz": "G'ildirak 8 x 18"
+   },
+   {
+    "num": "30155c01",
+    "en": "Wheel Rim 8 x 18 with 12 Spokes and Peghole with Tyre 12/50 x 16 Offset Tread",
+    "uz": "G'ildirak 8 x 18"
+   },
+   {
+    "num": "7039",
+    "en": "Wheel Rim 8 x 18 with 4 Studs and Cylindrical Axle",
+    "uz": "G'ildirak 8 x 18"
+   },
+   {
+    "num": "497c01",
+    "en": "Wheel Rim 8 x 18 with 4 Studs and Notched Axle",
+    "uz": "G'ildirak 8 x 18"
+   },
+   {
+    "num": "7039c02",
+    "en": "Wheel Rim 8 x 18 with 4 Studs, Cylindrical Axle with Black Tyre 7.2/ 45 x 8.8",
+    "uz": "G'ildirak 8 x 18"
+   },
+   {
+    "num": "7039c01",
+    "en": "Wheel Rim 8 x 18 with 4 Studs, Cylindrical Axle with LightGrey Tyre 7.2/ 45 x 8.8",
+    "uz": "G'ildirak 8 x 18"
+   },
+   {
+    "num": "7039c03",
+    "en": "Wheel Rim 8 x 18 with 4 Studs, Cylindrical Axle with Tyre 7/ 56 x 17 Offset Tread",
+    "uz": "G'ildirak 8 x 18"
+   },
+   {
+    "num": "56903",
+    "en": "Wheel Rim 8 x 18 with Deep Centre Groove and Axle Hole",
+    "uz": "G'ildirak 8 x 18"
+   },
+   {
+    "num": "56903c01",
+    "en": "Wheel Rim 8 x 18 with Deep Centre Groove and Axle Hole with Tyre 7/ 45 x 17 Offset Tread with Middle Band",
+    "uz": "G'ildirak 8 x 18"
+   },
+   {
+    "num": "56902",
+    "en": "Wheel Rim 8 x 18 with Deep Centre Groove and Peghole",
+    "uz": "G'ildirak 8 x 18"
+   },
+   {
+    "num": "56902c01",
+    "en": "Wheel Rim 8 x 18 with Deep Centre Groove and Peghole with Tyre 7/ 45 x 17 Offset Tread with Middle Band",
+    "uz": "G'ildirak 8 x 18"
+   },
+   {
+    "num": "13971",
+    "en": "Wheel Rim 8 x 18 with Deep Centre Groove, Deep Spokes and Peghole",
+    "uz": "G'ildirak 8 x 18"
+   },
+   {
+    "num": "13971c01",
+    "en": "Wheel Rim 8 x 18 with Deep Centre Groove, Deep Spokes and Peghole with Tyre 7/ 45x 17 Offset Tread with Middle Band",
+    "uz": "G'ildirak 8 x 18"
+   },
+   {
+    "num": "715",
+    "en": "Wheel Rim 8 x 35 with 12 Studs with Axle (Complete)",
+    "uz": "G'ildirak 8 x 35"
+   },
+   {
+    "num": "715c01",
+    "en": "Wheel Rim 8 x 35 with 12 Studs with Axle and Light Grey Tyre",
+    "uz": "G'ildirak 8 x 35"
+   },
+   {
+    "num": "715c02",
+    "en": "Wheel Rim 8 x 35 with 12 Studs with Axle with Black Tyre Large",
+    "uz": "G'ildirak 8 x 35"
+   },
+   {
+    "num": "30027c",
+    "en": "Wheel Rim 8 x 8 Notched Hole, One Slot, for Wheel Holding Pin",
+    "uz": "G'ildirak 8 x 8"
+   },
+   {
+    "num": "30027d",
+    "en": "Wheel Rim 8 x 8 Notched Hole, One Slot, Recessed Cross, for Wheel Holding Pin",
+    "uz": "G'ildirak 8 x 8"
+   },
+   {
+    "num": "74967",
+    "en": "Wheel Rim 8 x 8 Notched Hole, Reinforced Back",
+    "uz": "G'ildirak 8 x 8"
+   },
+   {
+    "num": "74967c01",
+    "en": "Wheel Rim 8 x 8 Notched Hole, Reinforced Back with Tyre 8/ 40 x 8 Slick Smooth",
+    "uz": "G'ildirak 8 x 8"
+   },
+   {
+    "num": "30027b",
+    "en": "Wheel Rim 8 x 8 Notched Hole, Two Slots, for Wheel Holding Pin",
+    "uz": "G'ildirak 8 x 8"
+   },
+   {
+    "num": "30027bc01",
+    "en": "Wheel Rim 8 x 8 Notched Hole, Two Slots, for Wheel Holding Pin with Tyre 8/ 40 x 8 Slick Smooth",
+    "uz": "G'ildirak 8 x 8"
+   },
+   {
+    "num": "30027a",
+    "en": "Wheel Rim 8 x 8 Round Hole, for Wheel Holding Pin",
+    "uz": "G'ildirak 8 x 8"
+   },
+   {
+    "num": "30027ac01",
+    "en": "Wheel Rim 8 x 8 Round Hole, for Wheel Holding Pin with Tyre 8/ 40 x 8 Slick Smooth",
+    "uz": "G'ildirak 8 x 8"
+   },
+   {
+    "num": "32496",
+    "en": "Wheel Spindle",
+    "uz": "G'ildirak"
+   },
+   {
+    "num": "32494",
+    "en": "Wheel Spindle Axle Driver",
+    "uz": "G'ildirak"
+   },
+   {
+    "num": "6615",
+    "en": "Wheel Spindle Axle Driver Bar 4L",
+    "uz": "G'ildirak"
+   },
+   {
+    "num": "2405",
+    "en": "Wheel Spindle Axle Driver Bar 5L",
+    "uz": "G'ildirak"
+   },
+   {
+    "num": "32495",
+    "en": "Wheel Spindle Steering Arm",
+    "uz": "G'ildirak"
+   },
+   {
+    "num": "32495c01",
+    "en": "Wheel Spindle Steering Arm (Complete)",
+    "uz": "G'ildirak"
+   },
+   {
+    "num": "242c01",
+    "en": "Wheel Spoked with Stud (Complete)",
+    "uz": "G'ildirak"
+   },
+   {
+    "num": "867",
+    "en": "Wheel Train for 12V Electric Motor",
+    "uz": "G'ildirak"
+   },
+   {
+    "num": "2496",
+    "en": "Wheel Trolley",
+    "uz": "G'ildirak"
+   },
+   {
+    "num": "276",
+    "en": "Wheelbarrow for 2 Wheels",
+    "uz": "G'ildirak 2"
+   },
+   {
+    "num": "277",
+    "en": "Wheelbarrow Wheels with Red Axle",
+    "uz": "G'ildirak"
+   },
+   {
+    "num": "4003",
+    "en": "Wheelbarrow with 1 Wheel",
+    "uz": "G'ildirak 1"
+   },
+   {
+    "num": "4003c01",
+    "en": "Wheelbarrow with 1 Wheel (Complete)",
+    "uz": "G'ildirak 1"
+   },
+   {
+    "num": "276c01",
+    "en": "Wheelbarrow with 2 Yellow Wheels and Red Axle (Complete)",
+    "uz": "G'ildirak 2"
+   },
+   {
+    "num": "98288",
+    "en": "Wheelbarrow with Two Studs and 2 Wheel Clips",
+    "uz": "G'ildirak"
+   },
+   {
+    "num": "24869",
+    "en": "Wheels Roller Coaster",
+    "uz": "G'ildirak"
+   },
+   {
+    "num": "45918",
+    "en": "Wheels Skateboard",
+    "uz": "G'ildirak"
+   }
+  ]
+ },
+ {
+  "group": {
+   "uz": "Motor va Elektronika",
+   "ru": "Моторы и Электроника",
+   "en": "Motors & Electronics"
+  },
+  "items": [
+   {
+    "num": "42590",
+    "en": "Motor Pull Back 5 x 7 x 3 Type 6 (Complete)",
+    "uz": "Motor 5 x 7"
+   },
+   {
+    "num": "12799",
+    "en": "Motor Pull Back 6 x 5 x 3 (Complete)",
+    "uz": "Motor 6 x 5"
+   }
+  ]
+ },
+ {
+  "group": {
+   "uz": "Rul va Amortizatorlar",
+   "ru": "Рулевое и Амортизаторы",
+   "en": "Steering & Shocks"
+  },
+  "items": [
+   {
+    "num": "76320-f2",
+    "en": "Shock Absorber 10L Damped (Compressed)",
+    "uz": "Detal"
+   },
+   {
+    "num": "76320-f1",
+    "en": "Shock Absorber 10L Damped (Extended)",
+    "uz": "Detal"
+   },
+   {
+    "num": "32183c02",
+    "en": "Shock Absorber 10L Damped Piston Rod with Gasket",
+    "uz": "Detal"
+   },
+   {
+    "num": "22020-f2",
+    "en": "Shock Absorber 10L Damped Spring (Compressed)",
+    "uz": "Detal"
+   },
+   {
+    "num": "22020-f1",
+    "en": "Shock Absorber 10L Damped Spring (Extended)",
+    "uz": "Detal"
+   },
+   {
+    "num": "32181c05",
+    "en": "Shock Absorber 10L Damped with Black Cap Body Assembly",
+    "uz": "Detal"
+   },
+   {
+    "num": "63144-f2",
+    "en": "Shock Absorber 10L Damped without Spring (Compressed)",
+    "uz": "Detal"
+   },
+   {
+    "num": "63144-f1",
+    "en": "Shock Absorber 10L Damped without Spring (Extended)",
+    "uz": "Detal"
+   },
+   {
+    "num": "65143c01",
+    "en": "Shock Absorber 11L Body Assembly",
+    "uz": "Detal"
+   },
+   {
+    "num": "65151c02-f2",
+    "en": "Shock Absorber 11L Soft With Black End (Compressed)",
+    "uz": "Detal"
+   },
+   {
+    "num": "65151c02-f1",
+    "en": "Shock Absorber 11L Soft With Black End (Extended)",
+    "uz": "Detal"
+   },
+   {
+    "num": "65151c01-f2",
+    "en": "Shock Absorber 11L Soft With Light Bluish Grey End (Compressed)",
+    "uz": "Detal"
+   },
+   {
+    "num": "65151c01-f1",
+    "en": "Shock Absorber 11L Soft With Light Bluish Grey End (Extended)",
+    "uz": "Detal"
+   },
+   {
+    "num": "47373-f3",
+    "en": "Shock Absorber 11L/9L (in Compressed Position, not Pre-Tensioned)",
+    "uz": "Detal"
+   },
+   {
+    "num": "47373-f4",
+    "en": "Shock Absorber 11L/9L (in Compressed Position, Pre-Tensioned)",
+    "uz": "Detal"
+   },
+   {
+    "num": "47373-f1",
+    "en": "Shock Absorber 11L/9L (in Extended Position, not Pre-Tensioned)",
+    "uz": "Detal"
+   },
+   {
+    "num": "47373-f2",
+    "en": "Shock Absorber 11L/9L (in Extended Position, Pre-Tensioned)",
+    "uz": "Detal"
+   },
+   {
+    "num": "67498-f2",
+    "en": "Shock Absorber 18L (Compressed)",
+    "uz": "Detal"
+   },
+   {
+    "num": "67498-f1",
+    "en": "Shock Absorber 18L (Extended)",
+    "uz": "Detal"
+   },
+   {
+    "num": "69633c01",
+    "en": "Shock Absorber 18L Body Assembly",
+    "uz": "Detal"
+   },
+   {
+    "num": "69635",
+    "en": "Shock Absorber 18L Piston",
+    "uz": "Detal"
+   },
+   {
+    "num": "73129",
+    "en": "Shock Absorber 6.5L (Complete)",
+    "uz": "Detal 6"
+   },
+   {
+    "num": "76537",
+    "en": "Shock Absorber 6.5L Extra Stiff (Complete)",
+    "uz": "Detal 6"
+   },
+   {
+    "num": "41838",
+    "en": "Shock Absorber 6.5L Soft (Complete)",
+    "uz": "Detal 6"
+   },
+   {
+    "num": "89953p01",
+    "en": "Shock Absorber 6.5L Soft with Black Piston Rod with Tight Coil Spring (Complete)",
+    "uz": "Detal 6"
+   },
+   {
+    "num": "89953p02",
+    "en": "Shock Absorber 6.5L Soft with Pearl Gold Piston Rod with Tight Coil Spring (Complete)",
+    "uz": "Detal 6"
+   },
+   {
+    "num": "89953",
+    "en": "Shock Absorber 6.5L Soft with Tight Coil Spring (Complete)",
+    "uz": "Detal 6"
+   },
+   {
+    "num": "76138",
+    "en": "Shock Absorber 6.5L Stiff (Complete)",
+    "uz": "Detal 6"
+   },
+   {
+    "num": "89954p01",
+    "en": "Shock Absorber 6.5L Stiff with Black Piston Rod with Spring with Tight Coils at Ends (Complete)",
+    "uz": "Detal 6"
+   },
+   {
+    "num": "89954",
+    "en": "Shock Absorber 6.5L Stiff with Spring with Tight Coils at Ends (Complete)",
+    "uz": "Detal 6"
+   },
+   {
+    "num": "2909",
+    "en": "Shock Absorber 9L Cylinder",
+    "uz": "Detal"
+   },
+   {
+    "num": "95292-f2",
+    "en": "Shock Absorber 9L Extra Hard (Compressed)",
+    "uz": "Detal"
+   },
+   {
+    "num": "95292-f1",
+    "en": "Shock Absorber 9L Extra Hard (Extended)",
+    "uz": "Detal"
+   },
+   {
+    "num": "41475-f2",
+    "en": "Shock Absorber 9L Hard (Compressed)",
+    "uz": "Detal"
+   },
+   {
+    "num": "41475-f1",
+    "en": "Shock Absorber 9L Hard (Extended)",
+    "uz": "Detal"
+   },
+   {
+    "num": "75348-f2",
+    "en": "Shock Absorber 9L Medium Hard (Compressed)",
+    "uz": "Detal"
+   },
+   {
+    "num": "75348-f1",
+    "en": "Shock Absorber 9L Medium Hard (Extended)",
+    "uz": "Detal"
+   },
+   {
+    "num": "2910",
+    "en": "Shock Absorber 9L Piston Rod",
+    "uz": "Detal"
+   },
+   {
+    "num": "74741-f2",
+    "en": "Shock Absorber 9L Soft (Compressed)",
+    "uz": "Detal"
+   },
+   {
+    "num": "74741-f1",
+    "en": "Shock Absorber 9L Soft (Extended)",
+    "uz": "Detal"
+   },
+   {
+    "num": "u9411-f2",
+    "en": "Shock Absorber 9L Spring Extra Hard (Compressed)",
+    "uz": "Detal"
+   },
+   {
+    "num": "u9411-f1",
+    "en": "Shock Absorber 9L Spring Extra Hard (Extended)",
+    "uz": "Detal"
+   },
+   {
+    "num": "41355-f2",
+    "en": "Shock Absorber 9L Spring Hard (Compressed)",
+    "uz": "Detal"
+   },
+   {
+    "num": "41355-f1",
+    "en": "Shock Absorber 9L Spring Hard (Extended)",
+    "uz": "Detal"
+   },
+   {
+    "num": "u9410-f2",
+    "en": "Shock Absorber 9L Spring Medium (Compressed)",
+    "uz": "Detal"
+   },
+   {
+    "num": "u9410-f1",
+    "en": "Shock Absorber 9L Spring Medium (Extended)",
+    "uz": "Detal"
+   },
+   {
+    "num": "u9409-f2",
+    "en": "Shock Absorber 9L Spring Soft (Compressed)",
+    "uz": "Detal"
+   },
+   {
+    "num": "u9409-f1",
+    "en": "Shock Absorber 9L Spring Soft (Extended)",
+    "uz": "Detal"
+   },
+   {
+    "num": "80022",
+    "en": "Shock Absorber 9L Thick Cylinder",
+    "uz": "Detal"
+   },
+   {
+    "num": "80028-f2",
+    "en": "Shock Absorber 9L Thick Fake Spring (Compressed)",
+    "uz": "Detal"
+   },
+   {
+    "num": "80028-f1",
+    "en": "Shock Absorber 9L Thick Fake Spring (Extended)",
+    "uz": "Detal"
+   },
+   {
+    "num": "u9562-f1",
+    "en": "Shock Absorber 9L Thick Internal Spring (Extended)",
+    "uz": "Detal"
+   },
+   {
+    "num": "80021",
+    "en": "Shock Absorber 9L Thick Piston",
+    "uz": "Detal"
+   },
+   {
+    "num": "u9562-f2",
+    "en": "Shock Absorber 9L Thick Spring (Compressed)",
+    "uz": "Detal"
+   },
+   {
+    "num": "79717p04-f2",
+    "en": "Shock Absorber 9L Thick with Black Fake Spring (Compressed)",
+    "uz": "Detal"
+   },
+   {
+    "num": "79717p04-f1",
+    "en": "Shock Absorber 9L Thick with Black Fake Spring (Extended)",
+    "uz": "Detal"
+   },
+   {
+    "num": "79717p01-f2",
+    "en": "Shock Absorber 9L Thick with Blue Fake Spring (Compressed)",
+    "uz": "Detal"
+   },
+   {
+    "num": "79717p01-f1",
+    "en": "Shock Absorber 9L Thick with Blue Fake Spring (Extended)",
+    "uz": "Detal"
+   },
+   {
+    "num": "79717p02-f2",
+    "en": "Shock Absorber 9L Thick with Red Fake Spring (Compressed)",
+    "uz": "Detal"
+   },
+   {
+    "num": "79717p02-f1",
+    "en": "Shock Absorber 9L Thick with Red Fake Spring (Extended)",
+    "uz": "Detal"
+   },
+   {
+    "num": "79717p03-f2",
+    "en": "Shock Absorber 9L Thick with Yellow Fake Spring (Compressed)",
+    "uz": "Detal"
+   },
+   {
+    "num": "79717p03-f1",
+    "en": "Shock Absorber 9L Thick with Yellow Fake Spring (Extended)",
+    "uz": "Detal"
+   },
+   {
+    "num": "4261",
+    "en": "Steering Arm",
+    "uz": "Detal"
+   },
+   {
+    "num": "6571",
+    "en": "Steering Arm 3H with Towball Sockets",
+    "uz": "Detal"
+   },
+   {
+    "num": "6540a",
+    "en": "Steering Arm Large with Axlehole",
+    "uz": "Detal"
+   },
+   {
+    "num": "41894",
+    "en": "Steering Arm Large with Four Holes",
+    "uz": "Detal"
+   },
+   {
+    "num": "6540b",
+    "en": "Steering Arm Large with Peghole",
+    "uz": "Detal"
+   },
+   {
+    "num": "2737",
+    "en": "Steering Arm Tall",
+    "uz": "Detal"
+   },
+   {
+    "num": "41895",
+    "en": "Steering Arm with 2 Ball Joints",
+    "uz": "Detal"
+   },
+   {
+    "num": "41894c01",
+    "en": "Steering Arm With 2 Ball Joints (Complete)",
+    "uz": "Detal"
+   },
+   {
+    "num": "32186",
+    "en": "Steering Arm with 3 Ball Joints",
+    "uz": "Detal"
+   },
+   {
+    "num": "15460",
+    "en": "Steering Arm with 3 Ball Joints with 1L Arm Side Connection",
+    "uz": "Detal"
+   },
+   {
+    "num": "32069",
+    "en": "Steering Arm with Connectors",
+    "uz": "Detal"
+   },
+   {
+    "num": "92906",
+    "en": "Steering Constant Velocity 4.8mm Joint Female",
+    "uz": "Detal"
+   },
+   {
+    "num": "4192",
+    "en": "Steering Constant Velocity 8mm Joint Female with 2L Axle",
+    "uz": "Detal"
+   },
+   {
+    "num": "52730",
+    "en": "Steering Constant Velocity 8mm Joint Female with 3L Axle",
+    "uz": "Detal"
+   },
+   {
+    "num": "52731",
+    "en": "Steering Constant Velocity 8mm Joint Male",
+    "uz": "Detal"
+   },
+   {
+    "num": "77590",
+    "en": "Steering Constant Velocity 8mm Joint Male with Sliding Axle Hole 3.5L",
+    "uz": "Detal"
+   },
+   {
+    "num": "2791a",
+    "en": "Steering Gear Holder",
+    "uz": "Detal"
+   },
+   {
+    "num": "6610",
+    "en": "Steering Link 4L",
+    "uz": "Detal"
+   },
+   {
+    "num": "4514",
+    "en": "Steering Link 6L Perpendicular",
+    "uz": "Detal"
+   },
+   {
+    "num": "2739a",
+    "en": "Steering Link 6L Type 1",
+    "uz": "Detal"
+   },
+   {
+    "num": "32005",
+    "en": "Steering Link 6L Type 2",
+    "uz": "Detal"
+   },
+   {
+    "num": "5996",
+    "en": "Steering Link 8L",
+    "uz": "Detal"
+   },
+   {
+    "num": "32293",
+    "en": "Steering Link 9L",
+    "uz": "Detal"
+   },
+   {
+    "num": "92908",
+    "en": "Steering Portal Axle Frame",
+    "uz": "Detal"
+   },
+   {
+    "num": "2790a",
+    "en": "Steering Rack",
+    "uz": "Detal"
+   },
+   {
+    "num": "2792",
+    "en": "Steering Top",
+    "uz": "Detal"
+   },
+   {
+    "num": "3468c01",
+    "en": "Steering Wheel Bearing Body",
+    "uz": "Detal"
+   },
+   {
+    "num": "11949",
+    "en": "Steering Wheel Bearing w/ 2 Pegholes & 2 Ball Joint Arms",
+    "uz": "Detal"
+   },
+   {
+    "num": "3465ac01",
+    "en": "Steering Wheel Bearing Wheel Hub and Driving Shaft",
+    "uz": "Detal"
+   },
+   {
+    "num": "11950",
+    "en": "Steering Wheel Bearing with 2 Pegholes",
+    "uz": "Detal"
+   },
+   {
+    "num": "23801",
+    "en": "Steering Wheel Bearing with 2 Pegholes & 2 Axleholes Arms",
+    "uz": "Detal"
+   },
+   {
+    "num": "100943",
+    "en": "Steering Wheel Bearing with 2 Towballs",
+    "uz": "Detal"
+   },
+   {
+    "num": "69636",
+    "en": "Steering Wheel Bearing with 4 Pegholes and Shock Absorber Socket",
+    "uz": "Detal"
+   },
+   {
+    "num": "46490c02",
+    "en": "Steering Wheel Bearing with Planetary Gear Reduction Body",
+    "uz": "Detal"
+   },
+   {
+    "num": "u9477",
+    "en": "Steering Wheel Bearing with Planetary Gear Reduction Driving Shaft",
+    "uz": "Detal"
+   },
+   {
+    "num": "46434",
+    "en": "Steering Wheel Bearing with Planetary Gear Reduction Wheel Hub",
+    "uz": "Detal"
+   },
+   {
+    "num": "46490c01",
+    "en": "Steering Wheel Bearing with Planetary Gear Reduction with Dark Bluish Grey Wheel Hub",
+    "uz": "Detal"
+   },
+   {
+    "num": "92909",
+    "en": "Steering Wheel Hub for Portal Axle",
+    "uz": "Detal"
+   },
+   {
+    "num": "35189",
+    "en": "Steering Wheel Hub with Brake Disc and 3 Pegholes",
+    "uz": "Detal"
+   },
+   {
+    "num": "2741",
+    "en": "Steering Wheel Large",
+    "uz": "Detal"
+   },
+   {
+    "num": "2819",
+    "en": "Steering Wheel Small",
+    "uz": "Detal"
+   },
+   {
+    "num": "18352",
+    "en": "Steering Wheel Yoke with Axle Hole and Hollow Stud",
+    "uz": "Detal"
+   },
+   {
+    "num": "40001",
+    "en": "Steering Wheel Yoke with Reduced Axle Hole and Open Stud",
+    "uz": "Detal"
+   },
+   {
+    "num": "15459",
+    "en": "Suspension Arm 1 x 5 Type 1",
+    "uz": "Detal 1 x 5"
+   },
+   {
+    "num": "31794",
+    "en": "Suspension Arm 1 x 5 Type 2",
+    "uz": "Detal 1 x 5"
+   },
+   {
+    "num": "32294",
+    "en": "Suspension Arm 1 x 9 x 2.5",
+    "uz": "Detal 1 x 9"
+   },
+   {
+    "num": "6572",
+    "en": "Suspension Arm 2 x 4.8 with Towball",
+    "uz": "Detal 2 x 4.8"
+   },
+   {
+    "num": "57515",
+    "en": "Suspension Arm 2 x 6",
+    "uz": "Detal 2 x 6"
+   },
+   {
+    "num": "2738",
+    "en": "Suspension Arm 2 x 6.5 Type 1",
+    "uz": "Detal 2 x 6.5"
+   },
+   {
+    "num": "32195a",
+    "en": "Suspension Arm 2 x 6.5 Type 2",
+    "uz": "Detal 2 x 6.5"
+   },
+   {
+    "num": "32195b",
+    "en": "Suspension Arm 2 x 6.5 Type 3",
+    "uz": "Detal 2 x 6.5"
+   },
+   {
+    "num": "5294",
+    "en": "Suspension Arm 4 x 6 Triangular",
+    "uz": "Detal 4 x 6"
+   },
+   {
+    "num": "5780",
+    "en": "Suspension Arm 7 x 8 x 2 Double",
+    "uz": "Detal 7 x 8"
+   }
+  ]
+ },
+ {
+  "group": {
+   "uz": "Zanjir, Tasma, Aylanuvchi",
+   "ru": "Цепи, Ремни, Поворотные",
+   "en": "Chains, Belts, Turntables"
+  },
+  "items": [
+   {
+    "num": "99009",
+    "en": "Turntable 28 Tooth Bottom",
+    "uz": "Aylanuvchi disk",
+    "starred": true
+   },
+   {
+    "num": "3711",
+    "en": "Chain Link",
+    "uz": "Detal"
+   },
+   {
+    "num": "53551",
+    "en": "Chain Link 1 x 3 x 0.5",
+    "uz": "Detal 1 x 3"
+   },
+   {
+    "num": "14696",
+    "en": "Chain Link Reinforced",
+    "uz": "Detal"
+   },
+   {
+    "num": "3249",
+    "en": "Chain Link with Bar",
+    "uz": "Detal"
+   },
+   {
+    "num": "273",
+    "en": "Chain Link with Two Studs",
+    "uz": "Detal"
+   },
+   {
+    "num": "69900",
+    "en": "Chain Tread 2 Wide with Central Divider",
+    "uz": "Detal 2"
+   },
+   {
+    "num": "3873",
+    "en": "Chain Tread 2.5 Wide",
+    "uz": "Detal 2.5"
+   },
+   {
+    "num": "57518",
+    "en": "Chain Tread 5 Wide",
+    "uz": "Detal 5"
+   },
+   {
+    "num": "88323",
+    "en": "Chain Tread 5 Wide Reinforced",
+    "uz": "Detal 5"
+   },
+   {
+    "num": "88323c03",
+    "en": "Chain Tread 5 Wide Reinforced with 2 Black Rubber Feet",
+    "uz": "Detal 5"
+   },
+   {
+    "num": "88323c06",
+    "en": "Chain Tread 5 Wide Reinforced with 2 Orange Rubber Feet",
+    "uz": "Detal 5"
+   },
+   {
+    "num": "88323c02",
+    "en": "Chain Tread 5 Wide Reinforced with Single Black Rubber Foot Left",
+    "uz": "Detal 5"
+   },
+   {
+    "num": "88323c01",
+    "en": "Chain Tread 5 Wide Reinforced with Single Black Rubber Foot Right",
+    "uz": "Detal 5"
+   },
+   {
+    "num": "88323c05",
+    "en": "Chain Tread 5 Wide Reinforced with Single Orange Rubber Foot Left",
+    "uz": "Detal 5"
+   },
+   {
+    "num": "88323c04",
+    "en": "Chain Tread 5 Wide Reinforced with Single Orange Rubber Foot Right",
+    "uz": "Detal 5"
+   },
+   {
+    "num": "57518c01",
+    "en": "Chain Tread 5 Wide with Red Rubber Foot",
+    "uz": "Detal 5"
+   },
+   {
+    "num": "69910",
+    "en": "Chain Tread 7 Wide with Cleat",
+    "uz": "Detal 7"
+   },
+   {
+    "num": "2723",
+    "en": "Disc 3 x 3 with Axlehole",
+    "uz": "Detal 3 x 3"
+   },
+   {
+    "num": "32439",
+    "en": "Disc 5 x 5",
+    "uz": "Detal 5 x 5"
+   },
+   {
+    "num": "32533",
+    "en": "Disc 5 x 5 Projectile",
+    "uz": "Detal 5 x 5"
+   },
+   {
+    "num": "3736",
+    "en": "Pulley Wheel 5D",
+    "uz": "Detal"
+   },
+   {
+    "num": "99013",
+    "en": "Rotor 1 Blade 31L with Beam 3L",
+    "uz": "Detal 1"
+   },
+   {
+    "num": "99013p01",
+    "en": "Rotor 1 Blade 31L with Beam 3L with Black Rubber Tip",
+    "uz": "Detal 1"
+   },
+   {
+    "num": "99013p02",
+    "en": "Rotor 1 Blade 31L with Beam 3L with Yellow Rubber Tip",
+    "uz": "Detal 1"
+   },
+   {
+    "num": "99012",
+    "en": "Rotor 1 Blade 8L with Peghole and Axlehole",
+    "uz": "Detal 1"
+   },
+   {
+    "num": "2711",
+    "en": "Rotor 2 Blade with 2 Studs",
+    "uz": "Detal 2"
+   },
+   {
+    "num": "32124",
+    "en": "Rotor 2 Blade with 4 Studs",
+    "uz": "Detal 2"
+   },
+   {
+    "num": "2712",
+    "en": "Rotor 3 Blade",
+    "uz": "Detal 3"
+   },
+   {
+    "num": "32125",
+    "en": "Rotor 3 Blade with 6 Studs",
+    "uz": "Detal 3"
+   },
+   {
+    "num": "44374",
+    "en": "Rotor 3 Blade x 0.5 Liftarm",
+    "uz": "Detal 3"
+   },
+   {
+    "num": "2906",
+    "en": "Rotor 4 Blade 7 Diameter",
+    "uz": "Detal 4"
+   },
+   {
+    "num": "65422",
+    "en": "Rotor Blade 19L with Beam 3L",
+    "uz": "Detal"
+   },
+   {
+    "num": "65422-f2",
+    "en": "Rotor Blade 19L with Beam 3L Bent Left",
+    "uz": "Detal"
+   },
+   {
+    "num": "65422-f1",
+    "en": "Rotor Blade 19L with Beam 3L Bent Right",
+    "uz": "Detal"
+   },
+   {
+    "num": "57520",
+    "en": "Sprocket Wheel 25.4",
+    "uz": "Detal 25.4"
+   },
+   {
+    "num": "57519",
+    "en": "Sprocket Wheel 40.4",
+    "uz": "Detal 40.4"
+   },
+   {
+    "num": "42529",
+    "en": "Sprocket Wheel 56.5",
+    "uz": "Detal 56.5"
+   },
+   {
+    "num": "71372-f1",
+    "en": "Tread (Formed for 2 Sprocket Wheels)",
+    "uz": "Detal"
+   },
+   {
+    "num": "498",
+    "en": "Tread Crawler",
+    "uz": "Detal"
+   },
+   {
+    "num": "486-f1",
+    "en": "Tread Crawler Wedge Shaped",
+    "uz": "Detal"
+   },
+   {
+    "num": "71735c01",
+    "en": "Tread Cybermaster (Formed for 5 Sprocket Wheel 20 Tooth)",
+    "uz": "Detal"
+   },
+   {
+    "num": "32090",
+    "en": "Tread Frame 5-point",
+    "uz": "Detal 5"
+   },
+   {
+    "num": "32007",
+    "en": "Tread Sprocket Wheel",
+    "uz": "Detal"
+   },
+   {
+    "num": "32089",
+    "en": "Tread Sprocket Wheel 20 Tooth Thin",
+    "uz": "Detal"
+   },
+   {
+    "num": "99010",
+    "en": "Turntable 28 Tooth Top",
+    "uz": "Detal 28 tishli"
+   },
+   {
+    "num": "76421",
+    "en": "Turntable 5 x 5 (Complete)",
+    "uz": "Detal 5 x 5"
+   },
+   {
+    "num": "32273",
+    "en": "Turntable 5 x 5 Base",
+    "uz": "Detal 5 x 5"
+   },
+   {
+    "num": "32274",
+    "en": "Turntable 5 x 5 Top",
+    "uz": "Detal 5 x 5"
+   },
+   {
+    "num": "18939",
+    "en": "Turntable 60 Tooth Bottom",
+    "uz": "Detal 60 tishli"
+   },
+   {
+    "num": "18938",
+    "en": "Turntable 60 Tooth Top",
+    "uz": "Detal 60 tishli"
+   },
+   {
+    "num": "2856",
+    "en": "Turntable Type 1 Bottom",
+    "uz": "Detal 1"
+   },
+   {
+    "num": "2855",
+    "en": "Turntable Type 1 Top",
+    "uz": "Detal 1"
+   },
+   {
+    "num": "48452",
+    "en": "Turntable Type 2 Base",
+    "uz": "Detal 2"
+   },
+   {
+    "num": "48168",
+    "en": "Turntable Type 2 Top",
+    "uz": "Detal 2"
+   }
+  ]
+ },
+ {
+  "group": {
+   "uz": "Pnevmatika",
+   "ru": "Пневматика",
+   "en": "Pneumatics"
+  },
+  "items": [
+   {
+    "num": "75974",
+    "en": "Pneumatic Airtank (Complete)",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "2944c01",
+    "en": "Pneumatic Cylinder 1 x 1 Piston Rod with Gasket",
+    "uz": "Pnevmatik 1 x 1"
+   },
+   {
+    "num": "74981-f2",
+    "en": "Pneumatic Cylinder 1 x 1 with 2 Ports (Extended)",
+    "uz": "Pnevmatik 1 x 1"
+   },
+   {
+    "num": "74981-f1",
+    "en": "Pneumatic Cylinder 1 x 1 with 2 Ports (Retracted)",
+    "uz": "Pnevmatik 1 x 1"
+   },
+   {
+    "num": "19475-f2",
+    "en": "Pneumatic Cylinder 1 x 1 x 5 with 2 Ports with Stepped Outlets (Extended)",
+    "uz": "Pnevmatik 1 x 1"
+   },
+   {
+    "num": "19475-f1",
+    "en": "Pneumatic Cylinder 1 x 1 x 5 with 2 Ports with Stepped Outlets (Retracted)",
+    "uz": "Pnevmatik 1 x 1"
+   },
+   {
+    "num": "2947bc01",
+    "en": "Pneumatic Cylinder 1 x 1 x 5 with 2 Ports with Stepped Outlets and Cap",
+    "uz": "Pnevmatik 1 x 1"
+   },
+   {
+    "num": "2943ac01",
+    "en": "Pneumatic Cylinder 1 x 1 x 5.5 and Cap",
+    "uz": "Pnevmatik 1 x 1"
+   },
+   {
+    "num": "2943bc01",
+    "en": "Pneumatic Cylinder 1 x 1 x 6 with Stepped Outlet and Cap",
+    "uz": "Pnevmatik 1 x 1"
+   },
+   {
+    "num": "21828c01",
+    "en": "Pneumatic Cylinder 1 x 11 Piston Head and Rod",
+    "uz": "Pnevmatik 1 x 11"
+   },
+   {
+    "num": "u9145c01",
+    "en": "Pneumatic Cylinder 1 x 11 with 2 Ports Body and Cap",
+    "uz": "Pnevmatik 1 x 11"
+   },
+   {
+    "num": "19476-f2",
+    "en": "Pneumatic Cylinder 1 x 11 with 2 Ports with Stepped Outlets (Extended)",
+    "uz": "Pnevmatik 1 x 11"
+   },
+   {
+    "num": "19476-f1",
+    "en": "Pneumatic Cylinder 1 x 11 with 2 Ports with Stepped Outlets (Retracted)",
+    "uz": "Pnevmatik 1 x 11"
+   },
+   {
+    "num": "19467c01",
+    "en": "Pneumatic Cylinder 2 x 11 Piston Head and Rod",
+    "uz": "Pnevmatik 2 x 11"
+   },
+   {
+    "num": "19466c01",
+    "en": "Pneumatic Cylinder 2 x 11 with 2 Ports Body and Cap",
+    "uz": "Pnevmatik 2 x 11"
+   },
+   {
+    "num": "19478-f2",
+    "en": "Pneumatic Cylinder 2 x 11 with 2 Ports with Stepped Outlets (Extended)",
+    "uz": "Pnevmatik 2 x 11"
+   },
+   {
+    "num": "19478-f1",
+    "en": "Pneumatic Cylinder 2 x 11 with 2 Ports with Stepped Outlets (Retracted)",
+    "uz": "Pnevmatik 2 x 11"
+   },
+   {
+    "num": "2796c01",
+    "en": "Pneumatic Cylinder 2 x 2 Piston Rod 4L Cylindrical with Gasket",
+    "uz": "Pnevmatik 2 x 2"
+   },
+   {
+    "num": "2799c01",
+    "en": "Pneumatic Cylinder 2 x 2 Piston Rod 4L Cylindrical with Gasket",
+    "uz": "Pnevmatik 2 x 2"
+   },
+   {
+    "num": "2797c03",
+    "en": "Pneumatic Cylinder 2 x 2 x 5 Base Type 2 and Cap",
+    "uz": "Pnevmatik 2 x 2"
+   },
+   {
+    "num": "127c01-f2",
+    "en": "Pneumatic Cylinder 2 x 2 x 5 with 1 Port (Extended)",
+    "uz": "Pnevmatik 2 x 2"
+   },
+   {
+    "num": "127c01-f1",
+    "en": "Pneumatic Cylinder 2 x 2 x 5 with 1 Port (Retracted)",
+    "uz": "Pnevmatik 2 x 2"
+   },
+   {
+    "num": "2793c01-f2",
+    "en": "Pneumatic Cylinder 2 x 2 x 5 with 2 Ports (Extended)",
+    "uz": "Pnevmatik 2 x 2"
+   },
+   {
+    "num": "2793c01-f1",
+    "en": "Pneumatic Cylinder 2 x 2 x 5 with 2 Ports (Retracted)",
+    "uz": "Pnevmatik 2 x 2"
+   },
+   {
+    "num": "2793c03",
+    "en": "Pneumatic Cylinder 2 x 2 x 5 with 2 Ports and Cap",
+    "uz": "Pnevmatik 2 x 2"
+   },
+   {
+    "num": "47224c01-f2",
+    "en": "Pneumatic Cylinder 2 x 2 x 5 with Curved Base (Extended)",
+    "uz": "Pnevmatik 2 x 2"
+   },
+   {
+    "num": "47224c01-f1",
+    "en": "Pneumatic Cylinder 2 x 2 x 5 with Curved Base (Retracted)",
+    "uz": "Pnevmatik 2 x 2"
+   },
+   {
+    "num": "335c01-f2",
+    "en": "Pneumatic Cylinder 2 x 2 x 6.6 with 1 Port (Extended)",
+    "uz": "Pnevmatik 2 x 2"
+   },
+   {
+    "num": "335c01-f1",
+    "en": "Pneumatic Cylinder 2 x 2 x 6.6 with 1 Port (Retracted)",
+    "uz": "Pnevmatik 2 x 2"
+   },
+   {
+    "num": "53178",
+    "en": "Pneumatic Cylinder Bracket",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "4692c01",
+    "en": "Pneumatic Distribution Block 2 x 4 (Complete)",
+    "uz": "Pnevmatik 2 x 4"
+   },
+   {
+    "num": "99021",
+    "en": "Pneumatic Hose Connector with Bush",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "2944c02",
+    "en": "Pneumatic Pump 1 x 1 Piston Rod with Gasket",
+    "uz": "Pnevmatik 1 x 1"
+   },
+   {
+    "num": "74982-f2",
+    "en": "Pneumatic Pump 1 x 1 x 5.5 (Extended)",
+    "uz": "Pnevmatik 1 x 1"
+   },
+   {
+    "num": "74982-f1",
+    "en": "Pneumatic Pump 1 x 1 x 5.5 (Retracted)",
+    "uz": "Pnevmatik 1 x 1"
+   },
+   {
+    "num": "99798-f2",
+    "en": "Pneumatic Pump 1 x 1 x 6 (Extended)",
+    "uz": "Pnevmatik 1 x 1"
+   },
+   {
+    "num": "99798-f1",
+    "en": "Pneumatic Pump 1 x 1 x 6 (Retracted)",
+    "uz": "Pnevmatik 1 x 1"
+   },
+   {
+    "num": "26674-f2",
+    "en": "Pneumatic Pump 1 x 1 x 6 with Reinforced Base (Extended)",
+    "uz": "Pnevmatik 1 x 1"
+   },
+   {
+    "num": "26674-f1",
+    "en": "Pneumatic Pump 1 x 1 x 6 with Reinforced Base (Retracted)",
+    "uz": "Pnevmatik 1 x 1"
+   },
+   {
+    "num": "19482-f2",
+    "en": "Pneumatic Pump 1 x 1 x 6 with Stepped Outlet (Extended)",
+    "uz": "Pnevmatik 1 x 1"
+   },
+   {
+    "num": "19482-f1",
+    "en": "Pneumatic Pump 1 x 1 x 6 with Stepped Outlet (Retracted)",
+    "uz": "Pnevmatik 1 x 1"
+   },
+   {
+    "num": "26280c01",
+    "en": "Pneumatic Pump 2 x 2 Base with 3L Beam with Black Cap",
+    "uz": "Pnevmatik 2 x 2"
+   },
+   {
+    "num": "u9329",
+    "en": "Pneumatic Pump 2 x 2 Piston with 1.2 Rod",
+    "uz": "Pnevmatik 2 x 2"
+   },
+   {
+    "num": "26288c01-f2",
+    "en": "Pneumatic Pump 2 x 2 with 3L Beam (Extended)",
+    "uz": "Pnevmatik 2 x 2"
+   },
+   {
+    "num": "26288c01-f1",
+    "en": "Pneumatic Pump 2 x 2 with 3L Beam (Retracted)",
+    "uz": "Pnevmatik 2 x 2"
+   },
+   {
+    "num": "127c03-f1",
+    "en": "Pneumatic Pump 2 x 2 x 5 with 5.5L Piston (Compressed)",
+    "uz": "Pnevmatik 2 x 2"
+   },
+   {
+    "num": "127c03-f2",
+    "en": "Pneumatic Pump 2 x 2 x 5 with 5.5L Piston (Extended)",
+    "uz": "Pnevmatik 2 x 2"
+   },
+   {
+    "num": "2797c01-f2",
+    "en": "Pneumatic Pump 2 x 2 x 5 with Large Knob (Extended)",
+    "uz": "Pnevmatik 2 x 2"
+   },
+   {
+    "num": "2797c01-f1",
+    "en": "Pneumatic Pump 2 x 2 x 5 with Large Knob (Retracted)",
+    "uz": "Pnevmatik 2 x 2"
+   },
+   {
+    "num": "127c02-f1",
+    "en": "Pneumatic Pump 2 x 2 x 5 without Knob (Compressed)",
+    "uz": "Pnevmatik 2 x 2"
+   },
+   {
+    "num": "127c02-f2",
+    "en": "Pneumatic Pump 2 x 2 x 5 without Knob (Extended)",
+    "uz": "Pnevmatik 2 x 2"
+   },
+   {
+    "num": "4697a",
+    "en": "Pneumatic T-Piece - Type 1",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "4697b",
+    "en": "Pneumatic T-Piece - Type 2",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "21767-f1",
+    "en": "Pneumatic Tube 10L",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "21767-f2",
+    "en": "Pneumatic Tube 10L with End Bulges",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "103671-f1",
+    "en": "Pneumatic Tube 11L",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "103671-f2",
+    "en": "Pneumatic Tube 11L with End Bulges",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "63539-f1",
+    "en": "Pneumatic Tube 12L",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "63539-f2",
+    "en": "Pneumatic Tube 12L with End Bulges",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "37467-f1",
+    "en": "Pneumatic Tube 13L",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "37467-f2",
+    "en": "Pneumatic Tube 13L with End Bulges",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "37461-f1",
+    "en": "Pneumatic Tube 14L",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "37461-f2",
+    "en": "Pneumatic Tube 14L with End Bulges",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "87948-f1",
+    "en": "Pneumatic Tube 16L",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "87948-f2",
+    "en": "Pneumatic Tube 16L with End Bulges",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "53168-f1",
+    "en": "Pneumatic Tube 17L",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "53168-f2",
+    "en": "Pneumatic Tube 17L with End Bulges",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "1661-f1",
+    "en": "Pneumatic Tube 18L",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "1661-f2",
+    "en": "Pneumatic Tube 18L with End Bulges",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "21839-f1",
+    "en": "Pneumatic Tube 19L",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "21839-f2",
+    "en": "Pneumatic Tube 19L with End Bulges",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "87950-f1",
+    "en": "Pneumatic Tube 20L",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "87950-f2",
+    "en": "Pneumatic Tube 20L with End Bulges",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "53184-f1",
+    "en": "Pneumatic Tube 21L",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "53184-f2",
+    "en": "Pneumatic Tube 21L with End Bulges",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "26436-f1",
+    "en": "Pneumatic Tube 23L",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "26436-f2",
+    "en": "Pneumatic Tube 23L with End Bulges",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "63540-f1",
+    "en": "Pneumatic Tube 24L",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "67678-f1",
+    "en": "Pneumatic Tube 25L",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "67678-f2",
+    "en": "Pneumatic Tube 25L with End Bulges",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "21830-f1",
+    "en": "Pneumatic Tube 27L",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "21830-f2",
+    "en": "Pneumatic Tube 27L with End Bulges",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "21825-f1",
+    "en": "Pneumatic Tube 28L",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "21825-f2",
+    "en": "Pneumatic Tube 28L with End Bulges",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "79306-f1",
+    "en": "Pneumatic Tube 2L",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "79306-f2",
+    "en": "Pneumatic Tube 2L with End Bulges",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "21833-f1",
+    "en": "Pneumatic Tube 30L",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "21833-f2",
+    "en": "Pneumatic Tube 30L with End Bulges",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "26440-f1",
+    "en": "Pneumatic Tube 32L",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "26440-f2",
+    "en": "Pneumatic Tube 32L with End Bulges",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "96889-f1",
+    "en": "Pneumatic Tube 33L",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "96889-f2",
+    "en": "Pneumatic Tube 33L with End Bulges",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "87949-f1",
+    "en": "Pneumatic Tube 36L",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "87949-f2",
+    "en": "Pneumatic Tube 36L with End Bulges",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "21835-f1",
+    "en": "Pneumatic Tube 37L",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "21835-f2",
+    "en": "Pneumatic Tube 37L with End Bulges",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "14661-f1",
+    "en": "Pneumatic Tube 39L",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "14661-f2",
+    "en": "Pneumatic Tube 39L with End Bulges",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "21761-f1",
+    "en": "Pneumatic Tube 3L",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "21761-f2",
+    "en": "Pneumatic Tube 3L with End Bulges",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "26438-f1",
+    "en": "Pneumatic Tube 40L",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "26438-f2",
+    "en": "Pneumatic Tube 40L with End Bulges",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "44079-f1",
+    "en": "Pneumatic Tube 42L",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "44079-f2",
+    "en": "Pneumatic Tube 42L with End Bulges",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "26439-f1",
+    "en": "Pneumatic Tube 48L",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "26439-f2",
+    "en": "Pneumatic Tube 48L with End Bulges",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "26445-f1",
+    "en": "Pneumatic Tube 4L",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "26445-f2",
+    "en": "Pneumatic Tube 4L with End Bulges",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "96890-f1",
+    "en": "Pneumatic Tube 54L",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "96890-f2",
+    "en": "Pneumatic Tube 54L with End Bulges",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "14653-f1",
+    "en": "Pneumatic Tube 5L",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "14653-f2",
+    "en": "Pneumatic Tube 5L with End Bulges",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "21766-f1",
+    "en": "Pneumatic Tube 6L",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "21766-f2",
+    "en": "Pneumatic Tube 6L with End Bulges",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "14657-f1",
+    "en": "Pneumatic Tube 7L",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "14657-f2",
+    "en": "Pneumatic Tube 7L with End Bulges",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "96891-f1",
+    "en": "Pneumatic Tube 80L",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "96891-f2",
+    "en": "Pneumatic Tube 80L with End Bulges",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "21837-f1",
+    "en": "Pneumatic Tube 8L",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "21837-f2",
+    "en": "Pneumatic Tube 8L with End Bulges",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "21826-f1",
+    "en": "Pneumatic Tube 9L",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "21826-f2",
+    "en": "Pneumatic Tube 9L with End Bulges",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "4694c01-f2",
+    "en": "Pneumatic Valve (Complete - Down Position)",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "4694c01-f1",
+    "en": "Pneumatic Valve (Complete - Neutral Position)",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "4694c01-f3",
+    "en": "Pneumatic Valve (Complete - Up Position)",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "4694c04",
+    "en": "Pneumatic Valve Box",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "19474-f2",
+    "en": "Pneumatic Valve with Axle Hole (Down Position)",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "19474-f1",
+    "en": "Pneumatic Valve with Axle Hole (Neutral Position)",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "19474-f3",
+    "en": "Pneumatic Valve with Axle Hole (Up Position)",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "u9417c01",
+    "en": "Pneumatic Valve with Axle Hole Box",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "47223a-f1",
+    "en": "Pneumatic Valve with Pegholes (Complete - Neutral Position)",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "47223a-f2",
+    "en": "Pneumatic Valve with Pegholes (Down Position)",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "47223a-f3",
+    "en": "Pneumatic Valve with Pegholes (Up Position)",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "47223d-f2",
+    "en": "Pneumatic Valve with Pegholes and Stepped Outlets (Down Position)",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "47223d-f1",
+    "en": "Pneumatic Valve with Pegholes and Stepped Outlets (Neutral Position)",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "47223d-f3",
+    "en": "Pneumatic Valve with Pegholes and Stepped Outlets (Up Position)",
+    "uz": "Pnevmatik"
+   },
+   {
+    "num": "47222ac01",
+    "en": "Pneumatic Valve with Pegholes Box",
+    "uz": "Pnevmatik"
+   }
+  ]
+ },
+ {
+  "group": {
+   "uz": "Boshqa Technic detallar",
+   "ru": "Другие детали Technic",
+   "en": "Other Technic Parts"
+  },
+  "items": [
+   {
+    "num": "32016",
+    "en": "Angle Connector #3 (157.5 degree)",
+    "uz": "90° ulovchi",
+    "starred": true
+   },
+   {
+    "num": "32014",
+    "en": "Angle Connector #6 (90 degree)",
+    "uz": "180° ulovchi",
+    "starred": true
+   },
+   {
+    "num": "32013",
+    "en": "Angle Connector #1",
+    "uz": "0° ulovchi",
+    "starred": true
+   },
+   {
+    "num": "32556",
+    "en": "Pin Conn. 3L",
+    "uz": "Burchakli ulovchi",
+    "starred": true
+   },
+   {
+    "num": "4265c",
+    "en": "Bush 1/2",
+    "uz": "Yarim vtulka",
+    "starred": true
+   },
+   {
+    "num": "3709",
+    "en": "Plate 2x4 holes",
+    "uz": "Teshikli plita",
+    "starred": true
+   },
+   {
+    "num": "30400",
+    "en": "Beam 1x9",
+    "uz": "To'g'ri balka",
+    "starred": true
+   },
+   {
+    "num": "3650",
+    "en": "24T Crown Gear",
+    "uz": "24 tishli toj",
+    "starred": true
+   },
+   {
+    "num": "7335",
+    "en": "2-Stage Pulley 1D + 2D",
+    "uz": "Detal 2"
+   },
+   {
+    "num": "6549",
+    "en": "4 Speed Shift Lever",
+    "uz": "Detal 4"
+   },
+   {
+    "num": "2698c01",
+    "en": "Action Figure (Complete)",
+    "uz": "Detal"
+   },
+   {
+    "num": "2701",
+    "en": "Action Figure Arm Bearing",
+    "uz": "Detal"
+   },
+   {
+    "num": "2705",
+    "en": "Action Figure Arm Bearing Pin",
+    "uz": "Detal"
+   },
+   {
+    "num": "2701c01",
+    "en": "Action Figure Arm Bearing with Pin",
+    "uz": "Detal"
+   },
+   {
+    "num": "2700",
+    "en": "Action Figure Arm Segment",
+    "uz": "Detal"
+   },
+   {
+    "num": "2699c01",
+    "en": "Action Figure Body",
+    "uz": "Detal"
+   },
+   {
+    "num": "2699",
+    "en": "Action Figure Body Connector",
+    "uz": "Detal"
+   },
+   {
+    "num": "2710",
+    "en": "Action Figure Body Lower",
+    "uz": "Detal"
+   },
+   {
+    "num": "2706",
+    "en": "Action Figure Foot",
+    "uz": "Detal"
+   },
+   {
+    "num": "2708",
+    "en": "Action Figure Hair",
+    "uz": "Detal"
+   },
+   {
+    "num": "2702",
+    "en": "Action Figure Hand",
+    "uz": "Detal"
+   },
+   {
+    "num": "2707",
+    "en": "Action Figure Head",
+    "uz": "Detal"
+   },
+   {
+    "num": "2715",
+    "en": "Action Figure Helmet (Needs Work)",
+    "uz": "Detal"
+   },
+   {
+    "num": "2716",
+    "en": "Action Figure Helmet Visor (Needs Work)",
+    "uz": "Detal"
+   },
+   {
+    "num": "2704",
+    "en": "Action Figure Leg Lower",
+    "uz": "Detal"
+   },
+   {
+    "num": "2703",
+    "en": "Action Figure Leg Upper Left",
+    "uz": "Detal"
+   },
+   {
+    "num": "2709",
+    "en": "Action Figure Leg Upper Right",
+    "uz": "Detal"
+   },
+   {
+    "num": "32008",
+    "en": "Action Figure Scuba Flipper",
+    "uz": "Detal"
+   },
+   {
+    "num": "2698",
+    "en": "Action Figure Torso",
+    "uz": "Detal"
+   },
+   {
+    "num": "10288",
+    "en": "Angle Connector (3 x 120 degree)",
+    "uz": "Detal 3 x 120"
+   },
+   {
+    "num": "32034",
+    "en": "Angle Connector #2 (180 degree)",
+    "uz": "Detal"
+   },
+   {
+    "num": "32192",
+    "en": "Angle Connector #4 (135 degree)",
+    "uz": "Detal"
+   },
+   {
+    "num": "32015",
+    "en": "Angle Connector #5 (112.5 degree)",
+    "uz": "Detal"
+   },
+   {
+    "num": "7329",
+    "en": "Angle Connector 3-Way 60 Degree + 120 Degrees Y-Shaped",
+    "uz": "Detal 3"
+   },
+   {
+    "num": "6611",
+    "en": "Angle Connector 4-Way 60 Degree",
+    "uz": "Detal 4"
+   },
+   {
+    "num": "4450",
+    "en": "Angle Connector 7 (168.75 degree)",
+    "uz": "Detal 7"
+   },
+   {
+    "num": "41666",
+    "en": "Arm 1 x 6 with Gear 12 Tooth Double Bevel Ends",
+    "uz": "Detal 1 x 6"
+   },
+   {
+    "num": "50921",
+    "en": "Arm 2 x 5 with Ball Joint and Gear 12 Tooth Double Bevel",
+    "uz": "Detal 2 x 5"
+   },
+   {
+    "num": "41667",
+    "en": "Arm 3 x 2 with Gear 36 Tooth Double Bevel Quarter",
+    "uz": "Detal 3 x 2"
+   },
+   {
+    "num": "52629",
+    "en": "Ball 19mm for Ball Castor",
+    "uz": "Detal"
+   },
+   {
+    "num": "92911",
+    "en": "Ball Joint 2.25 Diameter Socket",
+    "uz": "Detal 2.25"
+   },
+   {
+    "num": "92911c01",
+    "en": "Ball Joint 2.25 Diameter Socket with Steel Ball 18 mm",
+    "uz": "Detal 2.25"
+   },
+   {
+    "num": "92910",
+    "en": "Ball Joint 2.25 Diameter with C-Shape Frame",
+    "uz": "Detal 2.25"
+   },
+   {
+    "num": "32474",
+    "en": "Ball Joint with Axlehole Blind",
+    "uz": "Detal"
+   },
+   {
+    "num": "53585",
+    "en": "Ball Joint with Axlehole Open",
+    "uz": "Detal"
+   },
+   {
+    "num": "2907",
+    "en": "Ball with Grooves",
+    "uz": "Detal"
+   },
+   {
+    "num": "98347",
+    "en": "Blade Curved 0.5 x 4 with Pin Hole",
+    "uz": "Detal 0.5 x 4"
+   },
+   {
+    "num": "65416",
+    "en": "Brake Disc 6 x 6",
+    "uz": "Detal 6 x 6"
+   },
+   {
+    "num": "71711",
+    "en": "Brake Disc 9 x 9",
+    "uz": "Detal 9 x 9"
+   },
+   {
+    "num": "48202",
+    "en": "Bumper 2 x 18",
+    "uz": "Detal 2 x 18"
+   },
+   {
+    "num": "70961",
+    "en": "Bumper 2 x 4 Rubber",
+    "uz": "Detal 2 x 4"
+   },
+   {
+    "num": "48203",
+    "en": "Bumper 2 x 6",
+    "uz": "Detal 2 x 6"
+   },
+   {
+    "num": "70962",
+    "en": "Bumper 2 x 6 Rubber Angled",
+    "uz": "Detal 2 x 6"
+   },
+   {
+    "num": "49283",
+    "en": "Cable Clip",
+    "uz": "Detal"
+   },
+   {
+    "num": "6575a",
+    "en": "Cam with Narrow Slit and Recessed Axlehole",
+    "uz": "Detal"
+   },
+   {
+    "num": "6575b",
+    "en": "Cam with Wide Slit",
+    "uz": "Detal"
+   },
+   {
+    "num": "61073",
+    "en": "Car Spoiler 3 x 8 with 3 Pegholes",
+    "uz": "Detal 3 x 8"
+   },
+   {
+    "num": "4159",
+    "en": "Changeover Catch Fork",
+    "uz": "Detal"
+   },
+   {
+    "num": "4158",
+    "en": "Changeover Cylinder with Groove",
+    "uz": "Detal"
+   },
+   {
+    "num": "35188",
+    "en": "Changeover Rotary Catch",
+    "uz": "Detal"
+   },
+   {
+    "num": "61403",
+    "en": "Circular Saw Blade 14 Tooth",
+    "uz": "Detal"
+   },
+   {
+    "num": "46835",
+    "en": "Clutch with Axle Connector Inner Side",
+    "uz": "Detal"
+   },
+   {
+    "num": "46834",
+    "en": "Clutch with Axle Connector Outer Side",
+    "uz": "Detal"
+   },
+   {
+    "num": "76110p01",
+    "en": "Competition Arrow with Rubber Black Tip",
+    "uz": "Detal"
+   },
+   {
+    "num": "76110p03",
+    "en": "Competition Arrow with Rubber Dark Blue Tip",
+    "uz": "Detal"
+   },
+   {
+    "num": "76110p04",
+    "en": "Competition Arrow with Rubber Flat Silver Tip",
+    "uz": "Detal"
+   },
+   {
+    "num": "76110p05",
+    "en": "Competition Arrow with Rubber Lime Tip",
+    "uz": "Detal"
+   },
+   {
+    "num": "76110p02",
+    "en": "Competition Arrow with Rubber Purple Tip",
+    "uz": "Detal"
+   },
+   {
+    "num": "46537",
+    "en": "Competition Arrow with Solid Shaft and Cross Shaped Rubber Black Tip",
+    "uz": "Detal"
+   },
+   {
+    "num": "57796ac02",
+    "en": "Competition Cannon with Flat Bottom with Long Trigger (Loaded with Arrow)",
+    "uz": "Detal"
+   },
+   {
+    "num": "57796ac01",
+    "en": "Competition Cannon with Flat Bottom with Long Trigger (Unloaded)",
+    "uz": "Detal"
+   },
+   {
+    "num": "57796bc02",
+    "en": "Competition Cannon with Flat Bottom with Short Trigger (Loaded with Arrow)",
+    "uz": "Detal"
+   },
+   {
+    "num": "57796bc01",
+    "en": "Competition Cannon with Flat Bottom with Short Trigger (Unloaded)",
+    "uz": "Detal"
+   },
+   {
+    "num": "76100c02",
+    "en": "Competition Cannon with Round Bottom (Loaded with Arrow)",
+    "uz": "Detal"
+   },
+   {
+    "num": "76100c01",
+    "en": "Competition Cannon with Round Bottom (Unloaded)",
+    "uz": "Detal"
+   },
+   {
+    "num": "65421",
+    "en": "Concrete Mixer Half Shell",
+    "uz": "Detal"
+   },
+   {
+    "num": "2842c01",
+    "en": "Control Centre I with Yellow/Red Buttons (Complete)",
+    "uz": "Detal"
+   },
+   {
+    "num": "2842c02",
+    "en": "Control Centre II with Red/Grey Buttons (Complete)",
+    "uz": "Detal"
+   },
+   {
+    "num": "2745",
+    "en": "Cylinder 4 x 4 x 1.667 with Axleholes",
+    "uz": "Detal 4 x 4"
+   },
+   {
+    "num": "41531",
+    "en": "Cylinder 4 x 4 x 2 with 3 Pin Holes and Center Bar",
+    "uz": "Detal 4 x 4"
+   },
+   {
+    "num": "15361",
+    "en": "Cylinder Half 3 x 5 x 8 with Pin Holes",
+    "uz": "Detal 3 x 5"
+   },
+   {
+    "num": "1994",
+    "en": "Cylinder with Peghole and Half Click Rotation Joint Ball",
+    "uz": "Detal"
+   },
+   {
+    "num": "4413",
+    "en": "Dome 11 x 11 x 5.5",
+    "uz": "Detal 11 x 11"
+   },
+   {
+    "num": "4412",
+    "en": "Dome 5 x 5 x 2.5",
+    "uz": "Detal 5 x 5"
+   },
+   {
+    "num": "32272",
+    "en": "Dome 6 x 6 x 7",
+    "uz": "Detal 6 x 6"
+   },
+   {
+    "num": "57587",
+    "en": "Dome 7 x 7 x 5",
+    "uz": "Detal 7 x 7"
+   },
+   {
+    "num": "45575",
+    "en": "Double Flexible Fixing Pin",
+    "uz": "Detal"
+   },
+   {
+    "num": "6797",
+    "en": "Engine Air Scoop 4 x 4 x 1.333",
+    "uz": "Detal 4 x 4"
+   },
+   {
+    "num": "2852",
+    "en": "Engine Connecting Rod",
+    "uz": "Detal"
+   },
+   {
+    "num": "2854",
+    "en": "Engine Crankshaft Centre",
+    "uz": "Detal"
+   },
+   {
+    "num": "2853a",
+    "en": "Engine Crankshaft with Slot",
+    "uz": "Detal"
+   },
+   {
+    "num": "2853b",
+    "en": "Engine Crankshaft with Slot and Blocker",
+    "uz": "Detal"
+   },
+   {
+    "num": "2850b",
+    "en": "Engine Cylinder Head with Bottom Slots",
+    "uz": "Detal"
+   },
+   {
+    "num": "2850a",
+    "en": "Engine Cylinder Head with Side Slots",
+    "uz": "Detal"
+   },
+   {
+    "num": "6608",
+    "en": "Engine Cylinder Head without Studs",
+    "uz": "Detal"
+   },
+   {
+    "num": "2851",
+    "en": "Engine Piston Round",
+    "uz": "Detal"
+   },
+   {
+    "num": "28216",
+    "en": "Excavator Bucket 10 x 7",
+    "uz": "Detal 10 x 7"
+   },
+   {
+    "num": "2951",
+    "en": "Excavator Bucket 10 x 8",
+    "uz": "Detal 10 x 8"
+   },
+   {
+    "num": "2814",
+    "en": "Excavator Bucket 14 x 8 with 7 Teeth",
+    "uz": "Detal 14 x 8"
+   },
+   {
+    "num": "32030",
+    "en": "Excavator Bucket 18 x 10",
+    "uz": "Detal 18 x 10"
+   },
+   {
+    "num": "46891",
+    "en": "Excavator Bucket 19 x 12",
+    "uz": "Detal 19 x 12"
+   },
+   {
+    "num": "15265",
+    "en": "Excavator Bucket 23 x 13",
+    "uz": "Detal 23 x 13"
+   },
+   {
+    "num": "2950",
+    "en": "Excavator Bucket 4 x 4 x 9",
+    "uz": "Detal 4 x 4"
+   },
+   {
+    "num": "24120",
+    "en": "Excavator Bucket 4 x 5",
+    "uz": "Detal 4 x 5"
+   },
+   {
+    "num": "4700",
+    "en": "Excavator Bucket 6 x 9",
+    "uz": "Detal 6 x 9"
+   },
+   {
+    "num": "18943",
+    "en": "Excavator Bucket 7 x 5 x 4.5 Clamshell",
+    "uz": "Detal 7 x 5"
+   },
+   {
+    "num": "2823",
+    "en": "Forklift Fork",
+    "uz": "Detal"
+   },
+   {
+    "num": "11953",
+    "en": "Grabber Arm Claw / Hook with 3L Liftarm Thick",
+    "uz": "Detal"
+   },
+   {
+    "num": "30622",
+    "en": "Grille 1 x 4 with 2 Pins",
+    "uz": "Detal 1 x 4"
+   },
+   {
+    "num": "30632",
+    "en": "Grille 6 x 4 x 3 with 2 Pins and 2 Pin Holes",
+    "uz": "Detal 6 x 4"
+   },
+   {
+    "num": "6221",
+    "en": "Handle",
+    "uz": "Detal"
+   },
+   {
+    "num": "2908",
+    "en": "Helicopter Rotor Holder",
+    "uz": "Detal"
+   },
+   {
+    "num": "44790",
+    "en": "Hockey Helmet",
+    "uz": "Detal"
+   },
+   {
+    "num": "3691",
+    "en": "Holder Block 4 x 4 x 3",
+    "uz": "Detal 4 x 4"
+   },
+   {
+    "num": "70644",
+    "en": "Hook Large Metallic",
+    "uz": "Detal"
+   },
+   {
+    "num": "2999",
+    "en": "Large Wheel Hub",
+    "uz": "Detal"
+   },
+   {
+    "num": "40918-f1",
+    "en": "Linear Actuator 12 x 2 x 2 (Contracted)",
+    "uz": "Detal 12 x 2"
+   },
+   {
+    "num": "40918-f2",
+    "en": "Linear Actuator 12 x 2 x 2 (Extended)",
+    "uz": "Detal 12 x 2"
+   },
+   {
+    "num": "u9487c01",
+    "en": "Linear Actuator 12 x 2 x 2 Body Assembly",
+    "uz": "Detal 12 x 2"
+   },
+   {
+    "num": "62274c02",
+    "en": "Linear Actuator 12 x 2 x 2 Piston Assembly",
+    "uz": "Detal 12 x 2"
+   },
+   {
+    "num": "61904",
+    "en": "Linear Actuator 2 x 2 Bracket Hinged Mount",
+    "uz": "Detal 2 x 2"
+   },
+   {
+    "num": "61905",
+    "en": "Linear Actuator 2 x 2 Motor Mount",
+    "uz": "Detal 2 x 2"
+   },
+   {
+    "num": "92693c01-f1",
+    "en": "Linear Actuator 4 x 1 x 1 (Contracted)",
+    "uz": "Detal 4 x 1"
+   },
+   {
+    "num": "92693c01-f2",
+    "en": "Linear Actuator 4 x 1 x 1 (Extended)",
+    "uz": "Detal 4 x 1"
+   },
+   {
+    "num": "92695",
+    "en": "Linear Actuator 4 x 1 x 1 Axle Actuator",
+    "uz": "Detal 4 x 1"
+   },
+   {
+    "num": "92693c01",
+    "en": "Linear Actuator 4 x 1 x 1 Body Assembly",
+    "uz": "Detal 4 x 1"
+   },
+   {
+    "num": "92696",
+    "en": "Linear Actuator 4 x 1 x 1 Piston",
+    "uz": "Detal 4 x 1"
+   },
+   {
+    "num": "61927-f1",
+    "en": "Linear Actuator 8 x 2 x 2 (Contracted)",
+    "uz": "Detal 8 x 2"
+   },
+   {
+    "num": "61927-f2",
+    "en": "Linear Actuator 8 x 2 x 2 (Extended)",
+    "uz": "Detal 8 x 2"
+   },
+   {
+    "num": "62271c01",
+    "en": "Linear Actuator 8 x 2 x 2 Body Assembly",
+    "uz": "Detal 8 x 2"
+   },
+   {
+    "num": "u9559c01",
+    "en": "Linear Actuator 8 x 2 x 2 Body Assembly",
+    "uz": "Detal 8 x 2"
+   },
+   {
+    "num": "62274c01",
+    "en": "Linear Actuator 8 x 2 x 2 Piston Assembly",
+    "uz": "Detal 8 x 2"
+   },
+   {
+    "num": "43097-f1",
+    "en": "Linear Actuator 8 x 2 x 2 Type 2 (Contracted)",
+    "uz": "Detal 8 x 2"
+   },
+   {
+    "num": "43097-f2",
+    "en": "Linear Actuator 8 x 2 x 2 Type 2 (Extended)",
+    "uz": "Detal 8 x 2"
+   },
+   {
+    "num": "6247",
+    "en": "Link 11L",
+    "uz": "Detal"
+   },
+   {
+    "num": "2637",
+    "en": "Link 16L",
+    "uz": "Detal"
+   },
+   {
+    "num": "11455",
+    "en": "Link 2 x 4 Bent 90 with One Offset Transverse Peghole",
+    "uz": "Detal 2 x 4"
+   },
+   {
+    "num": "64451",
+    "en": "Link 4 x 6 Bent 53.13",
+    "uz": "Detal 4 x 6"
+   },
+   {
+    "num": "30397",
+    "en": "Link 5L",
+    "uz": "Detal"
+   },
+   {
+    "num": "3652",
+    "en": "Piston 2 x 2 Block",
+    "uz": "Detal 2 x 2"
+   },
+   {
+    "num": "18587",
+    "en": "Projectile Launcher Six-Shooter Trigger",
+    "uz": "Detal"
+   },
+   {
+    "num": "61510",
+    "en": "Reel 2 x 1",
+    "uz": "Detal 2 x 1"
+   },
+   {
+    "num": "32012",
+    "en": "Reel 2.5 x 2",
+    "uz": "Detal 2.5 x 2"
+   },
+   {
+    "num": "80295",
+    "en": "Reel 4 x 3",
+    "uz": "Detal 4 x 3"
+   },
+   {
+    "num": "71949",
+    "en": "Ribbed Hose 10L",
+    "uz": "Detal"
+   },
+   {
+    "num": "71986",
+    "en": "Ribbed Hose 11L",
+    "uz": "Detal"
+   },
+   {
+    "num": "71819",
+    "en": "Ribbed Hose 12L",
+    "uz": "Detal"
+   },
+   {
+    "num": "71945",
+    "en": "Ribbed Hose 13L",
+    "uz": "Detal"
+   },
+   {
+    "num": "71923",
+    "en": "Ribbed Hose 14L",
+    "uz": "Detal"
+   },
+   {
+    "num": "71946",
+    "en": "Ribbed Hose 15L",
+    "uz": "Detal"
+   },
+   {
+    "num": "71947",
+    "en": "Ribbed Hose 16L",
+    "uz": "Detal"
+   },
+   {
+    "num": "22900",
+    "en": "Ribbed Hose 17L",
+    "uz": "Detal"
+   },
+   {
+    "num": "72039",
+    "en": "Ribbed Hose 18L",
+    "uz": "Detal"
+   },
+   {
+    "num": "43675",
+    "en": "Ribbed Hose 19L",
+    "uz": "Detal"
+   },
+   {
+    "num": "23397",
+    "en": "Ribbed Hose 24L",
+    "uz": "Detal"
+   },
+   {
+    "num": "33763",
+    "en": "Ribbed Hose 26L",
+    "uz": "Detal"
+   },
+   {
+    "num": "72504",
+    "en": "Ribbed Hose 2L",
+    "uz": "Detal"
+   },
+   {
+    "num": "22678",
+    "en": "Ribbed Hose 31L",
+    "uz": "Detal"
+   },
+   {
+    "num": "72706",
+    "en": "Ribbed Hose 3L",
+    "uz": "Detal"
+   },
+   {
+    "num": "71952",
+    "en": "Ribbed Hose 4L",
+    "uz": "Detal"
+   },
+   {
+    "num": "72853",
+    "en": "Ribbed Hose 5L",
+    "uz": "Detal"
+   },
+   {
+    "num": "71944",
+    "en": "Ribbed Hose 6L",
+    "uz": "Detal"
+   },
+   {
+    "num": "57719",
+    "en": "Ribbed Hose 7L",
+    "uz": "Detal"
+   },
+   {
+    "num": "71951",
+    "en": "Ribbed Hose 8L",
+    "uz": "Detal"
+   },
+   {
+    "num": "71917",
+    "en": "Ribbed Hose 9L",
+    "uz": "Detal"
+   },
+   {
+    "num": "77107",
+    "en": "Ring 11",
+    "uz": "Detal 11"
+   },
+   {
+    "num": "3250",
+    "en": "Ring 15",
+    "uz": "Detal 15"
+   },
+   {
+    "num": "22631",
+    "en": "RoboRider Container Lid",
+    "uz": "Detal"
+   },
+   {
+    "num": "79505",
+    "en": "Rotation Joint Disk with Pin and 2 Perpendicular Click Rotation Ring Sockets",
+    "uz": "Detal"
+   },
+   {
+    "num": "80563",
+    "en": "Rotation Joint Socket with Two Friction Pins",
+    "uz": "Detal"
+   },
+   {
+    "num": "41753",
+    "en": "Rubber Band Holder Large with Pinholes",
+    "uz": "Detal"
+   },
+   {
+    "num": "41752",
+    "en": "Rubber Band Holder Small with Pinholes",
+    "uz": "Detal"
+   },
+   {
+    "num": "14149",
+    "en": "Rubber Foot for Chain Tread 5 Wide",
+    "uz": "Detal"
+   },
+   {
+    "num": "24375",
+    "en": "Rubber Pin for Chain Tread 5 Wide",
+    "uz": "Detal"
+   },
+   {
+    "num": "2717",
+    "en": "Seat 3 x 2 Base",
+    "uz": "Detal 3 x 2"
+   },
+   {
+    "num": "30647",
+    "en": "Side Flaring Intake 1 x 4 with Two Pins",
+    "uz": "Detal 1 x 4"
+   },
+   {
+    "num": "2713",
+    "en": "Ski",
+    "uz": "Detal"
+   },
+   {
+    "num": "98578",
+    "en": "Spiked Ball Half",
+    "uz": "Detal"
+   },
+   {
+    "num": "99948",
+    "en": "Steel Ball 18mm for Ball Castor",
+    "uz": "Detal"
+   },
+   {
+    "num": "55767",
+    "en": "Support 31 x 13 Bridge Side",
+    "uz": "Detal 31 x 13"
+   },
+   {
+    "num": "1937",
+    "en": "Swashplate 5 x 5 Base with 4 Pin Holes",
+    "uz": "Detal 5 x 5"
+   },
+   {
+    "num": "1936",
+    "en": "Swashplate 5 x 5 Top with 5 Pin Holes",
+    "uz": "Detal 5 x 5"
+   },
+   {
+    "num": "1938",
+    "en": "Swashplate Ball Joint with 4 Grooves and Square Hole",
+    "uz": "Detal"
+   },
+   {
+    "num": "41669",
+    "en": "Tooth 1 x 3 with Axlehole with Rounded Bottom Cavity",
+    "uz": "Detal 1 x 3"
+   },
+   {
+    "num": "48267",
+    "en": "Tooth 1 x 3 with Axlehole with Straight Bottom Cavity",
+    "uz": "Detal 1 x 3"
+   },
+   {
+    "num": "44775",
+    "en": "Track System Gate 11 x 2 with Three Holes and Paddle",
+    "uz": "Detal 11 x 2"
+   },
+   {
+    "num": "6641",
+    "en": "Transmission Changeover Catch Type 1",
+    "uz": "Detal"
+   },
+   {
+    "num": "51149",
+    "en": "Transmission Changeover Catch with Two-toothed Axlehole",
+    "uz": "Detal"
+   },
+   {
+    "num": "6539",
+    "en": "Transmission Driving Ring",
+    "uz": "Detal"
+   },
+   {
+    "num": "2473a",
+    "en": "Transmission Driving Ring 2L with 8 Teeth",
+    "uz": "Detal"
+   },
+   {
+    "num": "18947",
+    "en": "Transmission Driving Ring 3L",
+    "uz": "Detal"
+   },
+   {
+    "num": "32187",
+    "en": "Transmission Driving Ring Extension",
+    "uz": "Detal"
+   },
+   {
+    "num": "35186",
+    "en": "Transmission Driving Ring Extension with Eight Clutch Teeth",
+    "uz": "Detal"
+   },
+   {
+    "num": "4185a",
+    "en": "Wedge Belt Wheel - Not Reinforced",
+    "uz": "Detal"
+   },
+   {
+    "num": "4185b",
+    "en": "Wedge Belt Wheel - Reinforced",
+    "uz": "Detal"
+   },
+   {
+    "num": "4185ac01",
+    "en": "Wedge Belt Wheel (Not Reinforced) with Tyre",
+    "uz": "Detal"
+   },
+   {
+    "num": "4185bc01",
+    "en": "Wedge Belt Wheel (Reinforced) with Tyre",
+    "uz": "Detal"
+   },
+   {
+    "num": "2815",
+    "en": "Wedge Belt Wheel Tyre",
+    "uz": "Detal"
+   },
+   {
+    "num": "80428",
+    "en": "Weight 7 x 11 x 2",
+    "uz": "Detal 7 x 11"
+   },
+   {
+    "num": "75544",
+    "en": "Windscreen 11 x 11 Motorcycle with Angled Pegholes",
+    "uz": "Detal 11 x 11"
+   },
+   {
+    "num": "41671",
+    "en": "Windscreen 4 x 5 x 7",
+    "uz": "Detal 4 x 5"
+   },
+   {
+    "num": "60935",
+    "en": "Wing 11 x 8",
+    "uz": "Detal 11 x 8"
+   },
+   {
+    "num": "61800",
+    "en": "Wing with Axle Hole",
+    "uz": "Detal"
+   },
+   {
+    "num": "5429",
+    "en": "Wishbone Suspension Arm 13 x 6 x 3",
+    "uz": "Detal 13 x 6"
+   }
+  ]
+ }
+]

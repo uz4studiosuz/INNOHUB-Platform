@@ -16,7 +16,7 @@ export default function Home() {
     },
     {
       title: "Raketa (Rockets) Simulyatori",
-      description: "Tsiolkovskiy formulasi va Euler integratsiyasi yordamida yoqilg'i sarfi, apogey va barqarorlikni hisoblash.",
+      description: "Suv-raketa: adiabatik bosim tushishi, qarshilik va Barrowman barqarorligi bo'yicha to'liq parvoz hisobi.",
       link: "/modules/rockets",
       icon: "🚀",
       tag: "Kosmik Muhandislik",
@@ -40,6 +40,15 @@ export default function Home() {
       tag: "Qurilish / Mexanika",
       color: "from-violet-600 to-purple-600",
       shadow: "shadow-violet-500/10"
+    },
+    {
+      title: "3D Konstruktor (Hardware)",
+      description: "Detallar katalogidan real o'lchamli qismlarni uch o'lchamda yig'ish va konstruksiyani sinab ko'rish.",
+      link: "/modules/hardware",
+      icon: "🧩",
+      tag: "Konstruksiya",
+      color: "from-amber-600 to-orange-700",
+      shadow: "shadow-amber-500/10"
     },
     {
       title: "2D Sxema Muharriri",
@@ -112,7 +121,7 @@ export default function Home() {
               transition={{ delay: 0.4 }}
               className="text-sm md:text-base text-gray-400 leading-relaxed mt-2"
             >
-              Platforma orqali siz parvoz, aerodinamika, elektronika va mexanik tizimlarning matematik modellarini interaktiv vizualizatsiyalar yordamida simulyatsiya qilasiz. Barcha hisob-kitoblar Python dvigateli tomonidan amalga oshiriladi.
+              Platforma orqali siz parvoz, aerodinamika, elektronika va mexanik tizimlarning matematik modellarini interaktiv vizualizatsiyalar yordamida simulyatsiya qilasiz. Barcha hisob-kitoblar brauzerning o&apos;zida, real vaqtda bajariladi.
             </motion.p>
           </div>
           
@@ -127,10 +136,10 @@ export default function Home() {
             <div className="flex items-center gap-2">
               <span className="text-2xl animate-pulse">🤖</span>
               <div>
-                <div className="text-xs font-bold text-white">Python Core</div>
+                <div className="text-xs font-bold text-white">Real vaqt hisobi</div>
                 <div className="text-[10px] text-emerald-400 font-semibold flex items-center gap-1">
                   <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></div>
-                  289/289 Tests Active
+                  5 ta modul faol
                 </div>
               </div>
             </div>

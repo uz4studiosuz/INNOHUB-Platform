@@ -13,10 +13,10 @@ export async function POST(req: NextRequest) {
     const result = await runPythonSimulation(module, params || {});
     return NextResponse.json(result);
     
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Simulation API Error:", err);
     return NextResponse.json(
-      { error: err.message || "An unexpected error occurred during simulation" },
+      { error: err instanceof Error ? err.message : "An unexpected error occurred during simulation" },
       { status: 500 }
     );
   }

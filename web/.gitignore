@@ -42,3 +42,8 @@ next-env.d.ts
 
 # downloaded Fritzing sources used by scripts/gen-electronics-parts.py
 scripts/.fzcache/
+
+# LDraw detallar kutubxonasi (509 MB, 36k fayl) — library.ldraw.org dan yuklanadi,
+# git repoziga sig'maydi. Yo'qligi 3D Konstruktorni buzmaydi: modal orqali
+# mahalliy papka tanlash yoki CDN ko'rsatish mumkin.
+/public/ldraw/
