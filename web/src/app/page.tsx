@@ -2,73 +2,25 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { useI18n } from "@/i18n";
+
+/** Only what differs between cards. The words come from the dictionary. */
+const MODULES = [
+  { id: "glider", link: "/modules/glider", icon: "✈️", color: "from-blue-600 to-indigo-600", shadow: "shadow-blue-500/10" },
+  { id: "rockets", link: "/modules/rockets", icon: "🚀", color: "from-red-600 to-orange-600", shadow: "shadow-red-500/10" },
+  { id: "electronics", link: "/modules/electronics", icon: "🔌", color: "from-emerald-600 to-teal-600", shadow: "shadow-emerald-500/10" },
+  { id: "structures", link: "/modules/structures", icon: "🏗️", color: "from-violet-600 to-purple-600", shadow: "shadow-violet-500/10" },
+  { id: "hardware", link: "/modules/hardware", icon: "🧩", color: "from-amber-600 to-orange-700", shadow: "shadow-amber-500/10" },
+] as const;
 
 export default function Home() {
-  const modules = [
-    {
-      title: "Planyor (Glider) Simulyatori",
-      description: "Qanot parametrlari, havo profillari (NACA) va 2D parvoz trayektoriyasi aerodinamik simulyatsiyasi.",
-      link: "/modules/glider",
-      icon: "✈️",
-      tag: "Aerodinamika",
-      color: "from-blue-600 to-indigo-600",
-      shadow: "shadow-blue-500/10"
-    },
-    {
-      title: "Raketa (Rockets) Simulyatori",
-      description: "Suv-raketa: adiabatik bosim tushishi, qarshilik va Barrowman barqarorligi bo'yicha to'liq parvoz hisobi.",
-      link: "/modules/rockets",
-      icon: "🚀",
-      tag: "Kosmik Muhandislik",
-      color: "from-red-600 to-orange-600",
-      shadow: "shadow-red-500/10"
-    },
-    {
-      title: "Maket Taxtasi (Electronics)",
-      description: "Ohm qonuni, zanjir tahlillari va reaktiv komponentlarning ketma-ket/paralel tahlil laboratoriyasi.",
-      link: "/modules/electronics",
-      icon: "🔌",
-      tag: "Elektrotexnika",
-      color: "from-emerald-600 to-teal-600",
-      shadow: "shadow-emerald-500/10"
-    },
-    {
-      title: "Tuzilmalar (Structures) Tahlili",
-      description: "Balka egilishi, ustun bukilishi (Euler buckling) va xavfsizlik koeffitsientlarini professional hisoblash.",
-      link: "/modules/structures",
-      icon: "🏗️",
-      tag: "Qurilish / Mexanika",
-      color: "from-violet-600 to-purple-600",
-      shadow: "shadow-violet-500/10"
-    },
-    {
-      title: "3D Konstruktor (Hardware)",
-      description: "Detallar katalogidan real o'lchamli qismlarni uch o'lchamda yig'ish va konstruksiyani sinab ko'rish.",
-      link: "/modules/hardware",
-      icon: "🧩",
-      tag: "Konstruksiya",
-      color: "from-amber-600 to-orange-700",
-      shadow: "shadow-amber-500/10"
-    },
-    {
-      title: "2D Sxema Muharriri",
-      description: "Elementlarni drag-and-drop usulida joylashtirish, ulovchi simlarni tortish va sxemalarni loyihalash.",
-      link: "/editor2d",
-      icon: "📐",
-      tag: "Muharrir",
-      color: "from-cyan-600 to-blue-600",
-      shadow: "shadow-cyan-500/10"
-    },
-    {
-      title: "3D Zanjir Ko'rish",
-      description: "Sxemalarni uch o'lchamli fazoda (Three.js) real vaqtda ko'rish va parametrlarini o'zgartirish.",
-      link: "/viewer3d",
-      icon: "📦",
-      tag: "Visual 3D",
-      color: "from-amber-600 to-yellow-600",
-      shadow: "shadow-amber-500/10"
-    }
-  ];
+  const { t } = useI18n();
+  const modules = MODULES.map((m) => ({
+    ...m,
+    title: t(`mod.${m.id}.title`),
+    description: t(`mod.${m.id}.desc`),
+    tag: t(`mod.${m.id}.tag`),
+  }));
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -105,7 +57,7 @@ export default function Home() {
               transition={{ delay: 0.2 }}
               className="text-xs font-bold text-blue-500 tracking-widest uppercase"
             >
-              STEM Muhandislik Laboratoriyasi
+              {t("dash.eyebrow")}
             </motion.span>
             <motion.h1 
               initial={{ opacity: 0, x: -20 }}
@@ -113,7 +65,7 @@ export default function Home() {
               transition={{ delay: 0.3 }}
               className="text-3xl md:text-5xl font-extrabold tracking-tight text-white"
             >
-              INNOHUB Platformasi
+              {t("dash.title")}
             </motion.h1>
             <motion.p 
               initial={{ opacity: 0, x: -20 }}
@@ -121,7 +73,7 @@ export default function Home() {
               transition={{ delay: 0.4 }}
               className="text-sm md:text-base text-gray-400 leading-relaxed mt-2"
             >
-              Platforma orqali siz parvoz, aerodinamika, elektronika va mexanik tizimlarning matematik modellarini interaktiv vizualizatsiyalar yordamida simulyatsiya qilasiz. Barcha hisob-kitoblar brauzerning o&apos;zida, real vaqtda bajariladi.
+              {t("dash.intro")}
             </motion.p>
           </div>
           
@@ -132,14 +84,14 @@ export default function Home() {
             whileHover={{ scale: 1.05 }}
             className="flex flex-col gap-2 bg-[#080b11]/60 border border-[rgba(255,255,255,0.06)] rounded-2xl p-4 min-w-[200px]"
           >
-            <div className="text-[10px] font-bold text-gray-500 tracking-wider uppercase">Fizik Dvigatel</div>
+            <div className="text-[10px] font-bold text-gray-500 tracking-wider uppercase">{t("dash.engineLabel")}</div>
             <div className="flex items-center gap-2">
               <span className="text-2xl animate-pulse">🤖</span>
               <div>
-                <div className="text-xs font-bold text-white">Real vaqt hisobi</div>
+                <div className="text-xs font-bold text-white">{t("dash.engineName")}</div>
                 <div className="text-[10px] text-emerald-400 font-semibold flex items-center gap-1">
                   <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></div>
-                  5 ta modul faol
+                  {t("dash.engineStatus", { n: MODULES.length })}
                 </div>
               </div>
             </div>
@@ -150,7 +102,7 @@ export default function Home() {
       {/* Grid listing modules */}
       <div className="flex flex-col gap-4">
         <h2 className="text-xl font-bold tracking-tight text-white px-2">
-          Muhandislik Modullari
+          {t("dash.modulesHeading")}
         </h2>
         
         <motion.div 
@@ -185,7 +137,7 @@ export default function Home() {
                 </div>
                 
                 <div className="flex items-center gap-2 text-xs font-bold text-blue-400 group-hover:text-blue-300 transition-colors mt-6 pt-4 border-t border-[rgba(255,255,255,0.04)]">
-                  <span>Simulyatsiyani Boshlash</span>
+                  <span>{t("dash.start")}</span>
                   <motion.span 
                     animate={{ x: [0, 4, 0] }} 
                     transition={{ repeat: Infinity, duration: 1.5 }}

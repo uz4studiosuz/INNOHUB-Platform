@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { Cpu, Save, FolderOpen, Trash2, PackageCheck, Bot, Download, Upload, HardDrive, Box, Play, Globe } from 'lucide-react';
+import { Cpu, Save, FolderOpen, Trash2, PackageCheck, Bot, Download, Upload, HardDrive, Box, Play } from 'lucide-react';
 import { exportProjectToJson, importProjectFromJson } from '../utils/projectStorage';
 import { importFromLdr } from '../utils/ldrConverter';
 import { useI18n } from '../i18n/index.jsx';
@@ -17,7 +17,7 @@ export default function Header({
   onImportLdrObjects,
   onOpenLDrawSourceModal,
 }) {
-  const { t, lang, setLang } = useI18n();
+  const { t } = useI18n();
   const jsonFileInputRef = useRef(null);
   const ldrFileInputRef = useRef(null);
 
@@ -76,7 +76,9 @@ export default function Header({
         <div className="logo-badge">
           <Bot className="logo-icon" />
           <div className="logo-text">
-            <h1>Hardware Konstruktsiya</h1>
+            {/* The platform calls this section 3D Konstruktor; the module used
+                to call itself something else on its own header. */}
+            <h1>{t('nav.hardware')}</h1>
             <span className="logo-tagline">3D Robot Constructor & Simulator</span>
           </div>
         </div>
@@ -111,17 +113,9 @@ export default function Header({
       </div>
 
       <div className="header-actions">
-        {/* Tilni almashtirgich (Language Switcher) */}
-        <div className="lang-switcher">
-          <Globe size={14} className="text-blue" />
-          <select value={lang} onChange={(e) => setLang(e.target.value)}>
-            <option value="uz">UZ</option>
-            <option value="ru">RU</option>
-            <option value="en">EN</option>
-          </select>
-        </div>
-
-        <div className="divider-vertical" />
+        {/* The language switcher moved to the platform top bar. Two of them on
+            one screen was one too many, and this one only ever changed the
+            language of this module. */}
 
         {/* LDraw Source Config */}
         <button className="header-btn" onClick={onOpenLDrawSourceModal} title={t('header.ldrawLibTitle')}>
