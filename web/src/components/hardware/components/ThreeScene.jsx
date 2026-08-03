@@ -102,6 +102,9 @@ export default function ThreeScene({
   const onRemoveRef = useRef(onRemove);
   const onUpdateRef = useRef(onUpdate);
   const selectedIdRef = useRef(selectedId);
+  const cameraTweenRef = useRef(null);
+  const focusSceneRef = useRef(null);
+  const assemblyFocusTimerRef = useRef(null);
 
 
   useEffect(() => { snapEnabledRef.current = snapEnabled; }, [snapEnabled]);
@@ -384,6 +387,38 @@ export default function ThreeScene({
     orbitControls.target.set(0, 20, 0);
     orbitControlsRef.current = orbitControls;
 
+    focusSceneRef.current = () => {
+      const bounds = new THREE.Box3();
+      let hasParts = false;
+      objectsMapRef.current.forEach((part) => {
+        if (!part || part === 'loading' || !part.visible) return;
+        part.updateMatrixWorld(true);
+        bounds.expandByObject(part);
+        hasParts = true;
+      });
+      if (!hasParts || bounds.isEmpty()) return;
+
+      const size = bounds.getSize(new THREE.Vector3());
+      const center = bounds.getCenter(new THREE.Vector3());
+      center.y = Math.max(18, center.y * 0.82);
+      const verticalFov = THREE.MathUtils.degToRad(camera.fov);
+      const fitHeight = size.y / (2 * Math.tan(verticalFov / 2));
+      const fitWidth = size.x / (2 * Math.tan(verticalFov / 2) * camera.aspect);
+      const distance = Math.max(fitHeight, fitWidth, size.z * 1.25, 95) * 1.35;
+      const direction = camera.position.clone().sub(orbitControls.target).normalize();
+      if (direction.lengthSq() < 0.01) direction.set(0.7, 0.45, 1).normalize();
+
+      cameraTweenRef.current = {
+        startedAt: performance.now(),
+        duration: 900,
+        fromPosition: camera.position.clone(),
+        toPosition: center.clone().add(direction.multiplyScalar(Math.min(distance, 760))),
+        fromTarget: orbitControls.target.clone(),
+        toTarget: center,
+      };
+      requestRenderRef.current?.();
+    };
+
     // Snap visual indicators container group
     const snapGroup = new THREE.Group();
     scene.add(snapGroup);
@@ -600,11 +635,43 @@ export default function ThreeScene({
       animationFrameId = requestAnimationFrame(animate);
       frameCount++;
 
-      const continuous = isSimulatingRef.current || isDraggingRef.current;
+      const hasAssemblyMotion = Array.from(objectsMapRef.current.values()).some(
+        (part) => part && part !== 'loading' && part.userData?.assemblyAnimation,
+      );
+      const continuous = isSimulatingRef.current || isDraggingRef.current || hasAssemblyMotion || !!cameraTweenRef.current;
       if (!needsRender && !continuous) return;
       needsRender = false;
 
       orbitControls.update();
+
+      const cameraTween = cameraTweenRef.current;
+      if (cameraTween) {
+        const raw = Math.min(1, (performance.now() - cameraTween.startedAt) / cameraTween.duration);
+        const eased = 1 - Math.pow(1 - raw, 3);
+        camera.position.lerpVectors(cameraTween.fromPosition, cameraTween.toPosition, eased);
+        orbitControls.target.lerpVectors(cameraTween.fromTarget, cameraTween.toTarget, eased);
+        orbitControls.update();
+        if (raw >= 1) cameraTweenRef.current = null;
+      }
+
+      const now = performance.now();
+      objectsMapRef.current.forEach((part) => {
+        if (!part || part === 'loading') return;
+        const motion = part.userData?.assemblyAnimation;
+        if (!motion) return;
+        const raw = Math.min(1, (now - motion.startedAt) / motion.duration);
+        const eased = 1 - Math.pow(1 - raw, 3);
+        part.position.lerpVectors(motion.fromPosition, motion.toPosition, eased);
+        const scale = THREE.MathUtils.lerp(motion.fromScale, motion.toScale, eased);
+        part.scale.setScalar(scale);
+        part.rotation.y = motion.finalRotationY + (1 - eased) * motion.spin;
+        if (raw >= 1) {
+          part.position.copy(motion.toPosition);
+          part.scale.setScalar(motion.toScale);
+          part.rotation.y = motion.finalRotationY;
+          delete part.userData.assemblyAnimation;
+        }
+      });
 
       // Real-time 3D Simulation Harakat Animatsiyasi
       if (isSimulatingRef.current) {
@@ -615,13 +682,14 @@ export default function ThreeScene({
           if (!obj3d || obj3d === 'loading') return;
           const type = (obj3d.userData?.type || '').toLowerCase();
 
-          // G'ildiraklar, DC motorlar va shesternyalarni tezlik bo'yicha aylantirish
-          if (type.includes('wheel') || type.includes('motor') || type.includes('gear') || type.includes('tt-wheel') || type.includes('dc-tt')) {
+          // Sinov stendida faqat erkin aylanuvchi elementlar harakatlanadi.
+          if (type.includes('wheel') || type.includes('gear') || type.includes('tire')) {
             obj3d.rotation.z += (speed * 0.0008);
           }
           // Servoni berilgan burchak bo'yicha burish
           if (type.includes('servo') || type.includes('sg90') || type.includes('mg90s')) {
-            obj3d.rotation.y = (angleDeg * Math.PI / 180);
+            const baseY = obj3d.userData?.baseRotation?.[1] || 0;
+            obj3d.rotation.y = THREE.MathUtils.lerp(obj3d.rotation.y, baseY + (angleDeg - 90) * Math.PI / 180, 0.12);
           }
         });
       }
@@ -709,6 +777,8 @@ export default function ThreeScene({
       renderer.domElement.removeEventListener('click', handleClick);
       renderer.domElement.removeEventListener('mousemove', handleMouseMove);
       cancelAnimationFrame(animationFrameId);
+      if (assemblyFocusTimerRef.current) clearTimeout(assemblyFocusTimerRef.current);
+      focusSceneRef.current = null;
       if (mountEl) {
         mountEl.removeChild(renderer.domElement);
       }
@@ -890,7 +960,9 @@ export default function ThreeScene({
         const finalScale = baseScale * scaleMult;
 
         // SCALE NI REAL-VAQTDA ZUDLIK BILAN QO'LLASH:
-        existingObj.scale.set(finalScale, finalScale, finalScale);
+        if (!existingObj.userData?.assemblyAnimation) {
+          existingObj.scale.set(finalScale, finalScale, finalScale);
+        }
         existingObj.updateMatrixWorld(true);
         existingObj.visible = obj.visible;
 
@@ -927,7 +999,35 @@ export default function ThreeScene({
             object3d.rotation.set(obj.rotation[0], obj.rotation[1], obj.rotation[2]);
           }
 
-          object3d.userData = { id: obj.id, type: obj.type, paramsKey, baseScale, isLDraw, colorCode: obj.colorCode };
+          const finalRotationY = object3d.rotation.y;
+          object3d.userData = {
+            id: obj.id,
+            type: obj.type,
+            paramsKey,
+            baseScale,
+            isLDraw,
+            colorCode: obj.colorCode,
+            baseRotation: obj.rotation ? [...obj.rotation] : [0, 0, 0],
+          };
+
+          if (obj.assemblySpawn) {
+            const toPosition = object3d.position.clone();
+            const direction = (Number(String(obj.id).replace(/\D/g, '').slice(-2)) || 1) % 2 ? 1 : -1;
+            const fromPosition = toPosition.clone().add(new THREE.Vector3(direction * 90, 150, 80));
+            object3d.position.copy(fromPosition);
+            object3d.scale.setScalar(finalScale * 0.7);
+            object3d.rotation.y = finalRotationY + direction * 0.35;
+            object3d.userData.assemblyAnimation = {
+              startedAt: performance.now(),
+              duration: 760,
+              fromPosition,
+              toPosition,
+              fromScale: finalScale * 0.7,
+              toScale: finalScale,
+              finalRotationY,
+              spin: direction * 0.35,
+            };
+          }
           
           if (isLDraw && ldrawRootGroupRef.current) {
             ldrawRootGroupRef.current.add(object3d);
@@ -946,6 +1046,11 @@ export default function ThreeScene({
           // shu funksiya bilan tugaydi, shuning uchun qayta chizishni shu yerda
           // so'raymiz — bitta joy hammasini qoplaydi.
           requestRenderRef.current?.();
+
+          if (obj.assemblyLast) {
+            if (assemblyFocusTimerRef.current) clearTimeout(assemblyFocusTimerRef.current);
+            assemblyFocusTimerRef.current = setTimeout(() => focusSceneRef.current?.(), 850);
+          }
         };
 
         const createMissingModelPlaceholder = (fileName, partName = 'Detal') => {

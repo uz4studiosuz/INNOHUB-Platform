@@ -44,8 +44,24 @@ export function useTrussBounds(nodes: TrussNode[]) {
 
 const UNSOLVED_WOOD_COLOR = "#c19a6b";
 
-export function memberColorFor(res: SolvedMember | undefined): string {
-  if (!res) return UNSOLVED_WOOD_COLOR;
+type MaterialProfile = {
+  color: string;
+  roughness: number;
+  metalness: number;
+  round: boolean;
+  wood: boolean;
+};
+
+function materialProfileFor(label = "Balsa yog'och"): MaterialProfile {
+  const normalized = label.toLowerCase();
+  if (normalized.includes("alyuminiy")) return { color: "#aeb8bf", roughness: 0.28, metalness: 0.82, round: true, wood: false };
+  if (normalized.includes("po'lat") || normalized.includes("po‘lat")) return { color: "#68747d", roughness: 0.22, metalness: 0.9, round: true, wood: false };
+  if (normalized.includes("uglerod")) return { color: "#20262b", roughness: 0.34, metalness: 0.35, round: true, wood: false };
+  return { color: UNSOLVED_WOOD_COLOR, roughness: 0.82, metalness: 0.02, round: false, wood: true };
+}
+
+export function memberColorFor(res: SolvedMember | undefined, materialLabel?: string): string {
+  if (!res) return materialProfileFor(materialLabel).color;
   return res.safetyFactor < 1 ? "#ff0000" : res.inTension ? "#3b82f6" : "#ef4444";
 }
 
@@ -106,6 +122,7 @@ export function MemberBeam({
   color,
   thick,
   isWood,
+  materialLabel,
   sceneRadius,
   onClick,
 }: {
@@ -118,6 +135,7 @@ export function MemberBeam({
    * members render as plain flat color for a clearer tension/compression read.
    */
   isWood: boolean;
+  materialLabel?: string;
   /** The overall truss's bounding radius (useTrussBounds) - beam thickness
    * is a fraction of this, not a fixed absolute size, so members stay
    * visibly beam-like (not hairline-thin) regardless of the design's scale.
@@ -134,16 +152,20 @@ export function MemberBeam({
   }, [a, b]);
 
   const side = Math.max(sceneRadius * (thick ? 0.09 : 0.065), 0.14);
-  const woodTexture = isWood ? getWoodTexture() : null;
+  const profile = materialProfileFor(materialLabel);
+  const woodTexture = isWood && profile.wood ? getWoodTexture() : null;
 
   return (
     <mesh position={position} quaternion={quaternion} castShadow receiveShadow onClick={onClick}>
-      <boxGeometry args={[side, length, side]} />
+      {profile.round
+        ? <cylinderGeometry args={[side * 0.62, side * 0.62, length, 16, 1]} />
+        : <boxGeometry args={[side, length, side]} />}
       <meshStandardMaterial
         color={color}
         map={woodTexture}
-        roughness={isWood ? 0.85 : 0.55}
-        metalness={isWood ? 0.02 : 0.15}
+        roughness={isWood ? profile.roughness : Math.min(profile.roughness + 0.18, 0.72)}
+        metalness={profile.metalness}
+        envMapIntensity={profile.wood ? 0.35 : 1.15}
       />
     </mesh>
   );
@@ -161,11 +183,110 @@ export function SupportGlyph3D({
   if (type === "none") return null;
   const coneRadius = sceneRadius * 0.14;
   const coneHeight = sceneRadius * 0.2;
+  const baseY = pos.y - coneHeight * 1.18;
+  const rollerRadius = coneRadius * 0.28;
   return (
-    <mesh position={[pos.x, pos.y - coneHeight * 0.65, pos.z]} rotation={[Math.PI, 0, 0]} castShadow>
-      <coneGeometry args={[coneRadius, coneHeight, 4]} />
-      <meshStandardMaterial color={type === "pin" ? "#475569" : "#94a3b8"} />
-    </mesh>
+    <group>
+      <mesh position={[pos.x, pos.y - coneHeight * 0.65, pos.z]} rotation={[Math.PI, 0, 0]} castShadow receiveShadow>
+        <coneGeometry args={[coneRadius, coneHeight, 4]} />
+        <meshStandardMaterial color="#66737d" roughness={0.3} metalness={0.78} />
+      </mesh>
+      {type !== "pin" && (
+        <>
+          <mesh position={[pos.x - coneRadius * 0.45, baseY, pos.z]} rotation={[Math.PI / 2, 0, 0]} castShadow>
+            <cylinderGeometry args={[rollerRadius, rollerRadius, coneRadius * 0.7, 16]} />
+            <meshStandardMaterial color="#aab4bb" roughness={0.2} metalness={0.9} />
+          </mesh>
+          <mesh position={[pos.x + coneRadius * 0.45, baseY, pos.z]} rotation={[Math.PI / 2, 0, 0]} castShadow>
+            <cylinderGeometry args={[rollerRadius, rollerRadius, coneRadius * 0.7, 16]} />
+            <meshStandardMaterial color="#aab4bb" roughness={0.2} metalness={0.9} />
+          </mesh>
+        </>
+      )}
+      <mesh position={[pos.x, baseY - rollerRadius * 0.75, pos.z]} receiveShadow>
+        <boxGeometry args={[coneRadius * 2.4, rollerRadius * 0.35, coneRadius * 1.5]} />
+        <meshStandardMaterial color="#414c54" roughness={0.55} metalness={0.52} />
+      </mesh>
+    </group>
+  );
+}
+
+function BridgeDeck({ nodes, centerX, centerY, radius }: { nodes: TrussNode[]; centerX: number; centerY: number; radius: number }) {
+  const dimensions = useMemo(() => {
+    if (nodes.length < 2) return null;
+    const points = nodes.map((node) => toVec3(node, centerX, centerY));
+    const minX = Math.min(...points.map((point) => point.x));
+    const maxX = Math.max(...points.map((point) => point.x));
+    const minY = Math.min(...points.map((point) => point.y));
+    return { minX, maxX, y: minY - Math.max(radius * 0.045, 0.1) };
+  }, [centerX, centerY, nodes, radius]);
+  if (!dimensions) return null;
+
+  const width = dimensions.maxX - dimensions.minX;
+  const plankCount = Math.max(8, Math.min(28, Math.round(width / Math.max(radius * 0.16, 0.28))));
+  const plankWidth = width / plankCount;
+  const texture = getWoodTexture();
+  return (
+    <group position={[(dimensions.minX + dimensions.maxX) / 2, dimensions.y, 0]}>
+      {Array.from({ length: plankCount }, (_, index) => (
+        <mesh key={index} position={[-width / 2 + plankWidth * (index + 0.5), 0, 0]} castShadow receiveShadow>
+          <boxGeometry args={[plankWidth * 0.9, Math.max(radius * 0.035, 0.08), DEPTH_UNITS * 1.08]} />
+          <meshStandardMaterial color="#a77a4d" map={texture} roughness={0.86} metalness={0.01} />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
+function BridgeInfrastructure({ nodes, centerX, centerY, radius }: { nodes: TrussNode[]; centerX: number; centerY: number; radius: number }) {
+  const geometry = useMemo(() => {
+    if (nodes.length < 2) return null;
+    const points = nodes.map((node) => toVec3(node, centerX, centerY));
+    const minX = Math.min(...points.map((point) => point.x));
+    const maxX = Math.max(...points.map((point) => point.x));
+    const deckY = Math.min(...points.map((point) => point.y));
+    const floorY = -radius * 1.075;
+    return { minX, maxX, deckY, floorY, width: maxX - minX };
+  }, [centerX, centerY, nodes, radius]);
+  if (!geometry) return null;
+
+  const { minX, maxX, deckY, floorY, width } = geometry;
+  const abutmentHeight = Math.max(0.4, deckY - floorY - radius * 0.08);
+  const railY = deckY + Math.max(radius * 0.22, 0.65);
+  const postCount = Math.max(5, Math.min(18, Math.round(width / Math.max(radius * 0.3, 0.8))));
+  const steel = "Po'lat";
+
+  return (
+    <group>
+      {[minX - radius * 0.11, maxX + radius * 0.11].map((x) => (
+        <mesh key={`abutment-${x}`} position={[x, floorY + abutmentHeight / 2, 0]} castShadow receiveShadow>
+          <boxGeometry args={[radius * 0.42, abutmentHeight, DEPTH_UNITS * 1.55]} />
+          <meshStandardMaterial color="#6d7376" roughness={0.92} metalness={0.02} />
+        </mesh>
+      ))}
+      <group position={[0, 0, 0]}>
+        <mesh position={[0, floorY + (deckY - floorY) * 0.46, 0]} castShadow receiveShadow>
+          <boxGeometry args={[radius * 0.62, Math.max(0.22, radius * 0.16), DEPTH_UNITS * 1.1]} />
+          <meshStandardMaterial color="#747a7c" roughness={0.9} />
+        </mesh>
+        {[-DEPTH_UNITS * 0.24, DEPTH_UNITS * 0.24].map((z) => (
+          <mesh key={`pier-${z}`} position={[0, floorY + (deckY - floorY) * 0.23, z]} castShadow receiveShadow>
+            <cylinderGeometry args={[radius * 0.095, radius * 0.12, Math.max(0.3, deckY - floorY - radius * 0.2), 18]} />
+            <meshStandardMaterial color="#7b8082" roughness={0.88} />
+          </mesh>
+        ))}
+      </group>
+      {[-HALF_DEPTH * 1.13, HALF_DEPTH * 1.13].flatMap((z, sideIndex) => {
+        const rails = [railY, railY - radius * 0.1].map((y, railIndex) => (
+          <MemberBeam key={`rail-${sideIndex}-${railIndex}`} a={new THREE.Vector3(minX, y, z)} b={new THREE.Vector3(maxX, y, z)} color="#aeb8bf" thick={false} isWood={false} materialLabel={steel} sceneRadius={radius * 0.44} />
+        ));
+        const posts = Array.from({ length: postCount + 1 }, (_, index) => {
+          const x = minX + (width * index) / postCount;
+          return <MemberBeam key={`rail-post-${sideIndex}-${index}`} a={new THREE.Vector3(x, deckY, z)} b={new THREE.Vector3(x, railY, z)} color="#aeb8bf" thick={false} isWood={false} materialLabel={steel} sceneRadius={radius * 0.44} />;
+        });
+        return [...rails, ...posts];
+      })}
+    </group>
   );
 }
 
@@ -233,7 +354,7 @@ export function TrussSceneContents({
         color = failing ? "#b91c1c" : UNSOLVED_WOOD_COLOR;
         isWoodBeam = !failing;
       } else {
-        color = colorByForce && res ? forceBandColor(res.forceN) : memberColorFor(res);
+        color = colorByForce && res ? forceBandColor(res.forceN) : memberColorFor(res, m.materialLabel);
         isWoodBeam = !res;
       }
       return (
@@ -244,6 +365,7 @@ export function TrussSceneContents({
           color={color}
           thick={failing}
           isWood={isWoodBeam}
+          materialLabel={m.materialLabel}
           sceneRadius={radius}
           onClick={
             side === "front" && onMemberClick
@@ -263,9 +385,8 @@ export function TrussSceneContents({
       if (!pos) return null;
       return (
         <group key={`${side}-${n.id}`}>
-          <mesh
+          <group
             position={pos}
-            castShadow
             onClick={
               side === "front" && onNodeClick
                 ? (e) => {
@@ -275,9 +396,15 @@ export function TrussSceneContents({
                 : undefined
             }
           >
-            <sphereGeometry args={[Math.max(radius * 0.045, 0.12), 12, 12]} />
-            <meshStandardMaterial color="#e2e8f0" />
-          </mesh>
+            <mesh rotation={[Math.PI / 2, 0, 0]} castShadow receiveShadow>
+              <cylinderGeometry args={[Math.max(radius * 0.085, 0.22), Math.max(radius * 0.085, 0.22), Math.max(radius * 0.025, 0.07), 24]} />
+              <meshStandardMaterial color="#59656e" roughness={0.28} metalness={0.82} />
+            </mesh>
+            <mesh position={[0, 0, side === "front" ? -Math.max(radius * 0.024, 0.075) : Math.max(radius * 0.024, 0.075)]} rotation={[Math.PI / 2, 0, 0]} castShadow>
+              <cylinderGeometry args={[Math.max(radius * 0.028, 0.08), Math.max(radius * 0.028, 0.08), Math.max(radius * 0.035, 0.09), 16]} />
+              <meshStandardMaterial color="#c8d0d5" roughness={0.18} metalness={0.92} />
+            </mesh>
+          </group>
           {side === "front" && memberFirstNode === n.id && (
             <mesh position={pos} rotation={[Math.PI / 2, 0, 0]}>
               <ringGeometry args={[radius * 0.07, radius * 0.09, 24]} />
@@ -295,7 +422,7 @@ export function TrussSceneContents({
     const a = frontNodeMap.get(n.id);
     const b = backNodeMap.get(n.id);
     if (!a || !b) return null;
-    return <MemberBeam key={`brace-${n.id}`} a={a} b={b} color={UNSOLVED_WOOD_COLOR} thick={false} isWood sceneRadius={radius} />;
+    return <MemberBeam key={`brace-${n.id}`} a={a} b={b} color={materialProfileFor(members[0]?.materialLabel).color} thick={false} isWood materialLabel={members[0]?.materialLabel} sceneRadius={radius} />;
   });
 
   // Diagonal (X) bracing across the deck and across the top: real truss
@@ -314,8 +441,8 @@ export function TrussSceneContents({
     const fb = frontNodeMap.get(m.nodeB);
     if (!fa || !bb || !ba || !fb) return [];
     return [
-      <MemberBeam key={`xbrace-a-${m.id}`} a={fa} b={bb} color={UNSOLVED_WOOD_COLOR} thick={false} isWood sceneRadius={radius} />,
-      <MemberBeam key={`xbrace-b-${m.id}`} a={ba} b={fb} color={UNSOLVED_WOOD_COLOR} thick={false} isWood sceneRadius={radius} />,
+      <MemberBeam key={`xbrace-a-${m.id}`} a={fa} b={bb} color={materialProfileFor(m.materialLabel).color} thick={false} isWood materialLabel={m.materialLabel} sceneRadius={radius} />,
+      <MemberBeam key={`xbrace-b-${m.id}`} a={ba} b={fb} color={materialProfileFor(m.materialLabel).color} thick={false} isWood materialLabel={m.materialLabel} sceneRadius={radius} />,
     ];
   });
 
@@ -337,6 +464,8 @@ export function TrussSceneContents({
         </mesh>
       )}
 
+      <BridgeDeck nodes={nodes} centerX={center.x} centerY={center.y} radius={radius} />
+      <BridgeInfrastructure nodes={nodes} centerX={center.x} centerY={center.y} radius={radius} />
       {renderMembers(frontNodeMap, "front")}
       {renderMembers(backNodeMap, "back")}
       {crossBraces}

@@ -1,8 +1,8 @@
 "use client";
 
 import { Canvas } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei";
-import { PCFShadowMap } from "three";
+import { ContactShadows, OrbitControls } from "@react-three/drei";
+import { ACESFilmicToneMapping, PCFSoftShadowMap } from "three";
 import { TrussNode, TrussMemberDraft, SolvedMember } from "./types";
 import { useTrussBounds, TrussSceneContents } from "./trussScene3D";
 
@@ -18,19 +18,45 @@ export default function TrussViewport3D({ nodes, members, solved }: TrussViewpor
   return (
     <div className="relative flex-1 bg-[#17212b]">
       <Canvas
-        shadows={{ type: PCFShadowMap }}
+        shadows={{ type: PCFSoftShadowMap }}
         dpr={[1, 2]}
-        camera={{ position: [radius * 1.6, radius * 1.3, radius * 1.6], fov: 45 }}
+        gl={{ antialias: true, toneMapping: ACESFilmicToneMapping, toneMappingExposure: 1.05 }}
+        camera={{ position: [radius * 1.75, radius * 1.25, radius * 1.85], fov: 42, near: 0.1, far: radius * 30 }}
       >
         <color attach="background" args={["#17212b"]} />
-        <ambientLight intensity={0.72} />
-        <hemisphereLight args={["#d9eee7", "#17212b", 0.58]} />
-        <directionalLight position={[radius * 2, radius * 3, radius]} intensity={1.45} castShadow />
-        <directionalLight position={[-radius * 2, radius, -radius]} intensity={0.35} color="#b8d9cc" />
+        <fog attach="fog" args={["#17212b", radius * 5.5, radius * 15]} />
+        <ambientLight intensity={0.42} />
+        <hemisphereLight args={["#e3f1ec", "#293136", 0.78]} />
+        <directionalLight
+          position={[radius * 2.5, radius * 4, radius * 2]}
+          intensity={2.15}
+          color="#fff8ea"
+          castShadow
+          shadow-mapSize-width={1024}
+          shadow-mapSize-height={1024}
+          shadow-camera-near={0.1}
+          shadow-camera-far={radius * 12}
+          shadow-bias={-0.00015}
+        />
+        <directionalLight position={[-radius * 2.2, radius * 1.5, radius]} intensity={0.72} color="#b9d9ff" />
+        <directionalLight position={[0, radius * 2, -radius * 3]} intensity={0.46} color="#d9eee7" />
 
         <TrussSceneContents nodes={nodes} members={members} solved={solved} />
-        <gridHelper args={[radius * 4, 20, "#2b6f5d", "#25323c"]} position={[0, -radius - 1, 0]} />
-        <OrbitControls enableDamping dampingFactor={0.08} minDistance={2} maxDistance={radius * 8} />
+        <mesh position={[0, -radius * 1.08, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+          <planeGeometry args={[radius * 12, radius * 12]} />
+          <meshStandardMaterial color="#222c31" roughness={0.96} metalness={0.02} />
+        </mesh>
+        <gridHelper args={[radius * 8, 36, "#397565", "#2a3a40"]} position={[0, -radius * 1.075, 0]} />
+        <ContactShadows position={[0, -radius * 1.065, 0]} opacity={0.48} scale={radius * 6} blur={2.4} far={radius * 4} color="#09100e" />
+        <OrbitControls
+          makeDefault
+          target={[0, 0, 0]}
+          enableDamping
+          dampingFactor={0.075}
+          minDistance={Math.max(2, radius * 0.8)}
+          maxDistance={radius * 8}
+          maxPolarAngle={Math.PI * 0.49}
+        />
       </Canvas>
 
       <div className="pointer-events-none absolute bottom-3 left-3 rounded-lg border border-white/10 bg-[#111820]/90 px-3 py-2 text-[10px] font-medium text-slate-300">

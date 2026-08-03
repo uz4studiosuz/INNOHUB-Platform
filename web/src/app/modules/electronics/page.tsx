@@ -297,7 +297,7 @@ export default function ElectronicsPage() {
       {/* ================= BODY ================= */}
       <div style={{ flex: 1, display: "flex", minHeight: 0 }}>
         {/* canvas */}
-        <div style={{ flex: 1, position: "relative", overflow: "auto", minWidth: 0 }}>
+        <div style={{ flex: 1, position: "relative", overflow: "hidden", minWidth: 0 }}>
           <CircuitCanvas visuals={visuals} />
 
           {/* status pill */}

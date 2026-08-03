@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import SidebarRight from './components/SidebarRight';
 import KitAssemblyPanel from './components/KitAssemblyPanel';
@@ -36,6 +36,12 @@ function App() {
   const [isLDrawSourceOpen, setIsLDrawSourceOpen] = useState(false);
 
   const exportLdrFnRef = useRef(null);
+  const kitTimersRef = useRef([]);
+  const [assemblyProgress, setAssemblyProgress] = useState({ active: false, current: 0, total: 0, partName: '' });
+
+  useEffect(() => () => {
+    kitTimersRef.current.forEach(window.clearTimeout);
+  }, []);
 
   // Loyihani JSON fayldan yuklash
   const handleLoadProject = useCallback((data) => {
@@ -120,7 +126,10 @@ function App() {
     const parts = getKitParts(kitId);
     if (!parts.length) return;
 
-    const objects = parts.map((p) => {
+    kitTimersRef.current.forEach(window.clearTimeout);
+    kitTimersRef.current = [];
+
+    const objects = parts.map((p, index) => {
       const entry = getCatalogEntry(p.type);
       return {
         id: uuidv4(),
@@ -131,14 +140,34 @@ function App() {
         partNum: entry ? entry.partNum : null,
         colorCode: entry ? (entry.colorCode || 71) : 71,
         visible: true,
-        position: p.position,
+        // Kit koordinatalari shassi markaziga nisbatan yozilgan. Yig‘mani
+        // grid ostiga kesilib ketmasligi uchun butun robotni yer sathidan
+        // yuqoriga ko‘taramiz; g‘ildiraklarning pastki nuqtasi y=0 ga yaqin.
+        position: [p.position[0], p.position[1] + 140, p.position[2]],
         rotation: p.rotation,
         params: p.params ? { ...p.params } : (entry?.defaultParams ? { ...entry.defaultParams } : null),
+        assemblySpawn: true,
+        assemblyLast: index === parts.length - 1,
       };
     });
 
-    setSceneObjects(objects);
+    setSceneObjects([]);
     setSelectedObjectId(null);
+    setAssemblyProgress({ active: true, current: 0, total: objects.length, partName: '' });
+
+    objects.forEach((object, index) => {
+      const timer = window.setTimeout(() => {
+        setSceneObjects((current) => [...current, object]);
+        setAssemblyProgress({
+          active: index < objects.length - 1,
+          current: index + 1,
+          total: objects.length,
+          partName: object.name,
+        });
+        if (index === objects.length - 1) setSelectedObjectId(object.id);
+      }, 180 + index * 480);
+      kitTimersRef.current.push(timer);
+    });
   }, []);
 
   // LEGO Technic katalogidan (1000+ detal) qism qo'shish
@@ -272,6 +301,7 @@ function App() {
             sceneObjects={sceneObjects}
             onAddComponent={handleAddComponent}
             onLoadKit={handleLoadKit}
+            assemblyProgress={assemblyProgress}
           />
         )}
 

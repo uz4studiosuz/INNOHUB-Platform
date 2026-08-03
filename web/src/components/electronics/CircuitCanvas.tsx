@@ -6,6 +6,7 @@ import { COMPONENT_LIBRARY } from "./componentLibrary";
 import { PlacedComponent, Terminal, ComponentType, Wire } from "./types";
 import { acceptsLeads, findContacts, snapPosition, terminalWorldPos, worldTerminals, WorldTerminal } from "./geometry";
 import ComponentView, { CompVisual } from "./ComponentView";
+import { IconFocusCentered, IconHandMove, IconMinus, IconPlus } from "@tabler/icons-react";
 
 const CANVAS_W = 2600;
 const CANVAS_H = 1700;
@@ -96,6 +97,7 @@ export default function CircuitCanvas({ visuals }: Props) {
     select, selectWire, setProp, addWireBend, moveWireBend, removeWireBend,
   } = useElectronicsStore();
 
+  const viewportRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<{ id: string; offX: number; offY: number; moved: boolean } | null>(null);
   const bendRef = useRef<{ wireId: string; index: number; moved: boolean } | null>(null);
@@ -104,6 +106,30 @@ export default function CircuitCanvas({ visuals }: Props) {
   const [cursor, setCursor] = useState<Pt>({ x: 0, y: 0 });
   /** Holes the part being dragged is about to be seated in, highlighted live. */
   const [snapHoles, setSnapHoles] = useState<Pt[]>([]);
+  const [viewport, setViewport] = useState({ zoom: 0.72, x: 28, y: 24 });
+  const [isPanning, setIsPanning] = useState(false);
+  const viewportStateRef = useRef(viewport);
+  const spacePressedRef = useRef(false);
+  const panRef = useRef<{ startX: number; startY: number; originX: number; originY: number } | null>(null);
+
+  useEffect(() => { viewportStateRef.current = viewport; }, [viewport]);
+
+  useEffect(() => {
+    const down = (event: KeyboardEvent) => {
+      if (event.code !== "Space" || (event.target as HTMLElement | null)?.closest("input, textarea, select, [contenteditable='true']")) return;
+      spacePressedRef.current = true;
+      event.preventDefault();
+    };
+    const up = (event: KeyboardEvent) => {
+      if (event.code === "Space") spacePressedRef.current = false;
+    };
+    window.addEventListener("keydown", down);
+    window.addEventListener("keyup", up);
+    return () => {
+      window.removeEventListener("keydown", down);
+      window.removeEventListener("keyup", up);
+    };
+  }, []);
 
   const setRoute = useCallback((r: Routing | null) => {
     routingRef.current = r;
@@ -118,11 +144,45 @@ export default function CircuitCanvas({ visuals }: Props) {
    * that gap used to land here with a null ref.
    */
   const toCanvas = useCallback((clientX: number, clientY: number) => {
-    const el = canvasRef.current;
+    const el = viewportRef.current;
     if (!el) return null;
     const r = el.getBoundingClientRect();
-    return { x: clientX - r.left, y: clientY - r.top };
+    const view = viewportStateRef.current;
+    return { x: (clientX - r.left - view.x) / view.zoom, y: (clientY - r.top - view.y) / view.zoom };
   }, []);
+
+  const zoomAt = useCallback((nextZoom: number, clientX?: number, clientY?: number) => {
+    const el = viewportRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const current = viewportStateRef.current;
+    const zoom = Math.max(0.3, Math.min(2.2, nextZoom));
+    const anchorX = (clientX ?? rect.left + rect.width / 2) - rect.left;
+    const anchorY = (clientY ?? rect.top + rect.height / 2) - rect.top;
+    const worldX = (anchorX - current.x) / current.zoom;
+    const worldY = (anchorY - current.y) / current.zoom;
+    setViewport({ zoom, x: anchorX - worldX * zoom, y: anchorY - worldY * zoom });
+  }, []);
+
+  const resetViewport = useCallback(() => setViewport({ zoom: 0.72, x: 28, y: 24 }), []);
+
+  const beginPan = useCallback((event: React.PointerEvent) => {
+    if (!spacePressedRef.current && event.button !== 1) return;
+    event.preventDefault();
+    event.stopPropagation();
+    const current = viewportStateRef.current;
+    panRef.current = { startX: event.clientX, startY: event.clientY, originX: current.x, originY: current.y };
+    setIsPanning(true);
+    event.currentTarget.setPointerCapture?.(event.pointerId);
+  }, []);
+
+  const movePan = useCallback((event: React.PointerEvent) => {
+    const start = panRef.current;
+    if (!start) return;
+    setViewport((current) => ({ ...current, x: start.originX + event.clientX - start.startX, y: start.originY + event.clientY - start.startY }));
+  }, []);
+
+  const endPan = useCallback(() => { panRef.current = null; setIsPanning(false); }, []);
 
   /**
    * Place a part at (x, y) but let the breadboard grid pull it into line, the
@@ -349,14 +409,39 @@ export default function CircuitCanvas({ visuals }: Props) {
 
   return (
     <div
+      ref={viewportRef}
+      onPointerDownCapture={beginPan}
+      onPointerMove={movePan}
+      onPointerUp={endPan}
+      onPointerCancel={endPan}
+      onWheel={(event) => {
+        event.preventDefault();
+        const factor = Math.exp(-event.deltaY * 0.0014);
+        zoomAt(viewportStateRef.current.zoom * factor, event.clientX, event.clientY);
+      }}
+      style={{
+        position: "relative",
+        width: "100%",
+        height: "100%",
+        overflow: "hidden",
+        background: "#edf1f2",
+        cursor: isPanning ? "grabbing" : undefined,
+        touchAction: "none",
+      }}
+    >
+    <div
       ref={canvasRef}
       onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = "copy"; }}
       onDrop={onDrop}
-      onPointerDown={(e) => { if (e.target === e.currentTarget) { select(null); selectWire(null); } }}
+      onPointerDown={(e) => { if (e.target === e.currentTarget && !spacePressedRef.current) { select(null); selectWire(null); } }}
       style={{
-        position: "relative",
+        position: "absolute",
+        left: 0,
+        top: 0,
         width: CANVAS_W,
         height: CANVAS_H,
+        transform: `translate3d(${viewport.x}px, ${viewport.y}px, 0) scale(${viewport.zoom})`,
+        transformOrigin: "0 0",
         backgroundColor: "#f7f8f9",
         backgroundImage: "radial-gradient(circle, #cfd7de 1px, transparent 1px)",
         backgroundSize: "24px 24px",
@@ -448,6 +533,18 @@ export default function CircuitCanvas({ visuals }: Props) {
           {snapTarget && <circle cx={snapTarget.x} cy={snapTarget.y} r={7} fill="none" stroke="#16a34a" strokeWidth={2} />}
         </svg>
       )}
+    </div>
+
+      <div className="absolute bottom-4 left-4 z-20 flex items-center gap-1 rounded-lg border border-[var(--line)] bg-white p-1 shadow-[0_4px_16px_rgba(24,33,43,0.08)]">
+        <button type="button" onClick={() => zoomAt(viewport.zoom / 1.16)} className="flex h-8 w-8 items-center justify-center rounded-md text-[var(--ink-muted)] hover:bg-[var(--surface-muted)]" aria-label="Kichraytirish"><IconMinus size={16} stroke={1.8} /></button>
+        <span className="w-12 text-center font-mono text-[11px] font-semibold text-[var(--ink)]">{Math.round(viewport.zoom * 100)}%</span>
+        <button type="button" onClick={() => zoomAt(viewport.zoom * 1.16)} className="flex h-8 w-8 items-center justify-center rounded-md text-[var(--ink-muted)] hover:bg-[var(--surface-muted)]" aria-label="Kattalashtirish"><IconPlus size={16} stroke={1.8} /></button>
+        <span className="mx-1 h-5 w-px bg-[var(--line)]" />
+        <button type="button" onClick={resetViewport} className="flex h-8 w-8 items-center justify-center rounded-md text-[var(--ink-muted)] hover:bg-[var(--surface-muted)]" title="Ko‘rinishni tiklash" aria-label="Ko‘rinishni tiklash"><IconFocusCentered size={16} stroke={1.8} /></button>
+      </div>
+      <div className="pointer-events-none absolute bottom-4 right-4 z-20 flex items-center gap-2 rounded-lg border border-[var(--line)] bg-white/95 px-3 py-2 text-[11px] font-medium text-[var(--ink-muted)]">
+        <IconHandMove size={15} stroke={1.8} /> Space + sudrash: pan · g‘altak: zoom
+      </div>
     </div>
   );
 }

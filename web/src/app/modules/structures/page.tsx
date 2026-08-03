@@ -103,24 +103,24 @@ function BeamColumnCalculator() {
     <div className="flex-1 overflow-y-auto bg-[var(--canvas)]">
     <div className="flex flex-col gap-6 max-w-6xl mx-auto py-2 p-8">
       <div className="flex flex-col gap-1">
-        <span className="text-xs font-bold text-violet-500 tracking-wider uppercase">Qurilish & Mexanika Laboratoriyasi</span>
-        <h1 className="text-3xl font-extrabold text-white">Tuzilmalar (Structures) Tahlili</h1>
-        <p className="text-sm text-gray-400 max-w-3xl">
+        <span className="text-xs font-semibold text-[var(--accent)]">Qurilish va mexanika laboratoriyasi</span>
+        <h1 className="text-3xl font-semibold tracking-[-0.025em] text-[var(--ink)]">Tuzilmalar tahlili</h1>
+        <p className="max-w-3xl text-sm leading-6 text-[var(--ink-muted)]">
           Egiluvchan balkalar va siqiluvchan ustunlar parametrlarini sozlang. Tizim materiallar qarshiligi (Euler-Bernoulli beam theory hamda Euler buckling) qonuniyatlariga binoan egilish, zo&apos;riqish va tanglik koeffitsientlarini hisoblaydi.
         </p>
       </div>
 
       <div className="flex flex-wrap lg:flex-nowrap gap-6 items-start">
         {/* Left Side: Parameters */}
-        <div className="w-full lg:w-96 flex flex-col gap-4 glass-panel border border-[rgba(255,255,255,0.06)] bg-[#0d1220]/60 rounded-2xl p-5 shadow-xl">
-          <h2 className="font-bold text-lg text-white border-b border-[rgba(255,255,255,0.06)] pb-2 flex flex-col gap-3">
+        <div className="flex w-full flex-col gap-4 rounded-xl border border-[var(--line)] bg-white p-5 lg:w-96">
+          <h2 className="flex flex-col gap-3 border-b border-[var(--line)] pb-3 text-lg font-semibold text-[var(--ink)]">
             <div className="flex items-center justify-between">
               <span>Geometriya & Yuk</span>
-              <span className="text-xs font-semibold px-2 py-0.5 bg-violet-500/10 border border-violet-500/20 text-violet-400 rounded-md">Struktura</span>
+              <span className="rounded-md border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700">Struktura</span>
             </div>
             
             {/* Mode selection buttons */}
-            <div className="flex gap-1.5 p-1 bg-[#090d16] rounded-xl border border-[rgba(255,255,255,0.04)]">
+            <div className="flex gap-1.5 rounded-lg bg-[var(--surface-muted)] p-1">
               {(["beam", "column", "section"] as const).map(m => (
                 <button 
                   key={m} 
@@ -132,8 +132,8 @@ function BeamColumnCalculator() {
                   }}
                   className={`flex-1 text-center py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                     mode === m 
-                      ? "bg-violet-600 text-white shadow-md" 
-                      : "text-gray-400 hover:text-white hover:bg-[rgba(255,255,255,0.02)]"
+                      ? "bg-white text-[var(--accent)] shadow-[0_1px_2px_rgba(24,33,43,0.08)]"
+                      : "text-[var(--ink-muted)] hover:text-[var(--ink)]"
                   }`}
                 >
                   {m === "beam" ? "Balka" : m === "column" ? "Ustun" : "Kesim"}
@@ -144,41 +144,41 @@ function BeamColumnCalculator() {
 
           <div className="flex flex-col gap-4 mt-1">
             <label className="flex flex-col gap-1">
-              <div className="flex justify-between text-xs text-gray-300">
+              <div className="flex justify-between text-xs text-[var(--ink-muted)]">
                 <span>Tushayotgan kuch (F)</span>
-                <span className="font-mono text-violet-400 font-bold">{force} N</span>
+                <span className="font-mono font-semibold text-[var(--accent)]">{force} N</span>
               </div>
               <input type="range" min={10} max={10000} step={10} value={force} onChange={e => setForce(Number(e.target.value))} />
             </label>
 
             <label className="flex flex-col gap-1">
-              <div className="flex justify-between text-xs text-gray-300">
+              <div className="flex justify-between text-xs text-[var(--ink-muted)]">
                 <span>Uzunlik (L)</span>
-                <span className="font-mono text-violet-400 font-bold">{length.toFixed(2)} m</span>
+                <span className="font-mono font-semibold text-[var(--accent)]">{length.toFixed(2)} m</span>
               </div>
               <input type="range" min={0.1} max={5} step={0.05} value={length} onChange={e => setLength(Number(e.target.value))} />
             </label>
 
             <label className="flex flex-col gap-1">
-              <div className="flex justify-between text-xs text-gray-300">
+              <div className="flex justify-between text-xs text-[var(--ink-muted)]">
                 <span>Kesim eni (b)</span>
-                <span className="font-mono text-violet-400 font-bold">{(width * 1000).toFixed(0)} mm</span>
+                <span className="font-mono font-semibold text-[var(--accent)]">{(width * 1000).toFixed(0)} mm</span>
               </div>
               <input type="range" min={0.01} max={0.5} step={0.005} value={width} onChange={e => setWidth(Number(e.target.value))} />
             </label>
 
             <label className="flex flex-col gap-1">
-              <div className="flex justify-between text-xs text-gray-300">
+              <div className="flex justify-between text-xs text-[var(--ink-muted)]">
                 <span>Kesim balandligi (h)</span>
-                <span className="font-mono text-violet-400 font-bold">{(height * 1000).toFixed(0)} mm</span>
+                <span className="font-mono font-semibold text-[var(--accent)]">{(height * 1000).toFixed(0)} mm</span>
               </div>
               <input type="range" min={0.01} max={0.5} step={0.005} value={height} onChange={e => setHeight(Number(e.target.value))} />
             </label>
 
             <label className="flex flex-col gap-1">
-              <div className="flex justify-between text-xs text-gray-300">
+              <div className="flex justify-between text-xs text-[var(--ink-muted)]">
                 <span>Elastiklik moduli (E)</span>
-                <span className="font-mono text-violet-400 font-bold">{Emod} GPa</span>
+                <span className="font-mono font-semibold text-[var(--accent)]">{Emod} GPa</span>
               </div>
               <input type="range" min={1} max={300} step={1} value={Emod} onChange={e => setEmod(Number(e.target.value))} />
             </label>
@@ -186,7 +186,7 @@ function BeamColumnCalculator() {
             <button
               onClick={handleAnalyze}
               disabled={loading}
-              className="mt-2 rounded-xl bg-violet-600 px-6 py-3.5 text-white font-extrabold text-sm hover:bg-violet-700 disabled:bg-violet-800 disabled:opacity-50 transition-colors shadow-lg shadow-violet-500/20 active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+              className="mt-2 flex cursor-pointer items-center justify-center gap-2 rounded-lg bg-[var(--accent)] px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#0e5846] active:translate-y-px disabled:opacity-50"
             >
               {loading ? (
                 <>
@@ -230,17 +230,17 @@ function BeamColumnCalculator() {
           {/* Beam Results */}
           {mode === "beam" && beamResult && (
             <div className="flex flex-col gap-6">
-              <h2 className="font-bold text-lg text-white">Balka egilish tahlillari</h2>
+              <h2 className="text-lg font-semibold text-[var(--ink)]">Balka egilish tahlillari</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="bg-[#0f1524]/60 border border-[rgba(255,255,255,0.06)] rounded-2xl p-4 shadow-md flex justify-between items-center">
+                <div className="flex items-center justify-between rounded-xl border border-[var(--line)] bg-white p-4">
                   <div>
                     <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Maks. Egilish momenti</div>
-                    <div className="text-xl font-extrabold text-violet-400 font-mono mt-1">{beamResult.bending_moment_Nm.toFixed(1)} N·m</div>
+                    <div className="mt-1 font-mono text-xl font-semibold text-[var(--accent)]">{beamResult.bending_moment_Nm.toFixed(1)} N·m</div>
                   </div>
                   <IconVariable size={21} stroke={1.8} />
                 </div>
                 
-                <div className="bg-[#0f1524]/60 border border-[rgba(255,255,255,0.06)] rounded-2xl p-4 shadow-md flex justify-between items-center">
+                <div className="flex items-center justify-between rounded-xl border border-[var(--line)] bg-white p-4">
                   <div>
                     <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Maks. Egilish zo&apos;riqishi</div>
                     <div className="text-xl font-extrabold text-rose-400 font-mono mt-1">{(beamResult.bending_stress_Pa / 1e6).toFixed(2)} MPa</div>
@@ -248,7 +248,7 @@ function BeamColumnCalculator() {
                   <IconAlertTriangle size={21} stroke={1.8} />
                 </div>
 
-                <div className="bg-[#0f1524]/60 border border-[rgba(255,255,255,0.06)] rounded-2xl p-4 shadow-md flex justify-between items-center">
+                <div className="flex items-center justify-between rounded-xl border border-[var(--line)] bg-white p-4">
                   <div>
                     <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Maksimal egilish masofasi</div>
                     <div className="text-xl font-extrabold text-blue-400 font-mono mt-1">{(beamResult.deflection_m * 1000).toFixed(3)} mm</div>
@@ -256,7 +256,7 @@ function BeamColumnCalculator() {
                   <IconRulerMeasure size={21} stroke={1.8} />
                 </div>
 
-                <div className="bg-[#0f1524]/60 border border-[rgba(255,255,255,0.06)] rounded-2xl p-4 shadow-md flex justify-between items-center">
+                <div className="flex items-center justify-between rounded-xl border border-[var(--line)] bg-white p-4">
                   <div>
                     <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Inersiya momenti (I)</div>
                     <div className="text-base font-bold text-emerald-400 font-mono mt-1">{beamResult.moment_of_inertia_m4.toExponential(3)} m⁴</div>
@@ -270,9 +270,9 @@ function BeamColumnCalculator() {
           {/* Column Results */}
           {mode === "column" && columnResult && (
             <div className="flex flex-col gap-6">
-              <h2 className="font-bold text-lg text-white">Ustun bukilish tahlillari</h2>
+              <h2 className="text-lg font-semibold text-[var(--ink)]">Ustun bukilish tahlillari</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="bg-[#0f1524]/60 border border-[rgba(255,255,255,0.06)] rounded-2xl p-4 shadow-md flex justify-between items-center">
+                <div className="flex items-center justify-between rounded-xl border border-[var(--line)] bg-white p-4">
                   <div>
                     <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Tangidiy bukilish yuki (P_cr)</div>
                     <div className="text-xl font-extrabold text-rose-400 font-mono mt-1">{columnResult.critical_load_N.toFixed(0)} N</div>
@@ -280,7 +280,7 @@ function BeamColumnCalculator() {
                   <IconChartLine size={21} stroke={1.8} />
                 </div>
 
-                <div className="bg-[#0f1524]/60 border border-[rgba(255,255,255,0.06)] rounded-2xl p-4 shadow-md flex justify-between items-center">
+                <div className="flex items-center justify-between rounded-xl border border-[var(--line)] bg-white p-4">
                   <div>
                     <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Xavfsizlik Koeffitsienti</div>
                     <div className={`text-xl font-extrabold font-mono mt-1 ${columnResult.safety_factor < 1.5 ? "text-rose-400" : "text-emerald-400"}`}>
@@ -296,14 +296,14 @@ function BeamColumnCalculator() {
           {/* Section Results */}
           {mode === "section" && sectionResult && (
             <div className="flex flex-col gap-6">
-              <h2 className="font-bold text-lg text-white">Geometrik inersiya momentlari</h2>
+              <h2 className="text-lg font-semibold text-[var(--ink)]">Geometrik inersiya momentlari</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="bg-[#0f1524]/60 border border-[rgba(255,255,255,0.06)] rounded-2xl p-4 shadow-md">
+                <div className="rounded-xl border border-[var(--line)] bg-white p-4">
                   <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">To&apos;rtburchak kesim I_xx</div>
-                  <div className="text-base font-bold text-violet-400 font-mono mt-1">{sectionResult.I_rect_m4.toExponential(4)} m⁴</div>
+                  <div className="mt-1 font-mono text-base font-semibold text-[var(--accent)]">{sectionResult.I_rect_m4.toExponential(4)} m⁴</div>
                 </div>
 
-                <div className="bg-[#0f1524]/60 border border-[rgba(255,255,255,0.06)] rounded-2xl p-4 shadow-md">
+                <div className="rounded-xl border border-[var(--line)] bg-white p-4">
                   <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Doiraviy kesim I_xx (d = {Math.min(width, height).toFixed(3)}m)</div>
                   <div className="text-base font-bold text-blue-400 font-mono mt-1">{sectionResult.I_circle_m4.toExponential(4)} m⁴</div>
                 </div>
@@ -312,7 +312,7 @@ function BeamColumnCalculator() {
           )}
 
           {!beamResult && !columnResult && !sectionResult && (
-            <div className="h-[300px] flex flex-col items-center justify-center glass-panel border border-[rgba(255,255,255,0.06)] bg-[#0d1220]/30 rounded-3xl text-gray-500 shadow-xl border-dashed">
+            <div className="flex h-[300px] flex-col items-center justify-center rounded-xl border border-dashed border-[var(--line-strong)] bg-white text-[var(--ink-muted)]">
               <IconCircleCheck size={36} stroke={1.6} className="mb-3" />
               <span className="text-sm font-semibold">Tahlillash uchun &quot;Konstruksiyani tahlillash&quot; tugmasini bosing.</span>
               <span className="text-xs text-gray-600 mt-1">Koeffitsientlar materiallar qarshiligi tenglamalari asosida hisoblanadi.</span>

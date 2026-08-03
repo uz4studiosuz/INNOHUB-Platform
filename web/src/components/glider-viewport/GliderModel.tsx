@@ -11,7 +11,6 @@ const SCALE = 0.1;
 
 // WhiteBox-style wood color palette
 const WOOD_COLOR = "#c9a66b";    // balsa wood base
-const WOOD_DARK  = "#a67c52";    // slightly darker grain
 const NOSE_COLOR = "#cc3333";    // red nose weight (clay ballast marker)
 
 /**
@@ -333,9 +332,9 @@ export function GliderModel({ designOverride, hideUI = false }: { designOverride
         taperScale = Math.sqrt(Math.max(0, 1 - t * t));
       }
       
-      let newX = x * taperScale;
+      const newX = x * taperScale;
       let newY = y * taperScale * sandingScale;
-      let newZ = z;
+      const newZ = z;
 
       let dihedralRise = Math.tan(dihedralRad) * z;
       if (isTipDihedral && z > innerSpan) {
@@ -395,7 +394,7 @@ export function GliderModel({ designOverride, hideUI = false }: { designOverride
 
   // Procedural Aeroelastic Wing Flexing & Aerodynamic Glide Oscillations (Three.js Animation Skill)
   useFrame((state) => {
-    if (gliderGroupRef.current) {
+    if (gliderGroupRef.current && !hideUI) {
       const time = state.clock.elapsedTime;
       // Gentle thermal glide pitch and roll motions
       gliderGroupRef.current.rotation.z = Math.sin(time * 0.8) * 0.02;

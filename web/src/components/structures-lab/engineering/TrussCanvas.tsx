@@ -77,6 +77,8 @@ interface TrussCanvasProps {
   onNodeClick: (id: string) => void;
   onNodeDrag: (id: string, x: number, y: number) => void;
   onMemberClick: (id: string) => void;
+  onDeleteNode?: (id: string) => void;
+  onDeleteMember?: (id: string) => void;
   /** Disables editing (drag/click-to-add/click-to-delete) - used for read-only displays like Competition. */
   readOnly?: boolean;
   /** Color members by how close each is to ITS OWN failure point instead of the flat safetyFactor<1 scheme. */
@@ -93,6 +95,8 @@ export default function TrussCanvas({
   onNodeClick,
   onNodeDrag,
   onMemberClick,
+  onDeleteNode,
+  onDeleteMember,
   readOnly = false,
   intensityMode = false,
 }: TrussCanvasProps) {
@@ -128,17 +132,22 @@ export default function TrussCanvas({
   const nodeMap = new Map(nodes.map((n) => [n.id, n]));
   const gridLines = [];
   for (let x = 0; x <= dimensions.width; x += GRID_SIZE) {
-    gridLines.push(<Line key={`gx${x}`} points={[x, 0, x, dimensions.height]} stroke="#1e2a44" strokeWidth={0.5} />);
+    gridLines.push(<Line key={`gx${x}`} points={[x, 0, x, dimensions.height]} stroke="#263845" strokeWidth={0.5} />);
   }
   for (let y = 0; y <= dimensions.height; y += GRID_SIZE) {
-    gridLines.push(<Line key={`gy${y}`} points={[0, y, dimensions.width, y]} stroke="#1e2a44" strokeWidth={0.5} />);
+    gridLines.push(<Line key={`gy${y}`} points={[0, y, dimensions.width, y]} stroke="#263845" strokeWidth={0.5} />);
   }
 
   return (
-    <div ref={containerRef} className="flex-1 relative" style={{ background: "#0f1e3d" }}>
-      <Stage width={dimensions.width} height={dimensions.height} onClick={handleStageClick}>
+    <div ref={containerRef} className="relative flex-1" style={{ background: "#17212b" }}>
+      <Stage
+        width={dimensions.width}
+        height={dimensions.height}
+        onClick={handleStageClick}
+        onContextMenu={(event) => event.evt.preventDefault()}
+      >
         <Layer listening={false}>
-          <Rect x={0} y={0} width={dimensions.width} height={dimensions.height} fill="#0f1e3d" />
+          <Rect x={0} y={0} width={dimensions.width} height={dimensions.height} fill="#17212b" />
           {gridLines}
         </Layer>
 
@@ -160,8 +169,17 @@ export default function TrussCanvas({
             const midX = (a.x + b.x) / 2;
             const midY = (a.y + b.y) / 2;
             return (
-              <Group key={m.id} onClick={() => !readOnly && mode === "delete" && onMemberClick(m.id)}>
-                <Line points={[a.x, a.y, b.x, b.y]} stroke={color} strokeWidth={res && res.safetyFactor < 1 ? 5 : 3} />
+              <Group
+                key={m.id}
+                onClick={() => !readOnly && mode === "delete" && onMemberClick(m.id)}
+                onContextMenu={(event) => {
+                  if (readOnly || !onDeleteMember) return;
+                  event.evt.preventDefault();
+                  event.cancelBubble = true;
+                  onDeleteMember(m.id);
+                }}
+              >
+                <Line points={[a.x, a.y, b.x, b.y]} stroke={color} strokeWidth={res && res.safetyFactor < 1 ? 5 : 3} hitStrokeWidth={14} />
                 {res && (
                   <Text
                     x={midX - 16}
@@ -194,12 +212,23 @@ export default function TrussCanvas({
                 strokeWidth={2}
                 draggable={!readOnly && mode === "node"}
                 onClick={() => !readOnly && onNodeClick(n.id)}
+                onContextMenu={(event) => {
+                  if (readOnly || !onDeleteNode) return;
+                  event.evt.preventDefault();
+                  event.cancelBubble = true;
+                  onDeleteNode(n.id);
+                }}
                 onDragEnd={(e) => onNodeDrag(n.id, snap(e.target.x()), snap(e.target.y()))}
               />
             </Group>
           ))}
         </Layer>
       </Stage>
+      {!readOnly && (
+        <div className="pointer-events-none absolute bottom-3 left-3 rounded-lg border border-white/10 bg-[#111820]/90 px-3 py-2 text-[10px] font-medium text-slate-300">
+          Chap tugma: qo‘shish yoki tanlash · o‘ng tugma: elementni o‘chirish · Ctrl+Z: bekor qilish
+        </div>
+      )}
     </div>
   );
 }

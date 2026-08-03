@@ -2,7 +2,6 @@
 
 import React, { useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 import { useRocketStore } from "../../../../store/rocketStore";
 import { RocketModel } from "../../../../components/rocket-viewport/RocketModel";
@@ -164,52 +163,50 @@ function fitDistance(halfH: number, halfW: number, cam: THREE.PerspectiveCamera)
  * back only enough to keep some sky and ground context - the way launch footage
  * is actually shot.
  */
-function LaunchCamera({ entrants, phase, spread, rocketTop }: {
+function LaunchCamera({ entrants, phase, spread, rocketTop, playerX }: {
   entrants: Entrant[];
   phase: Phase;
   /** Half-width of the pad line-up, in scene units. */
   spread: number;
   /** Height of the tallest airframe on its pad, in scene units. */
   rocketTop: number;
+  playerX: number;
 }) {
   const startRef = useRef(0);
+  const lookAtRef = useRef(new THREE.Vector3(0, rocketTop * 0.45, 0));
+  const directionRef = useRef(new THREE.Vector3(0.78, 0.24, 1.45).normalize());
   const { clock } = useThree();
 
   React.useEffect(() => { if (phase === "LAUNCHING") startRef.current = clock.getElapsedTime(); }, [phase, clock]);
 
-  useFrame((state) => {
+  useFrame((state, delta) => {
     const cam = state.camera as THREE.PerspectiveCamera;
     if (!(cam instanceof THREE.PerspectiveCamera)) return;
 
     // Staging: hold the whole row of rockets, ground included, with a margin.
     const stageHalfH = (rocketTop * 1.25) / 2;
     const stageDist = fitDistance(stageHalfH, spread * 1.12, cam);
+    let targetX = 0;
     let targetY = rocketTop * 0.45;
     let dist = stageDist;
-    let ease = 0.08;
 
     if (phase === "LAUNCHING") {
       const t = state.clock.getElapsedTime() - startRef.current;
-      const highest = Math.max(0, ...entrants.map((e) =>
-        sampleFlight(e.analysis.flightPath, Math.min(t, e.analysis.totalFlightTimeS))?.h ?? 0
-      ));
-      const y = highest * METRE * ALTITUDE_VIEW_SCALE;
-      // Follow the leader, but never drop below the pads.
+      const player = entrants.find((entrant) => entrant.isPlayer) ?? entrants[0];
+      const playerHeight = sampleFlight(player.analysis.flightPath, Math.min(t, player.analysis.totalFlightTimeS))?.h ?? 0;
+      const y = playerHeight * METRE * ALTITUDE_VIEW_SCALE;
+      targetX = playerX;
+      // Kamera doim foydalanuvchining o'z raketasiga ergashadi.
       targetY = Math.max(rocketTop * 0.45, y + rocketTop * 0.3);
-      // Ease back a little with altitude so there is context, capped so the
-      // rockets stay big enough to see.
-      dist = stageDist * (1 + Math.min(1.1, y / (rocketTop * 14)));
-      ease = 0.05;
+      dist = Math.max(rocketTop * 3.8, Math.min(stageDist * 1.1, rocketTop * 6.5));
     }
 
-    const camY = targetY + dist * 0.16;
-    cam.position.y += (camY - cam.position.y) * ease;
-    const flat = new THREE.Vector3(cam.position.x, 0, cam.position.z);
-    if (flat.lengthSq() < 1e-6) flat.set(0, 0, 1);
-    flat.normalize().multiplyScalar(dist);
-    cam.position.x += (flat.x - cam.position.x) * ease;
-    cam.position.z += (flat.z - cam.position.z) * ease;
-    cam.lookAt(0, targetY, 0);
+    const desiredTarget = new THREE.Vector3(targetX, targetY, 0);
+    const desiredPosition = desiredTarget.clone().add(directionRef.current.clone().multiplyScalar(dist));
+    const alpha = 1 - Math.exp(-(phase === "LAUNCHING" ? 4.2 : 6.5) * Math.min(delta, 0.05));
+    cam.position.lerp(desiredPosition, alpha);
+    lookAtRef.current.lerp(desiredTarget, alpha);
+    cam.lookAt(lookAtRef.current);
   });
   return null;
 }
@@ -311,15 +308,8 @@ export default function CompetitionPage() {
 
       <div className="flex-1 relative min-h-0">
         <Canvas camera={{ position: [0, 60, 320], fov: 45 }} shadows gl={{ antialias: true }}>
-          {/* Orbiting is for inspecting the line-up; while the camera is driving
-              itself the controls step aside so the two do not fight. */}
-          <OrbitControls
-            maxPolarAngle={Math.PI / 2 - 0.03}
-            target={[0, rocketTop * 0.45, 0]}
-            enabled={false}
-          />
           <StadiumArena />
-          <LaunchCamera entrants={entrants} phase={phase} spread={offset + spacing * 0.5} rocketTop={rocketTop} />
+          <LaunchCamera entrants={entrants} phase={phase} spread={offset + spacing * 0.5} rocketTop={rocketTop} playerX={-offset} />
           {entrants.map((e, i) => (
             <FlyingRocket key={e.name} entrant={e} phase={phase} onLanded={handleLanded} x={i * spacing - offset} />
           ))}

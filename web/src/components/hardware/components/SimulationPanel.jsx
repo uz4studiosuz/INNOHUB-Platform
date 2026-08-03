@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { IconPlayerPlay as Play, IconSquare as Square, IconCpu as Cpu, IconTerminal2 as Terminal, IconBolt as Zap, IconGauge as Gauge, IconCompass as Compass } from '@tabler/icons-react';
+import { IconPlayerPlay as Play, IconSquare as Square, IconCpu as Cpu, IconTerminal2 as Terminal, IconBolt as Zap, IconGauge as Gauge, IconCompass as Compass, IconCircleCheck, IconAlertTriangle, IconCode } from '@tabler/icons-react';
 import { useI18n } from '../i18n/index.jsx';
 
 const DEFAULT_ARDUINO_CODE = `// Arduino Bot Control Code
@@ -17,6 +17,8 @@ void setup() {
   pinMode(ENA, OUTPUT);
   pinMode(IN1, OUTPUT);
   pinMode(IN2, OUTPUT);
+  pinMode(TRIG, OUTPUT);
+  pinMode(ECHO, INPUT);
   myServo.attach(11);
 
   // Motor tezligini sozlash
@@ -26,6 +28,15 @@ void setup() {
 
   // Servoni 90 gradusga burish
   myServo.write(90);
+}
+
+long readUltrasonic() {
+  digitalWrite(TRIG, LOW);
+  delayMicroseconds(2);
+  digitalWrite(TRIG, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(TRIG, LOW);
+  return pulseIn(ECHO, HIGH, 30000) * 0.034 / 2;
 }
 
 void loop() {
@@ -42,7 +53,7 @@ void loop() {
 }`;
 
 export default function SimulationPanel({
-  _sceneObjects,
+  sceneObjects = [],
   isSimulating,
   onStartSimulation,
   onStopSimulation,
@@ -54,6 +65,17 @@ export default function SimulationPanel({
   const [servoAngle, setServoAngle] = useState(90);
   const [sensorDistance] = useState(35.0);
   const [logs, setLogs] = useState([]);
+  const [compileState, setCompileState] = useState('idle');
+
+  const types = sceneObjects.map((item) => String(item.type || '').toLowerCase());
+  const benchChecks = [
+    { label: 'Kontroller', ok: types.some((type) => type.includes('arduino') || type.includes('esp32') || type.includes('raspberry')) },
+    { label: 'Motor drayver', ok: types.some((type) => type.includes('l298') || type.includes('driver')) },
+    { label: 'Harakat uzeli', ok: types.some((type) => type.includes('motor') || type.includes('wheel') || type.includes('gear')) },
+    { label: 'Quvvat manbai', ok: types.some((type) => type.includes('battery') || type.includes('power')) },
+  ];
+  const hardwareReady = benchChecks.every((check) => check.ok);
+  const codeReady = /void\s+setup\s*\(/.test(code) && /void\s+loop\s*\(/.test(code);
 
   // The ticking log reads the sliders, but it must not be *restarted* by them.
   // While these values were effect dependencies, nudging a slider mid-run tore
@@ -89,6 +111,10 @@ export default function SimulationPanel({
   }, [isSimulating]);
 
   const handleStart = () => {
+    if (!hardwareReady || !codeReady) {
+      setLogs([`[XATO] Sinovni boshlashdan oldin apparat zanjiri va setup()/loop() kodini tekshiring.`]);
+      return;
+    }
     setLogs([
       `[SYSTEM] Simulyatsiya boshlandi...`,
       `[ARDUINO] Setup bajarildi. Motor Speed = ${motorSpeed} RPM, Servo = ${servoAngle}°`,
@@ -97,6 +123,15 @@ export default function SimulationPanel({
     if (onStartSimulation) {
       onStartSimulation({ motorSpeed, servoAngle, sensorDistance });
     }
+  };
+
+  const handleCompile = () => {
+    const passed = codeReady;
+    setCompileState(passed ? 'ready' : 'error');
+    setLogs((previous) => [
+      passed ? '[BUILD] sketch.ino tekshirildi: 0 ta xato, sinovga tayyor.' : '[BUILD] setup() yoki loop() funksiyasi topilmadi.',
+      ...previous,
+    ]);
   };
 
   const handleStop = () => {
@@ -117,12 +152,27 @@ export default function SimulationPanel({
       </div>
 
       <div className="simulation-body" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px', height: 'calc(100% - 70px)', overflowY: 'auto' }}>
+        <div style={{ padding: 12, borderRadius: 10, border: `1px solid ${hardwareReady ? '#1f8f6c' : '#475569'}`, background: '#111827' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', color: '#f8fafc', fontSize: 12, fontWeight: 700, marginBottom: 10 }}>
+            <span>Sinov stendi</span>
+            <span style={{ color: hardwareReady ? '#5ee5b0' : '#fbbf24' }}>{hardwareReady ? 'ULANISH TAYYOR' : 'ZANJIR TO‘LIQ EMAS'}</span>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 7 }}>
+            {benchChecks.map((check) => (
+              <div key={check.label} style={{ display: 'flex', alignItems: 'center', gap: 6, color: check.ok ? '#d1fae5' : '#cbd5e1', fontSize: 11 }}>
+                {check.ok ? <IconCircleCheck size={14} color="#34d399" /> : <IconAlertTriangle size={14} color="#fbbf24" />}
+                {check.label}
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* Simulyatsiya Boshqaruv Tugmalari */}
         <div className="sim-controls" style={{ display: 'flex', gap: '10px' }}>
           {!isSimulating ? (
             <button
               className="btn-primary"
-              style={{ flex: 1, padding: '12px', background: 'linear-gradient(90deg, #10b981, #059669)', fontSize: '14px', fontWeight: 'bold' }}
+              style={{ flex: 1, padding: '12px', background: hardwareReady && codeReady ? '#0f8065' : '#475569', fontSize: '14px', fontWeight: 'bold', cursor: hardwareReady && codeReady ? 'pointer' : 'not-allowed' }}
               onClick={handleStart}
             >
               <Play size={18} />
@@ -131,7 +181,7 @@ export default function SimulationPanel({
           ) : (
             <button
               className="btn-primary"
-              style={{ flex: 1, padding: '12px', background: 'linear-gradient(90deg, #ef4444, #dc2626)', fontSize: '14px', fontWeight: 'bold' }}
+              style={{ flex: 1, padding: '12px', background: '#dc2626', fontSize: '14px', fontWeight: 'bold' }}
               onClick={handleStop}
             >
               <Square size={18} />
@@ -184,11 +234,11 @@ export default function SimulationPanel({
         <div className="code-block-container" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', color: '#94a3b8' }}>
             <span>Arduino C++ Kodi (sketch.ino)</span>
-            <span style={{ color: '#34d399', fontSize: '11px' }}>● C++ Syntax</span>
+            <span style={{ color: compileState === 'error' ? '#f87171' : '#34d399', fontSize: '11px' }}>{compileState === 'ready' ? '● Build tayyor' : compileState === 'error' ? '● Xato topildi' : '● C++ Syntax'}</span>
           </div>
           <textarea
             value={code}
-            onChange={(e) => setCode(e.target.value)}
+            onChange={(e) => { setCode(e.target.value); setCompileState('idle'); }}
             style={{
               width: '100%',
               height: '180px',
@@ -204,6 +254,9 @@ export default function SimulationPanel({
               resize: 'vertical',
             }}
           />
+          <button type="button" onClick={handleCompile} style={{ alignSelf: 'flex-end', display: 'inline-flex', alignItems: 'center', gap: 6, border: '1px solid #334155', background: '#172033', color: '#e2e8f0', borderRadius: 7, padding: '8px 11px', fontSize: 12, fontWeight: 700 }}>
+            <IconCode size={15} /> Kodni tekshirish
+          </button>
         </div>
 
         {/* Simulyatsiya Konsoli (Loglar) */}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { TrussToolbar, ViewMode } from "./TrussToolbar";
 import { TrussNode, TrussMemberDraft, BuilderMode, MATERIALS, SolvedMember, SupportType } from "./types";
@@ -23,6 +23,12 @@ const TrussViewport3D = dynamic(() => import("./TrussViewport3D"), {
 });
 
 const SUPPORT_CYCLE: SupportType[] = ["none", "pin", "roller_h", "roller_v"];
+const HISTORY_LIMIT = 80;
+
+type TrussSnapshot = {
+  nodes: TrussNode[];
+  members: TrussMemberDraft[];
+};
 
 export default function TrussBuilder() {
   // All three start as the SSR-safe default (localStorage doesn't exist on
@@ -42,9 +48,48 @@ export default function TrussBuilder() {
   const [solved, setSolved] = useState<Map<string, SolvedMember> | null>(null);
   const [solving, setSolving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [history, setHistory] = useState<{ past: TrussSnapshot[]; future: TrussSnapshot[] }>({ past: [], future: [] });
+  const currentSnapshotRef = useRef<TrussSnapshot>({ nodes: [], members: [] });
 
   const material = MATERIALS.find((m) => m.id === materialId) ?? MATERIALS[0];
   const stability = computeStability(nodes, members);
+
+  useEffect(() => {
+    currentSnapshotRef.current = { nodes, members };
+  }, [nodes, members]);
+
+  const checkpoint = useCallback(() => {
+    const snapshot = currentSnapshotRef.current;
+    setHistory((current) => ({
+      past: [...current.past.slice(-(HISTORY_LIMIT - 1)), snapshot],
+      future: [],
+    }));
+  }, []);
+
+  const applySnapshot = useCallback((snapshot: TrussSnapshot) => {
+    currentSnapshotRef.current = snapshot;
+    setNodes(snapshot.nodes);
+    setMembers(snapshot.members);
+    setMemberFirstNode(null);
+    setSolved(null);
+    setError(null);
+  }, []);
+
+  const handleUndo = useCallback(() => {
+    const previous = history.past.at(-1);
+    if (!previous) return;
+    const present = currentSnapshotRef.current;
+    setHistory({ past: history.past.slice(0, -1), future: [present, ...history.future] });
+    applySnapshot(previous);
+  }, [applySnapshot, history]);
+
+  const handleRedo = useCallback(() => {
+    const next = history.future[0];
+    if (!next) return;
+    const present = currentSnapshotRef.current;
+    setHistory({ past: [...history.past, present], future: history.future.slice(1) });
+    applySnapshot(next);
+  }, [applySnapshot, history]);
 
   // Load whatever was last saved, exactly once, after the client has
   // actually mounted (hasMounted flips true post-hydration). This is a
@@ -62,6 +107,25 @@ export default function TrussBuilder() {
     setHydrated(true);
   }
 
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (target?.closest("input, textarea, select, [contenteditable='true']")) return;
+      const modifier = event.ctrlKey || event.metaKey;
+      if (!modifier) return;
+      if (event.key.toLowerCase() === "z") {
+        event.preventDefault();
+        if (event.shiftKey) handleRedo();
+        else handleUndo();
+      } else if (event.key.toLowerCase() === "y") {
+        event.preventDefault();
+        handleRedo();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [handleRedo, handleUndo]);
+
   // Keep the design synced to storage so the Competition tab can pick up
   // whatever was last built here, whenever the user navigates away. Gated on
   // `hydrated` so this doesn't fire with the empty initial state and
@@ -72,14 +136,18 @@ export default function TrussBuilder() {
   }, [hydrated, designName, nodes, members]);
 
   const handleAddNode = useCallback((x: number, y: number) => {
+    checkpoint();
     setNodes((prev) => [...prev, { id: nextId(prev, "n"), x, y, support: "none", loadFx: 0, loadFy: 0 }]);
     setSolved(null);
-  }, []);
+  }, [checkpoint]);
 
   const handleNodeDrag = useCallback((id: string, x: number, y: number) => {
+    const node = currentSnapshotRef.current.nodes.find((item) => item.id === id);
+    if (!node || (node.x === x && node.y === y)) return;
+    checkpoint();
     setNodes((prev) => prev.map((n) => (n.id === id ? { ...n, x, y } : n)));
     setSolved(null);
-  }, []);
+  }, [checkpoint]);
 
   const handleNodeClick = useCallback(
     (id: string) => {
@@ -90,6 +158,7 @@ export default function TrussBuilder() {
         } else if (memberFirstNode === id) {
           setMemberFirstNode(null);
         } else {
+          checkpoint();
           setMembers((prev) => [
             ...prev,
             {
@@ -106,6 +175,7 @@ export default function TrussBuilder() {
           setMemberFirstNode(null);
         }
       } else if (mode === "support") {
+        checkpoint();
         setNodes((prev) =>
           prev.map((n) => {
             if (n.id !== id) return n;
@@ -114,6 +184,7 @@ export default function TrussBuilder() {
           })
         );
       } else if (mode === "load") {
+        checkpoint();
         setNodes((prev) =>
           prev.map((n) => {
             if (n.id !== id) return n;
@@ -122,46 +193,62 @@ export default function TrussBuilder() {
           })
         );
       } else if (mode === "delete") {
+        checkpoint();
         setNodes((prev) => prev.filter((n) => n.id !== id));
         setMembers((prev) => prev.filter((m) => m.nodeA !== id && m.nodeB !== id));
       }
     },
-    [mode, memberFirstNode, material, loadMagnitude]
+    [checkpoint, mode, memberFirstNode, material, loadMagnitude]
   );
 
   const handleMemberClick = useCallback((id: string) => {
+    if (!currentSnapshotRef.current.members.some((member) => member.id === id)) return;
+    checkpoint();
     setMembers((prev) => prev.filter((m) => m.id !== id));
     setSolved(null);
-  }, []);
+  }, [checkpoint]);
+
+  const handleDeleteNode = useCallback((id: string) => {
+    if (!currentSnapshotRef.current.nodes.some((node) => node.id === id)) return;
+    checkpoint();
+    setNodes((prev) => prev.filter((node) => node.id !== id));
+    setMembers((prev) => prev.filter((member) => member.nodeA !== id && member.nodeB !== id));
+    setMemberFirstNode((current) => current === id ? null : current);
+    setSolved(null);
+  }, [checkpoint]);
 
   const handleClear = useCallback(() => {
+    if (currentSnapshotRef.current.nodes.length === 0 && currentSnapshotRef.current.members.length === 0) return;
+    checkpoint();
     setNodes([]);
     setMembers([]);
     setMemberFirstNode(null);
     setSolved(null);
     setError(null);
-  }, []);
+  }, [checkpoint]);
 
   const handleMirror = useCallback(() => {
     if (nodes.length === 0) {
       setError("Avval nusxalash uchun ferma quring.");
       return;
     }
+    checkpoint();
     const mirrored = mirrorTrussHorizontally(nodes, members);
     setNodes(mirrored.nodes);
     setMembers(mirrored.members);
     setSolved(null);
     setError(null);
-  }, [nodes, members]);
+  }, [checkpoint, nodes, members]);
 
   const handleLoadExample = useCallback(() => {
+    checkpoint();
     const example = buildExampleWarrenTruss();
     setNodes(example.nodes);
     setMembers(example.members);
     setDesignName(example.name);
     setSolved(null);
     setError(null);
-  }, []);
+  }, [checkpoint]);
 
   const handleSolve = useCallback(async () => {
     setError(null);
@@ -239,6 +326,10 @@ export default function TrussBuilder() {
         onClear={handleClear}
         onMirror={handleMirror}
         onLoadExample={handleLoadExample}
+        onUndo={handleUndo}
+        onRedo={handleRedo}
+        canUndo={history.past.length > 0}
+        canRedo={history.future.length > 0}
         solving={solving}
         view={view}
         onViewChange={(nextView) => {
@@ -259,6 +350,8 @@ export default function TrussBuilder() {
             onNodeClick={handleNodeClick}
             onNodeDrag={handleNodeDrag}
             onMemberClick={handleMemberClick}
+            onDeleteNode={handleDeleteNode}
+            onDeleteMember={handleMemberClick}
           />
         ) : (
           <TrussViewport3D

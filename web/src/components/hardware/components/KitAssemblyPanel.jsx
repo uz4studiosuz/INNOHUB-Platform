@@ -28,7 +28,7 @@ const KIT_SCENARIOS = [
   },
 ];
 
-export default function KitAssemblyPanel({ sceneObjects, onAddComponent, onLoadKit }) {
+export default function KitAssemblyPanel({ sceneObjects, onAddComponent, onLoadKit, assemblyProgress }) {
   const { t } = useI18n();
   const [selectedScenarioId, setSelectedScenarioId] = useState('2wd_car');
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
@@ -36,6 +36,7 @@ export default function KitAssemblyPanel({ sceneObjects, onAddComponent, onLoadK
   const [selectedKitId, setSelectedKitId] = useState(ROBOT_KITS[0]?.id || '');
 
   const activeKit = ROBOT_KITS.find(k => k.id === selectedKitId) || ROBOT_KITS[0];
+  const isAssembling = !!assemblyProgress?.active;
 
   const handleLoadReadyKit = () => {
     if (!onLoadKit || !activeKit) return;
@@ -115,9 +116,20 @@ export default function KitAssemblyPanel({ sceneObjects, onAddComponent, onLoadK
             className="btn-primary"
             style={{ width: '100%', padding: '9px', fontSize: '13px' }}
             onClick={handleLoadReadyKit}
+            disabled={isAssembling}
           >
-            {t('kit.loadButton')}
+            {isAssembling ? `Yig‘ilmoqda ${assemblyProgress.current}/${assemblyProgress.total}` : t('kit.loadButton')}
           </button>
+          {assemblyProgress?.total > 0 && (
+            <div style={{ marginTop: '10px' }} aria-live="polite">
+              <div style={{ height: '6px', overflow: 'hidden', borderRadius: '999px', background: '#dce7e3' }}>
+                <div style={{ width: `${(assemblyProgress.current / assemblyProgress.total) * 100}%`, height: '100%', background: '#126b55', transition: 'width 320ms ease' }} />
+              </div>
+              <div style={{ marginTop: '6px', fontSize: '11px', color: 'var(--text-secondary)' }}>
+                {isAssembling ? `${assemblyProgress.partName || 'Detallar tayyorlanmoqda'} sahnaga o‘rnatilmoqda` : 'Yig‘ma tayyor. Har bir detal alohida tahrirlanadi.'}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Ssenariy Tanlash */}

@@ -3,6 +3,8 @@
 import { BuilderMode, MATERIALS } from "./types";
 import {
   Icon,
+  IconArrowBackUp,
+  IconArrowForwardUp,
   IconBox,
   IconCircle,
   IconCopy,
@@ -37,6 +39,10 @@ export function TrussToolbar({
   onClear,
   onMirror,
   onLoadExample,
+  onUndo,
+  onRedo,
+  canUndo,
+  canRedo,
   solving,
   view,
   onViewChange,
@@ -51,6 +57,10 @@ export function TrussToolbar({
   onClear: () => void;
   onMirror: () => void;
   onLoadExample: () => void;
+  onUndo: () => void;
+  onRedo: () => void;
+  canUndo: boolean;
+  canRedo: boolean;
   solving: boolean;
   view: ViewMode;
   onViewChange: (v: ViewMode) => void;
@@ -110,6 +120,11 @@ export function TrussToolbar({
       </div>
 
       <div className="flex min-h-12 flex-wrap items-center gap-2 border-t border-[var(--line)] px-4 py-1.5">
+        <div className="flex items-center gap-1" aria-label="Amallar tarixi">
+          <button onClick={onUndo} disabled={!canUndo} title="Bekor qilish (Ctrl+Z)" aria-label="Bekor qilish" className={`${secondaryButton} w-9 justify-center px-0 disabled:cursor-not-allowed disabled:opacity-35`}><IconArrowBackUp size={16} stroke={1.8} /></button>
+          <button onClick={onRedo} disabled={!canRedo} title="Qayta qilish (Ctrl+Y)" aria-label="Qayta qilish" className={`${secondaryButton} w-9 justify-center px-0 disabled:cursor-not-allowed disabled:opacity-35`}><IconArrowForwardUp size={16} stroke={1.8} /></button>
+        </div>
+        <span className="mx-1 h-6 w-px bg-[var(--line)]" />
         <button onClick={onLoadExample} className={secondaryButton}><IconRulerMeasure size={15} stroke={1.8} /> Namuna</button>
         <button onClick={onMirror} disabled={!editing} className={`${secondaryButton} disabled:cursor-not-allowed disabled:opacity-40`}><IconCopy size={15} stroke={1.8} /> Ko‘zgulash</button>
         <button onClick={onClear} disabled={!editing} className={`${secondaryButton} disabled:cursor-not-allowed disabled:opacity-40`}><IconTrash size={15} stroke={1.8} /> Tozalash</button>
