@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
-import { IconPlayerPlay as Play, IconSquare as Square, IconCpu as Cpu, IconTerminal2 as Terminal, IconBolt as Zap, IconGauge as Gauge, IconCompass as Compass, IconCircleCheck, IconAlertTriangle, IconCode } from '@tabler/icons-react';
+import { useState, useEffect } from 'react';
+import { IconPlayerPlay as Play, IconSquare as Square, IconCpu as Cpu, IconTerminal2 as Terminal, IconBolt as Zap, IconGauge as Gauge, IconCompass as Compass, IconCircleCheck, IconAlertTriangle, IconCode, IconMap2, IconDeviceGamepad2, IconRobot, IconRefresh, IconTrophy } from '@tabler/icons-react';
 import { useI18n } from '../i18n/index.jsx';
+import { COURSE_PRESETS } from '../simulation/arenaBuilder';
 
 const DEFAULT_ARDUINO_CODE = `// Arduino Bot Control Code
 #include <Servo.h>
@@ -52,9 +53,27 @@ void loop() {
   delay(100);
 }`;
 
+/** Kodda yozilgan to'siq chegarasini o'qiydi: `if (distance < 15)`.
+ * Shunda o'quvchi kodni o'zgartirsa, robotning xatti-harakati ham o'zgaradi —
+ * bu panelning butun ma'nosi shunda. Topilmasa 15 sm (standart qiymat). */
+function readStopDistance(code) {
+  const match = code.match(/distance\s*<\s*(\d+(?:\.\d+)?)/);
+  if (!match) return 15;
+  return Math.max(3, Math.min(120, Number(match[1])));
+}
+
 export default function SimulationPanel({
   sceneObjects = [],
   isSimulating,
+  telemetry,
+  course,
+  driveMode,
+  logs = [],
+  onCourseChange,
+  onDriveModeChange,
+  onStopCmChange,
+  onLog,
+  onResetLogs,
   onStartSimulation,
   onStopSimulation,
   onUpdateSimState,
@@ -63,9 +82,9 @@ export default function SimulationPanel({
   const [code, setCode] = useState(DEFAULT_ARDUINO_CODE);
   const [motorSpeed, setMotorSpeed] = useState(180);
   const [servoAngle, setServoAngle] = useState(90);
-  const [sensorDistance] = useState(35.0);
-  const [logs, setLogs] = useState([]);
   const [compileState, setCompileState] = useState('idle');
+
+  const stopCm = readStopDistance(code);
 
   const types = sceneObjects.map((item) => String(item.type || '').toLowerCase());
   const benchChecks = [
@@ -77,65 +96,54 @@ export default function SimulationPanel({
   const hardwareReady = benchChecks.every((check) => check.ok);
   const codeReady = /void\s+setup\s*\(/.test(code) && /void\s+loop\s*\(/.test(code);
 
-  // The ticking log reads the sliders, but it must not be *restarted* by them.
-  // While these values were effect dependencies, nudging a slider mid-run tore
-  // down the interval, reseeded the log from scratch and lost the second in
-  // progress. A ref lets each tick see the current values without the effect
-  // ever re-running.
-  const liveRef = useRef({ motorSpeed, servoAngle, sensorDistance, onUpdateSimState });
+  // Slayderlar sahnaga uzatiladi: motor tezligi va servo burchagi robotning
+  // haqiqiy harakatiga kiradi, shuning uchun ular o'zgargan zahoti yuboriladi.
   useEffect(() => {
-    liveRef.current = { motorSpeed, servoAngle, sensorDistance, onUpdateSimState };
-  });
+    onUpdateSimState?.({ motorSpeed, servoAngle });
+  }, [motorSpeed, servoAngle, onUpdateSimState]);
 
-  // Only the interval belongs here. The start and stop banners are consequences
-  // of pressing a button, not state to be synchronised, so they are written by
-  // the handlers below.
+  // Kodda yozilgan to'siq chegarasi sahnaga ham kerak (HUD va avtonom mantiq).
   useEffect(() => {
-    if (!isSimulating) return undefined;
+    onStopCmChange?.(stopCm);
+  }, [stopCm, onStopCmChange]);
 
-    const interval = setInterval(() => {
-      const live = liveRef.current;
-      const noise = (Math.random() * 2 - 1).toFixed(1);
-      const dist = Math.max(5, (parseFloat(live.sensorDistance) + parseFloat(noise))).toFixed(1);
-      setLogs(prev => [
-        `[LOG ${new Date().toLocaleTimeString()}] HC-SR04 Distance: ${dist} cm | Motors: ${live.motorSpeed} RPM | Servo: ${live.servoAngle}°`,
-        ...prev.slice(0, 15),
-      ]);
-
-      if (live.onUpdateSimState) {
-        live.onUpdateSimState({ motorSpeed: live.motorSpeed, servoAngle: live.servoAngle, sensorDistance: dist });
-      }
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [isSimulating]);
+  // Serial Monitor satrlari App da yig'iladi: masofa o'lchovlari sahnaning
+  // animatsiya siklidan keladi, tugma xabarlari esa shu yerdan — ikkalasi
+  // bitta ro'yxatda bo'lgandagina loglar to'g'ri tartibda turadi.
 
   const handleStart = () => {
     if (!hardwareReady || !codeReady) {
-      setLogs([`[XATO] Sinovni boshlashdan oldin apparat zanjiri va setup()/loop() kodini tekshiring.`]);
+      onResetLogs?.([`[XATO] Sinovni boshlashdan oldin apparat zanjiri va setup()/loop() kodini tekshiring.`]);
       return;
     }
-    setLogs([
-      `[SYSTEM] Simulyatsiya boshlandi...`,
-      `[ARDUINO] Setup bajarildi. Motor Speed = ${motorSpeed} RPM, Servo = ${servoAngle}°`,
-      `[SENSOR] HC-SR04 Ultrasonik masofa sensori faol.`,
+    const preset = COURSE_PRESETS.find((item) => item.id === course);
+    onResetLogs?.([
+      `[SYSTEM] "${preset?.label || course}" poligonida sinov boshlandi.`,
+      `[ARDUINO] Setup bajarildi. PWM = ${motorSpeed}, Servo = ${servoAngle}°`,
+      `[ARDUINO] To'siq chegarasi kodda: distance < ${stopCm} sm`,
+      `[SENSOR] HC-SR04 ultratovush sensori faol.`,
+      driveMode === 'manual'
+        ? `[REJIM] Qo'lda boshqarish: sahnani bosing va W / A / S / D bilan haydang.`
+        : `[REJIM] Avtonom: robot kod mantig'i bo'yicha o'zi yuradi.`,
     ]);
-    if (onStartSimulation) {
-      onStartSimulation({ motorSpeed, servoAngle, sensorDistance });
-    }
+    onStartSimulation?.({ motorSpeed, servoAngle });
+  };
+
+  const handleRestart = () => {
+    // Poligonni qayta qurish uchun sinovni to'xtatib, darhol qayta boshlaymiz:
+    // ThreeScene dagi effekt shu paytda robotni startga qaytaradi.
+    onStopSimulation?.();
+    window.setTimeout(handleStart, 60);
   };
 
   const handleCompile = () => {
     const passed = codeReady;
     setCompileState(passed ? 'ready' : 'error');
-    setLogs((previous) => [
-      passed ? '[BUILD] sketch.ino tekshirildi: 0 ta xato, sinovga tayyor.' : '[BUILD] setup() yoki loop() funksiyasi topilmadi.',
-      ...previous,
-    ]);
+    onLog?.(passed ? '[BUILD] sketch.ino tekshirildi: 0 ta xato, sinovga tayyor.' : '[BUILD] setup() yoki loop() funksiyasi topilmadi.');
   };
 
   const handleStop = () => {
-    setLogs(prev => [`[SYSTEM] Simulyatsiya to'xtatildi.`, ...prev]);
+    onLog?.(`[SYSTEM] Simulyatsiya to'xtatildi.`);
     if (onStopSimulation) {
       onStopSimulation();
     }
@@ -148,7 +156,7 @@ export default function SimulationPanel({
           <Cpu className="icon-blue" size={20} />
           <h2>{t('sim.title')}</h2>
         </div>
-        <p className="sidebar-subtitle">Arduino C++ kodi va 3D harakat simulyatori</p>
+        <p className="sidebar-subtitle">Arduino C++ kodi va to‘siqli 3D sinov xonasi</p>
       </div>
 
       <div className="simulation-body" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px', height: 'calc(100% - 70px)', overflowY: 'auto' }}>
@@ -167,6 +175,68 @@ export default function SimulationPanel({
           </div>
         </div>
 
+        {/* Sinov poligoni tanlash */}
+        <div style={{ padding: 12, borderRadius: 10, border: '1px solid #334155', background: '#111827' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#38bdf8', fontSize: 12, fontWeight: 700, textTransform: 'uppercase', marginBottom: 10 }}>
+            <IconMap2 size={14} />
+            <span>Sinov xonasi</span>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            {COURSE_PRESETS.map((preset) => (
+              <button
+                key={preset.id}
+                type="button"
+                disabled={isSimulating}
+                onClick={() => onCourseChange?.(preset.id)}
+                style={{
+                  textAlign: 'left',
+                  padding: '9px 11px',
+                  borderRadius: 8,
+                  cursor: isSimulating ? 'not-allowed' : 'pointer',
+                  opacity: isSimulating && course !== preset.id ? 0.45 : 1,
+                  border: `1px solid ${course === preset.id ? '#2563eb' : '#334155'}`,
+                  background: course === preset.id ? 'rgba(37, 99, 235, 0.18)' : '#0f172a',
+                  color: '#e2e8f0',
+                }}
+              >
+                <div style={{ fontSize: 12.5, fontWeight: 700 }}>{preset.label}</div>
+                <div style={{ fontSize: 10.5, color: '#94a3b8', marginTop: 2 }}>{preset.hint}</div>
+              </button>
+            ))}
+          </div>
+
+          <div style={{ display: 'flex', gap: 6, marginTop: 10 }}>
+            {[
+              { id: 'auto', label: 'Avtonom', icon: IconRobot },
+              { id: 'manual', label: "Qo'lda (WASD)", icon: IconDeviceGamepad2 },
+            ].map((option) => (
+              <button
+                key={option.id}
+                type="button"
+                onClick={() => onDriveModeChange?.(option.id)}
+                style={{
+                  flex: 1,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 5,
+                  padding: '8px 6px',
+                  borderRadius: 7,
+                  fontSize: 11.5,
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  border: `1px solid ${driveMode === option.id ? '#7c3aed' : '#334155'}`,
+                  background: driveMode === option.id ? 'rgba(124, 58, 237, 0.2)' : '#0f172a',
+                  color: driveMode === option.id ? '#ddd6fe' : '#94a3b8',
+                }}
+              >
+                <option.icon size={14} />
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Simulyatsiya Boshqaruv Tugmalari */}
         <div className="sim-controls" style={{ display: 'flex', gap: '10px' }}>
           {!isSimulating ? (
@@ -179,16 +249,56 @@ export default function SimulationPanel({
               <span>{t('sim.start')}</span>
             </button>
           ) : (
-            <button
-              className="btn-primary"
-              style={{ flex: 1, padding: '12px', background: '#dc2626', fontSize: '14px', fontWeight: 'bold' }}
-              onClick={handleStop}
-            >
-              <Square size={18} />
-              <span>{t('sim.stop')}</span>
-            </button>
+            <>
+              <button
+                className="btn-primary"
+                style={{ flex: 1, padding: '12px', background: '#dc2626', fontSize: '14px', fontWeight: 'bold' }}
+                onClick={handleStop}
+              >
+                <Square size={18} />
+                <span>{t('sim.stop')}</span>
+              </button>
+              <button
+                className="btn-primary"
+                title="Robotni startga qaytarish"
+                style={{ padding: '12px 14px', background: '#1e293b', border: '1px solid #334155' }}
+                onClick={handleRestart}
+              >
+                <IconRefresh size={18} />
+              </button>
+            </>
           )}
         </div>
+
+        {/* Jonli natijalar tablosi */}
+        {isSimulating && telemetry && (
+          <div
+            style={{
+              padding: 12,
+              borderRadius: 10,
+              border: `1px solid ${telemetry.goalReached ? '#15803d' : '#334155'}`,
+              background: telemetry.goalReached ? 'rgba(22, 163, 74, 0.14)' : '#0b1220',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 9, fontSize: 12, fontWeight: 700, color: telemetry.goalReached ? '#4ade80' : '#38bdf8' }}>
+              <IconTrophy size={14} />
+              <span>{telemetry.goalReached ? 'MARRAGA YETDI' : 'Sinov ketmoqda'}</span>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+              {[
+                { label: 'To‘siqqacha', value: `${telemetry.distanceCm.toFixed(1)} sm`, alert: telemetry.distanceCm < stopCm },
+                { label: 'Tezlik', value: `${telemetry.speedMmS} mm/s` },
+                { label: 'Vaqt', value: `${telemetry.elapsed.toFixed(1)} s` },
+                { label: 'Urilishlar', value: telemetry.collisions, alert: telemetry.collisions > 0 },
+              ].map((item) => (
+                <div key={item.label} style={{ background: '#0f172a', borderRadius: 7, padding: '7px 9px', border: '1px solid rgba(255,255,255,0.06)' }}>
+                  <div style={{ fontSize: 9.5, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748b' }}>{item.label}</div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: item.alert ? '#f87171' : '#e2e8f0' }}>{item.value}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Real-vaqtli Boshqaruv Panelchasi */}
         <div className="sim-sliders-card" style={{ background: 'rgba(15, 23, 42, 0.8)', padding: '14px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -235,6 +345,10 @@ export default function SimulationPanel({
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', color: '#94a3b8' }}>
             <span>Arduino C++ Kodi (sketch.ino)</span>
             <span style={{ color: compileState === 'error' ? '#f87171' : '#34d399', fontSize: '11px' }}>{compileState === 'ready' ? '● Build tayyor' : compileState === 'error' ? '● Xato topildi' : '● C++ Syntax'}</span>
+          </div>
+          <div style={{ fontSize: 10.5, color: '#94a3b8', lineHeight: 1.45 }}>
+            Poligondagi robot shu koddan <b style={{ color: '#38bdf8' }}>distance &lt; {stopCm}</b> chegarasini o‘qiydi — raqamni
+            o‘zgartiring va robot to‘siqlarga boshqacha munosabat bildiradi.
           </div>
           <textarea
             value={code}

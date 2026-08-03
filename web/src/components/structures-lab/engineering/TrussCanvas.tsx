@@ -45,6 +45,25 @@ function blendHex(hexA: string, hexB: string, t: number): string {
   return `rgb(${r},${g},${bl})`;
 }
 
+/**
+ * A'zoning materiali bo'yicha rangi (tahlildan oldin).
+ *
+ * Ranglar 3D ko'rinishdagi material ranglariga mos: yog'och issiq jigarrang,
+ * alyuminiy och kumush, po'lat to'q kulrang, uglerod tolasi deyarli qora —
+ * shunda 2D chizma va 3D model bir xil "tilda" gapiradi.
+ */
+export const MATERIAL_SWATCHES: { match: string; label: string; color: string }[] = [
+  { match: "alyuminiy", label: "Alyuminiy", color: "#cbd5e1" },
+  { match: "po'lat", label: "Po'lat", color: "#7c8b99" },
+  { match: "uglerod", label: "Uglerod tolasi", color: "#5b6bd6" },
+  { match: "balsa", label: "Balsa yog'och", color: "#c19a6b" },
+];
+
+export function materialStrokeColor(label?: string): string {
+  const normalized = (label ?? "").toLowerCase().replace("‘", "'");
+  return MATERIAL_SWATCHES.find((s) => normalized.includes(s.match))?.color ?? "#94a3b8";
+}
+
 /** Gradient color by how close a member is to ITS OWN failure point (0 = unloaded, 1 = at limit). */
 function intensityColor(inTension: boolean, fraction: number): string {
   const t = Math.max(0, Math.min(1, fraction));
@@ -85,6 +104,11 @@ interface TrussCanvasProps {
   intensityMode?: boolean;
   /** Re-centres the current truss whenever this token changes. */
   fitRequest?: number;
+  /** Also scale the truss to fill the viewport, not just centre it. The builder
+   * leaves this off so its grid stays 1:1 with the snap grid; read-only views
+   * (the rally, results) turn it on so a small design isn't a speck in one
+   * corner of a large canvas. */
+  fitZoom?: boolean;
 }
 
 export default function TrussCanvas({
@@ -102,10 +126,12 @@ export default function TrussCanvas({
   readOnly = false,
   intensityMode = false,
   fitRequest = 0,
+  fitZoom = false,
 }: TrussCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 800, height: 500 });
   const [viewportOffset, setViewportOffset] = useState({ x: 0, y: 0 });
+  const [viewportScale, setViewportScale] = useState(1);
   const appliedFitRef = useRef("");
 
   useEffect(() => {
@@ -125,28 +151,61 @@ export default function TrussCanvas({
 
   useEffect(() => {
     if (fitRequest <= 0 || nodes.length === 0) return;
+    // Deliberately NOT keyed on the node list: in the builder the user adds
+    // nodes one at a time, and re-fitting on every addition would yank the
+    // view out from under them mid-drawing. A re-fit is always an explicit
+    // request (the token) or a viewport resize.
     const fitKey = `${fitRequest}:${dimensions.width}:${dimensions.height}`;
     if (appliedFitRef.current === fitKey) return;
     appliedFitRef.current = fitKey;
+
     const minX = Math.min(...nodes.map((node) => node.x));
     const maxX = Math.max(...nodes.map((node) => node.x));
     const minY = Math.min(...nodes.map((node) => node.y));
     const maxY = Math.max(...nodes.map((node) => node.y));
+    const centreX = (minX + maxX) / 2;
+    const centreY = (minY + maxY) / 2;
+
+    // Padding leaves room for the node glyphs and support triangles, which are
+    // drawn outside the raw node bounding box.
+    const padding = 90;
+    const scale = fitZoom
+      ? Math.max(
+          0.35,
+          Math.min(
+            2.5,
+            Math.min(
+              (dimensions.width - padding * 2) / Math.max(maxX - minX, 1),
+              (dimensions.height - padding * 2) / Math.max(maxY - minY, 1)
+            )
+          )
+        )
+      : 1;
+
+    setViewportScale(scale);
+    // Group transform is screen = offset + scale * model, so to land the truss
+    // centre on the viewport centre the offset has to absorb the scale too.
     setViewportOffset({
-      x: dimensions.width / 2 - (minX + maxX) / 2,
-      y: dimensions.height / 2 - (minY + maxY) / 2,
+      x: dimensions.width / 2 - centreX * scale,
+      y: dimensions.height / 2 - centreY * scale,
     });
-  }, [dimensions.height, dimensions.width, fitRequest, nodes]);
+  }, [dimensions.height, dimensions.width, fitRequest, fitZoom, nodes]);
 
   const handleStageClick = useCallback(
     (e: KonvaEventObject<MouseEvent>) => {
       const stage = e.target.getStage();
       if (!readOnly && e.target === stage && mode === "node" && stage) {
         const pos = stage.getPointerPosition();
-        if (pos) onAddNode(snap(pos.x - viewportOffset.x), snap(pos.y - viewportOffset.y));
+        // Inverse of the group transform above: model = (screen - offset) / scale.
+        if (pos) {
+          onAddNode(
+            snap((pos.x - viewportOffset.x) / viewportScale),
+            snap((pos.y - viewportOffset.y) / viewportScale)
+          );
+        }
       }
     },
-    [mode, onAddNode, readOnly, viewportOffset]
+    [mode, onAddNode, readOnly, viewportOffset, viewportScale]
   );
 
   const nodeMap = new Map(nodes.map((n) => [n.id, n]));
@@ -158,8 +217,27 @@ export default function TrussCanvas({
     gridLines.push(<Line key={`gy${y}`} points={[0, y, dimensions.width, y]} stroke="#263845" strokeWidth={0.5} />);
   }
 
+  // Faqat chizmada haqiqatan ishlatilgan materiallar ko'rsatiladi — to'liq
+  // ro'yxat bo'sh ko'prikda ham joy egallab turardi.
+  const usedMaterials = MATERIAL_SWATCHES.filter((swatch) =>
+    members.some((m) => (m.materialLabel ?? "").toLowerCase().replace("‘", "'").includes(swatch.match))
+  );
+
   return (
     <div ref={containerRef} className="relative flex-1" style={{ background: "#17212b" }}>
+      {!solved && usedMaterials.length > 0 && (
+        <div className="pointer-events-none absolute top-3 right-3 z-10 rounded-lg border border-white/10 bg-[#111820]/90 px-3 py-2">
+          <div className="mb-1.5 text-[9px] font-bold uppercase tracking-wider text-slate-500">Material</div>
+          <div className="flex flex-col gap-1">
+            {usedMaterials.map((swatch) => (
+              <div key={swatch.match} className="flex items-center gap-2">
+                <span className="h-[3px] w-5 rounded-full" style={{ background: swatch.color }} />
+                <span className="text-[10px] font-medium text-slate-300">{swatch.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
       <Stage
         width={dimensions.width}
         height={dimensions.height}
@@ -172,13 +250,17 @@ export default function TrussCanvas({
         </Layer>
 
         <Layer>
-          <Group x={viewportOffset.x} y={viewportOffset.y}>
+          <Group x={viewportOffset.x} y={viewportOffset.y} scaleX={viewportScale} scaleY={viewportScale}>
           {members.map((m) => {
             const a = nodeMap.get(m.nodeA);
             const b = nodeMap.get(m.nodeB);
             if (!a || !b) return null;
             const res = solved?.get(m.id);
-            let color = "#94a3b8";
+            // Tahlildan oldin a'zo o'z materialining rangi bilan chiziladi.
+            // Avval hammasi bir xil kulrang edi va aralash materialli
+            // ko'prikda qaysi a'zo nimadan qilinganini bilib bo'lmasdi —
+            // holbuki material a'zoning kuchini belgilaydigan asosiy tanlov.
+            let color = materialStrokeColor(m.materialLabel);
             if (res) {
               if (intensityMode) {
                 const fraction = res.safetyFactor > 0 ? 1 / res.safetyFactor : 1;
@@ -218,7 +300,7 @@ export default function TrussCanvas({
         </Layer>
 
         <Layer>
-          <Group x={viewportOffset.x} y={viewportOffset.y}>
+          <Group x={viewportOffset.x} y={viewportOffset.y} scaleX={viewportScale} scaleY={viewportScale}>
           {memberFirstNode && nodeMap.get(memberFirstNode) && (
             <Circle x={nodeMap.get(memberFirstNode)!.x} y={nodeMap.get(memberFirstNode)!.y} radius={12} stroke="#facc15" strokeWidth={2} />
           )}

@@ -393,6 +393,330 @@
   bottom: 18px;
 }
 
+/* ─── Tayyor yig'ma kartochkalari ─── */
+.kit-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 268px;
+  overflow-y: auto;
+  margin-bottom: 10px;
+  padding-right: 2px;
+}
+
+.kit-card {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  width: 100%;
+  padding: 9px 10px;
+  border-radius: 9px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.03);
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.kit-card:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.kit-card.is-active {
+  border-color: #38bdf8;
+  background: rgba(56, 189, 248, 0.14);
+}
+
+.kit-card:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.kit-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.kit-card-head strong {
+  font-size: 12.5px;
+  line-height: 1.25;
+}
+
+.kit-card-badge {
+  flex-shrink: 0;
+  font-size: 9.5px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.kit-card-badge.lvl-0 { background: rgba(52, 211, 153, 0.18); color: #6ee7b7; }
+.kit-card-badge.lvl-1 { background: rgba(56, 189, 248, 0.18); color: #7dd3fc; }
+.kit-card-badge.lvl-2 { background: rgba(250, 204, 21, 0.18); color: #fde047; }
+.kit-card-badge.lvl-3 { background: rgba(249, 115, 22, 0.18); color: #fdba74; }
+.kit-card-badge.lvl-4 { background: rgba(239, 68, 68, 0.18); color: #fca5a5; }
+
+.kit-card-desc {
+  font-size: 10.5px;
+  line-height: 1.45;
+  opacity: 0.68;
+}
+
+.kit-card-meta {
+  font-size: 10px;
+  font-weight: 700;
+  opacity: 0.5;
+}
+
+/* ─── Sarlavhadagi "Loyiha" menyusi ─── */
+.header-menu {
+  position: relative;
+}
+
+.header-menu .header-btn.is-open {
+  background: rgba(56, 189, 248, 0.16);
+  border-color: rgba(56, 189, 248, 0.45);
+}
+
+.header-menu-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 60;
+  min-width: 240px;
+  padding: 6px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(12, 18, 30, 0.97);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.header-menu-panel button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 10px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #dbe4ea;
+  font-size: 12.5px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.header-menu-panel button span {
+  flex: 1;
+  min-width: 0;
+}
+
+.header-menu-panel button small {
+  font-size: 10px;
+  font-weight: 700;
+  color: #64748b;
+  letter-spacing: 0.03em;
+}
+
+.header-menu-panel button:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.header-menu-panel button.is-danger {
+  color: #f87171;
+}
+
+.header-menu-panel button.is-danger:hover {
+  background: rgba(239, 68, 68, 0.15);
+  color: #fca5a5;
+}
+
+.header-menu-sep {
+  height: 1px;
+  margin: 5px 6px;
+  background: rgba(255, 255, 255, 0.09);
+}
+
+/* ─── Sahna kamera paneli (Reset / Sig'dirish / ko'rinishlar) ─── */
+.scene-camera-bar {
+  position: absolute;
+  z-index: 30;
+  right: 20px;
+  bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 8px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(9, 14, 24, 0.9);
+  backdrop-filter: blur(12px);
+}
+
+.scene-camera-bar button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #94a3b8;
+  border-radius: 6px;
+  padding: 6px 9px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.scene-camera-bar button:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #e2e8f0;
+}
+
+.scene-camera-sep {
+  width: 1px;
+  height: 18px;
+  background: rgba(255, 255, 255, 0.14);
+  margin: 0 3px;
+}
+
+/* ─── Sinov xonasi HUD (o'yin uslubidagi ko'rsatkichlar paneli) ─── */
+.sim-hud {
+  position: absolute;
+  z-index: 30;
+  left: 50%;
+  bottom: 20px;
+  transform: translateX(-50%);
+  min-width: 460px;
+  padding: 11px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(9, 14, 24, 0.9);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+  pointer-events: none;
+}
+
+.sim-hud-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.sim-hud-stat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 9px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  color: #cbd5e1;
+}
+
+.sim-hud-stat strong {
+  display: block;
+  font-size: 14px;
+  color: #f1f5f9;
+  line-height: 1.2;
+}
+
+.sim-hud-label {
+  display: block;
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #7c8aa0;
+}
+
+.sim-hud-stat.is-alert {
+  border-color: rgba(239, 68, 68, 0.55);
+  background: rgba(239, 68, 68, 0.14);
+  color: #fca5a5;
+}
+
+.sim-hud-stat.is-warn {
+  border-color: rgba(245, 158, 11, 0.5);
+  color: #fcd34d;
+}
+
+.sim-hud-stat.is-done {
+  border-color: rgba(34, 197, 94, 0.55);
+  background: rgba(34, 197, 94, 0.14);
+  color: #86efac;
+}
+
+.sim-hud-gauge {
+  margin-top: 9px;
+  height: 5px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.09);
+  overflow: hidden;
+}
+
+.sim-hud-gauge-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.18s linear, background 0.18s linear;
+}
+
+.sim-hud-foot {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 7px;
+  font-size: 10.5px;
+  font-weight: 600;
+  color: #8ea0b8;
+}
+
+.sim-camera-switch {
+  position: absolute;
+  z-index: 30;
+  right: 20px;
+  bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 9px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(9, 14, 24, 0.9);
+  backdrop-filter: blur(12px);
+  color: #7c8aa0;
+}
+
+.sim-camera-switch button {
+  border: 1px solid transparent;
+  background: transparent;
+  color: #94a3b8;
+  border-radius: 6px;
+  padding: 5px 9px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.sim-camera-switch button:hover {
+  background: rgba(255, 255, 255, 0.07);
+  color: #e2e8f0;
+}
+
+.sim-camera-switch button.is-active {
+  background: rgba(37, 99, 235, 0.9);
+  border-color: rgba(96, 165, 250, 0.6);
+  color: #fff;
+}
+
 /* Header Adaptiv Qoidalari (Responsive Breakpoints) */
 @media (max-width: 1500px) {
   .logo-tagline {

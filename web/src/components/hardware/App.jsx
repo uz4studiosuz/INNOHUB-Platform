@@ -24,7 +24,54 @@ function App() {
 
   // Simulation state
   const [isSimulating, setIsSimulating] = useState(false);
-  const [simState, setSimState] = useState({ motorSpeed: 180, servoAngle: 90, sensorDistance: 35.0 });
+  const [simState, setSimState] = useState({ motorSpeed: 180, servoAngle: 90 });
+  // Sinov xonasi sozlamalari va sahnadan qaytadigan jonli ko'rsatkichlar
+  const [simCourse, setSimCourse] = useState('slalom');
+  const [simDriveMode, setSimDriveMode] = useState('auto');
+  const [telemetry, setTelemetry] = useState(null);
+  const [simStopCm, setSimStopCm] = useState(15);
+  // Serial Monitor satrlari. Ular sahnadagi animatsiya siklidan (telemetriya)
+  // va paneldagi tugmalardan keladi, ya'ni ikkala manba ham shu yerda
+  // birlashadi — shundagina loglar to'g'ri tartibda turadi.
+  const [simLogs, setSimLogs] = useState([]);
+  const simStopCmRef = useRef(simStopCm);
+  const lastLogAtRef = useRef(0);
+
+  useEffect(() => { simStopCmRef.current = simStopCm; }, [simStopCm]);
+
+  const appendSimLog = useCallback((line) => {
+    setSimLogs(prev => [line, ...prev.slice(0, 24)]);
+  }, []);
+
+  const resetSimLogs = useCallback((lines = []) => {
+    setSimLogs(lines);
+    lastLogAtRef.current = 0;
+  }, []);
+
+  /** ThreeScene animatsiya siklidan sekundiga ~5 marta chaqiriladi. */
+  const handleTelemetry = useCallback((snapshot) => {
+    setTelemetry(snapshot);
+
+    if (snapshot.justReachedGoal) {
+      lastLogAtRef.current = Date.now();
+      setSimLogs(prev => [
+        `[FINISH] Marraga yetdi! Vaqt: ${snapshot.elapsed.toFixed(1)} s · urilishlar: ${snapshot.collisions}`,
+        ...prev.slice(0, 24),
+      ]);
+      return;
+    }
+
+    // Log sekundiga bir marta: 5 Hz da yozilsa oyna o'qib bo'lmas holga keladi.
+    const now = Date.now();
+    if (now - lastLogAtRef.current < 1000) return;
+    lastLogAtRef.current = now;
+
+    const warning = snapshot.distanceCm < simStopCmRef.current ? "  <-- TO'SIQ! to'xtash" : '';
+    setSimLogs(prev => [
+      `[${new Date().toLocaleTimeString()}] Masofa: ${snapshot.distanceCm.toFixed(1)} sm | ${snapshot.speedMmS} mm/s | urilish: ${snapshot.collisions}${warning}`,
+      ...prev.slice(0, 24),
+    ]);
+  }, []);
 
   // Hozirda tanlangan obyekt ID si
   const [selectedObjectId, setSelectedObjectId] = useState(null);
@@ -41,6 +88,30 @@ function App() {
 
   useEffect(() => () => {
     kitTimersRef.current.forEach(window.clearTimeout);
+  }, []);
+
+  // SimulationPanel buni effekt ichidan chaqiradi, shuning uchun havolasi
+  // barqaror bo'lishi shart: har renderda yangi funksiya bo'lsa, effekt qayta
+  // ishga tushib, state ni yangilab, yana renderni keltirib chiqaradi.
+  const handleUpdateSimState = useCallback((newState) => {
+    setSimState(prev => ({ ...prev, ...newState }));
+  }, []);
+
+  /**
+   * Rejim almashtirish sinovni ham to'xtatadi.
+   *
+   * Avval faqat panel almashardi: "Kod & Simulyatsiya" dan chiqilganda
+   * isSimulating true bo'lib qolar, robot poligonda yurishda davom etar,
+   * yig'ish rejimida esa detallarni surib bo'lmasdi (gizmo o'chirilgan) va
+   * foydalanuvchi sinovni to'xtatish tugmasini ham topa olmasdi — u faqat
+   * simulyatsiya panelida bo'lgan.
+   */
+  const handleSelectMode = useCallback((mode) => {
+    setActiveMode(mode);
+    if (mode !== 'simulation') {
+      setIsSimulating(false);
+      setTelemetry(null);
+    }
   }, []);
 
   // Loyihani JSON fayldan yuklash
@@ -256,7 +327,7 @@ function App() {
         sceneObjects={sceneObjects}
         pinMappings={pinMappings}
         activeMode={activeMode}
-        onSelectMode={setActiveMode}
+        onSelectMode={handleSelectMode}
         onLoadProject={handleLoadProject}
         onClearScene={handleClearScene}
         onOpenBomModal={() => setIsBomOpen(true)}
@@ -270,11 +341,15 @@ function App() {
       <div style={{ display: 'flex', flex: 1, width: '100%', minHeight: 0, overflow: 'hidden', position: 'relative' }}>
         {/* Markaziy 3D Oyna */}
         <div style={{ flex: 1, position: 'relative', height: '100%' }}>
-          <ThreeScene 
+          <ThreeScene
             objects={sceneObjects}
             selectedId={selectedObjectId}
             isSimulating={isSimulating}
             simState={simState}
+            simCourse={simCourse}
+            simDriveMode={simDriveMode}
+            simStopCm={simStopCm}
+            onTelemetry={handleTelemetry}
             onSelect={setSelectedObjectId}
             onRemove={handleRemoveObject}
             onUpdate={handleUpdateTransform}
@@ -282,9 +357,13 @@ function App() {
             onDropPart={handleDropPart}
             onExportLdrReady={(exportFn) => { exportLdrFnRef.current = exportFn; }}
           />
-          <div className="scene-count-badge" aria-live="polite">
-            {sceneObjects.length} detal · katalogdan sudrab sahnaga qo‘ying
-          </div>
+          {/* Sinov xonasida bu maslahat o'rinsiz — u yerda detal qo'shilmaydi,
+              ekranning pastki chap burchagi esa HUD uchun kerak. */}
+          {!isSimulating && (
+            <div className="scene-count-badge" aria-live="polite">
+              {sceneObjects.length} detal · katalogdan sudrab sahnaga qo‘ying
+            </div>
+          )}
         </div>
 
         {/* O'ng panel: Rejimga qarab dinamik panel (Erkin qurish, Tayyor Yig'ish, Simulyatsiya) */}
@@ -309,12 +388,25 @@ function App() {
           <SimulationPanel
             sceneObjects={sceneObjects}
             isSimulating={isSimulating}
+            telemetry={telemetry}
+            course={simCourse}
+            driveMode={simDriveMode}
+            logs={simLogs}
+            onCourseChange={setSimCourse}
+            onDriveModeChange={setSimDriveMode}
+            onStopCmChange={setSimStopCm}
+            onLog={appendSimLog}
+            onResetLogs={resetSimLogs}
             onStartSimulation={(initialState) => {
+              setTelemetry(null);
               setIsSimulating(true);
-              if (initialState) setSimState(initialState);
+              if (initialState) setSimState(prev => ({ ...prev, ...initialState }));
             }}
-            onStopSimulation={() => setIsSimulating(false)}
-            onUpdateSimState={(newState) => setSimState(prev => ({ ...prev, ...newState }))}
+            onStopSimulation={() => {
+              setIsSimulating(false);
+              setTelemetry(null);
+            }}
+            onUpdateSimState={handleUpdateSimState}
           />
         )}
       </div>

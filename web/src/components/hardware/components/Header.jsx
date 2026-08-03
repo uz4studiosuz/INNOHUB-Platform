@@ -1,5 +1,5 @@
-import { useRef } from 'react';
-import { IconCpu as Cpu, IconDeviceFloppy as Save, IconFolderOpen as FolderOpen, IconTrash as Trash2, IconPackage as PackageCheck, IconRobot as Bot, IconDownload as Download, IconUpload as Upload, IconDatabase as HardDrive, IconBox as Box, IconPlayerPlay as Play } from '@tabler/icons-react';
+import { useEffect, useRef, useState } from 'react';
+import { IconCpu as Cpu, IconDeviceFloppy as Save, IconFolderOpen as FolderOpen, IconTrash as Trash2, IconPackage as PackageCheck, IconRobot as Bot, IconDownload as Download, IconUpload as Upload, IconDatabase as HardDrive, IconBox as Box, IconPlayerPlay as Play, IconFolder, IconChevronDown } from '@tabler/icons-react';
 import { exportProjectToJson, importProjectFromJson } from '../utils/projectStorage';
 import { importFromLdr } from '../utils/ldrConverter';
 import { useI18n } from '../i18n/index.jsx';
@@ -20,6 +20,30 @@ export default function Header({
   const { t } = useI18n();
   const jsonFileInputRef = useRef(null);
   const ldrFileInputRef = useRef(null);
+
+  // Fayl amallari (saqlash, yuklash, import/eksport, tozalash) bitta menyuga
+  // yig'ildi. Avval ular sarlavha qatorida oltita alohida tugma bo'lib turardi
+  // va asosiy ish — rejim tanlash hamda BOM/Arduino — ular orasida yo'qolib
+  // ketardi; tor ekranda esa yozuvlar butunlay yashirinib, faqat ikonkalar
+  // qolardi va qaysi biri nima qilishini bilib bo'lmasdi.
+  const [fileMenuOpen, setFileMenuOpen] = useState(false);
+  const fileMenuRef = useRef(null);
+
+  useEffect(() => {
+    if (!fileMenuOpen) return undefined;
+    const onPointerDown = (event) => {
+      if (!fileMenuRef.current?.contains(event.target)) setFileMenuOpen(false);
+    };
+    const onKey = (event) => {
+      if (event.key === 'Escape') setFileMenuOpen(false);
+    };
+    document.addEventListener('pointerdown', onPointerDown);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('pointerdown', onPointerDown);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [fileMenuOpen]);
 
   // Saqlash
   const handleSave = () => {
@@ -117,24 +141,66 @@ export default function Header({
             one screen was one too many, and this one only ever changed the
             language of this module. */}
 
-        {/* LDraw Source Config */}
-        <button className="header-btn" onClick={onOpenLDrawSourceModal} title={t('header.ldrawLibTitle')}>
-          <HardDrive size={16} className="text-blue" />
-          <span>{t('header.ldrawLib')}</span>
-        </button>
+        {/* Fayl menyusi — saqlash, yuklash, import/eksport, tozalash */}
+        <div className="header-menu" ref={fileMenuRef}>
+          <button
+            className={`header-btn${fileMenuOpen ? ' is-open' : ''}`}
+            onClick={() => setFileMenuOpen((open) => !open)}
+            aria-expanded={fileMenuOpen}
+            aria-haspopup="menu"
+            title="Loyiha fayllari va kutubxona"
+          >
+            <IconFolder size={16} />
+            <span>Loyiha</span>
+            <IconChevronDown size={14} style={{ opacity: 0.6 }} />
+          </button>
 
-        <div className="divider-vertical" />
+          {fileMenuOpen && (
+            <div className="header-menu-panel" role="menu">
+              <button role="menuitem" onClick={() => { setFileMenuOpen(false); handleSave(); }}>
+                <Save size={15} />
+                <span>{t('header.save')}</span>
+                <small>JSON</small>
+              </button>
+              <button role="menuitem" onClick={() => { setFileMenuOpen(false); jsonFileInputRef.current?.click(); }}>
+                <FolderOpen size={15} />
+                <span>{t('header.load')}</span>
+                <small>JSON</small>
+              </button>
 
-        {/* LDR Export / Import */}
-        <button className="header-btn primary" onClick={onExportLdr} title={t('header.exportLdrTitle')}>
-          <Download size={16} />
-          <span>{t('header.exportLdr')}</span>
-        </button>
+              <div className="header-menu-sep" />
 
-        <button className="header-btn" onClick={() => ldrFileInputRef.current?.click()} title={t('header.importLdrTitle')}>
-          <Upload size={16} />
-          <span>{t('header.importLdr')}</span>
-        </button>
+              <button role="menuitem" onClick={() => { setFileMenuOpen(false); onExportLdr(); }}>
+                <Download size={15} />
+                <span>{t('header.exportLdr')}</span>
+                <small>.ldr</small>
+              </button>
+              <button role="menuitem" onClick={() => { setFileMenuOpen(false); ldrFileInputRef.current?.click(); }}>
+                <Upload size={15} />
+                <span>{t('header.importLdr')}</span>
+                <small>.ldr</small>
+              </button>
+              <button role="menuitem" onClick={() => { setFileMenuOpen(false); onOpenLDrawSourceModal(); }}>
+                <HardDrive size={15} />
+                <span>{t('header.ldrawLib')}</span>
+              </button>
+
+              <div className="header-menu-sep" />
+
+              <button
+                role="menuitem"
+                className="is-danger"
+                onClick={() => {
+                  setFileMenuOpen(false);
+                  if (window.confirm(t('header.clearConfirm'))) onClearScene();
+                }}
+              >
+                <Trash2 size={15} />
+                <span>{t('header.clear')}</span>
+              </button>
+            </div>
+          )}
+        </div>
 
         <input
           type="file"
@@ -143,20 +209,6 @@ export default function Header({
           accept=".ldr,.mpd,.dat"
           onChange={handleLdrFileChange}
         />
-
-        <div className="divider-vertical" />
-
-        {/* JSON Saqlash / Yuklash */}
-        <button className="header-btn" onClick={handleSave} title={t('header.saveTitle')}>
-          <Save size={16} />
-          <span>{t('header.save')}</span>
-        </button>
-
-        <button className="header-btn" onClick={() => jsonFileInputRef.current?.click()} title={t('header.loadTitle')}>
-          <FolderOpen size={16} />
-          <span>{t('header.load')}</span>
-        </button>
-
         <input
           type="file"
           ref={jsonFileInputRef}
@@ -164,19 +216,6 @@ export default function Header({
           accept=".json"
           onChange={handleJsonFileChange}
         />
-
-        <button
-          className="header-btn danger"
-          onClick={() => {
-            if (window.confirm(t('header.clearConfirm'))) {
-              onClearScene();
-            }
-          }}
-          title={t('header.clearTitle')}
-        >
-          <Trash2 size={16} />
-          <span>{t('header.clear')}</span>
-        </button>
 
         <div className="divider-vertical" />
 

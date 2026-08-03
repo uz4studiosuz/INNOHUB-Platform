@@ -13,7 +13,9 @@ import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
 import { OutlinePass } from 'three/examples/jsm/postprocessing/OutlinePass';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment';
 
-import { IconArrowsMove as Move, IconRotateClockwise2 as RotateCw, IconMaximize as Maximize2, IconRotate as RotateCcw, IconAdjustments as Sliders, IconTrash as Trash2, IconWorld as Globe, IconMagnet as Magnet } from '@tabler/icons-react';
+import { IconArrowsMove as Move, IconRotateClockwise2 as RotateCw, IconMaximize as Maximize2, IconRotate as RotateCcw, IconAdjustments as Sliders, IconTrash as Trash2, IconWorld as Globe, IconMagnet as Magnet, IconVideo, IconAlertTriangle, IconFlag, IconRadar2, IconClock, IconRefresh } from '@tabler/icons-react';
+import { buildArena, LDU_TO_CM } from '../simulation/arenaBuilder';
+import { createRobotState, stepRobot, keyRole } from '../simulation/robotDriver';
 import { getCatalogEntry, getMaterialConfig } from '../data/catalog';
 import { findSnapTarget } from '../utils/snappingSystem';
 import { loadLDrawPart, applyColorToLDrawGroup } from '../library/ldrawPartsCache';
@@ -61,6 +63,14 @@ export default function ThreeScene({
   selectedId,
   isSimulating = false,
   simState = {},
+  /** Sinov poligoni: 'slalom' | 'maze' | 'warehouse' */
+  simCourse = 'slalom',
+  /** 'auto' — kod bo'yicha o'zi yuradi, 'manual' — WASD bilan boshqariladi */
+  simDriveMode = 'auto',
+  /** Kodda to'siq "yaqin" deb hisoblanadigan masofa (sm) */
+  simStopCm = 15,
+  /** Har ~200 ms da sinov ko'rsatkichlarini tashqariga uzatadi */
+  onTelemetry,
   onSelect,
   onRemove,
   onUpdate,
@@ -81,6 +91,7 @@ export default function ThreeScene({
   const transformControlsRef = useRef(null);
   const objectsMapRef = useRef(new Map()); // id -> mesh/group
   const requestRenderRef = useRef(null); // sahnani qayta chizishni so'rash (render on demand)
+  const requestShadowUpdateRef = useRef(null);
   const raycasterRef = useRef(new THREE.Raycaster());
   const mouseRef = useRef(new THREE.Vector2());
   const dropPreviewRef = useRef(null);
@@ -99,12 +110,37 @@ export default function ThreeScene({
   const isSimulatingRef = useRef(isSimulating);
   const simStateRef = useRef(simState);
 
+  // ── Sinov xonasi (simulation room) ──
+  // robotBody butun yig'mani bitta jism sifatida harakatlantiradi; detallar
+  // esa har doimgidek o'z lokal koordinatalarida qoladi, shuning uchun
+  // simulyatsiya tugagach hech narsani "orqaga hisoblash" kerak emas.
+  const robotBodyRef = useRef(null);
+  const robotAlignRef = useRef(null);
+  const robotCenterRef = useRef(null);
+  const partsRootRef = useRef(null);
+  const groundRef = useRef(null);
+  const gridRef = useRef(null);
+  const arenaRef = useRef(null);
+  const robotStateRef = useRef(null);
+  const robotRadiusRef = useRef(120);
+  const sensorYRef = useRef(60);
+  const wheelBaseRotationRef = useRef(new Map());
+  const driveKeysRef = useRef({ forward: false, back: false, left: false, right: false });
+  const simDriveModeRef = useRef(simDriveMode);
+  const simStopCmRef = useRef(simStopCm);
+  const onTelemetryRef = useRef(onTelemetry);
+  const telemetryClockRef = useRef(0);
+  const simCameraModeRef = useRef('chase');
+  const [simCameraMode, setSimCameraMode] = useState('chase');
+  const [hud, setHud] = useState(null);
+
   const onSelectRef = useRef(onSelect);
   const onRemoveRef = useRef(onRemove);
   const onUpdateRef = useRef(onUpdate);
   const selectedIdRef = useRef(selectedId);
   const cameraTweenRef = useRef(null);
   const focusSceneRef = useRef(null);
+  const frameSceneRef = useRef(null);
   const assemblyFocusTimerRef = useRef(null);
 
 
@@ -112,6 +148,10 @@ export default function ThreeScene({
   useEffect(() => { objectsRef.current = objects; }, [objects]);
   useEffect(() => { isSimulatingRef.current = isSimulating; }, [isSimulating]);
   useEffect(() => { simStateRef.current = simState; }, [simState]);
+  useEffect(() => { simDriveModeRef.current = simDriveMode; }, [simDriveMode]);
+  useEffect(() => { simStopCmRef.current = simStopCm; }, [simStopCm]);
+  useEffect(() => { onTelemetryRef.current = onTelemetry; }, [onTelemetry]);
+  useEffect(() => { simCameraModeRef.current = simCameraMode; }, [simCameraMode]);
   useEffect(() => { onSelectRef.current = onSelect; }, [onSelect]);
   useEffect(() => { onRemoveRef.current = onRemove; }, [onRemove]);
   useEffect(() => { onUpdateRef.current = onUpdate; }, [onUpdate]);
@@ -283,10 +323,45 @@ export default function ThreeScene({
     scene.fog = new THREE.Fog('#0f172a', 600, 3000);
     sceneRef.current = scene;
 
+    // Robot tanasi — yig'ilgan detallarni o'z ichiga oladi.
+    //
+    // Yig'ish rejimida bu guruh butunlay qimirlamaydi (position/rotation nol),
+    // ya'ni detallar sahnaga to'g'ridan-to'g'ri qo'shilgandagidek turadi.
+    // Simulyatsiya boshlanganda esa robotni surish uchun faqat shu bitta
+    // guruhni harakatlantirish kifoya — detallarning o'z transformlariga
+    // tegilmaydi, shuning uchun sinovdan chiqqach yig'ma buzilmaydi.
+    // Uch qavat, har biri bitta vazifani bajaradi — shunda hech qaysi
+    // burilish boshqasining hisobini buzmaydi:
+    //   robotBody   — poligondagi joylashuv va yo'nalish (faqat simulyatsiyada)
+    //   robotAlign  — yig'ma "oldi" +X ga qaramasa, uni burib qo'yadi
+    //   robotCenter — yig'ma markazini koordinata boshiga suradi, shunda
+    //                 robot o'z markazi atrofida buriladi, sahna markazi emas
+    const robotBody = new THREE.Group();
+    robotBody.name = 'robot-body';
+    scene.add(robotBody);
+    robotBodyRef.current = robotBody;
+
+    const robotAlign = new THREE.Group();
+    robotAlign.name = 'robot-align';
+    robotBody.add(robotAlign);
+    robotAlignRef.current = robotAlign;
+
+    const robotCenter = new THREE.Group();
+    robotCenter.name = 'robot-center';
+    robotAlign.add(robotCenter);
+    robotCenterRef.current = robotCenter;
+
+    const partsRoot = new THREE.Group();
+    partsRoot.name = 'robot-parts';
+    partsRoot.userData.isRoot = true;
+    robotCenter.add(partsRoot);
+    partsRootRef.current = partsRoot;
+
     // LDraw Root Group (+Y = DOWN handling: rotation.x = Math.PI)
     const ldrawRootGroup = new THREE.Group();
     ldrawRootGroup.rotation.x = Math.PI;
-    scene.add(ldrawRootGroup);
+    ldrawRootGroup.userData.isRoot = true;
+    robotCenter.add(ldrawRootGroup);
     ldrawRootGroupRef.current = ldrawRootGroup;
 
     // 2. Camera
@@ -345,14 +420,15 @@ export default function ThreeScene({
     keyLight.shadow.mapSize.height = 2048;
     keyLight.shadow.bias = -0.0002;
     keyLight.shadow.radius = 2;
-    // ±320 LDU = ±128 mm: eng katta robot yig'masi (200 mm shassi = 500 LDU)
-    // butunlay sig'adi, chetlarida zaxira bilan.
-    keyLight.shadow.camera.left = -320;
-    keyLight.shadow.camera.right = 320;
-    keyLight.shadow.camera.top = 320;
-    keyLight.shadow.camera.bottom = -320;
+    // ±560 LDU = ±224 mm. Ish maydoni kengaytirilgach (grid 2000 LDU) yig'ma
+    // ham markazdan uzoqroqqa qo'yilishi mumkin, shuning uchun soya frustumi
+    // ham kengaydi — aks holda chetdagi detal soya bermay qolardi.
+    keyLight.shadow.camera.left = -560;
+    keyLight.shadow.camera.right = 560;
+    keyLight.shadow.camera.top = 560;
+    keyLight.shadow.camera.bottom = -560;
     keyLight.shadow.camera.near = 0.5;
-    keyLight.shadow.camera.far = 900;
+    keyLight.shadow.camera.far = 1400;
     scene.add(keyLight);
 
     const fillLight = new THREE.DirectionalLight(0xc3d8f2, 0.25);
@@ -360,7 +436,7 @@ export default function ThreeScene({
     scene.add(fillLight);
 
     // 5. Ground Plane & Grid - Shaffof va shinam to'q zamin
-    const groundGeometry = new THREE.PlaneGeometry(2500, 2500);
+    const groundGeometry = new THREE.PlaneGeometry(6000, 6000);
     const groundMaterial = new THREE.MeshStandardMaterial({
       color: '#1e293b',
       roughness: 0.7,
@@ -372,11 +448,16 @@ export default function ThreeScene({
     ground.receiveShadow = true;
     ground.userData.isGround = true;
     scene.add(ground);
+    groundRef.current = ground;
 
-    const gridHelper = new THREE.GridHelper(800, 80, '#3b82f6', '#334155');
+    // Ish maydoni 800 -> 2000 LDU (320 -> 800 mm). Katta yig'malar va bir
+    // nechta robot bir vaqtda joylashadigan bo'ldi; katak qadami 10 LDU
+    // snap qadamining karrasi bo'lib qoladi.
+    const gridHelper = new THREE.GridHelper(2000, 100, '#3b82f6', '#334155');
     gridHelper.material.opacity = 0.5;
     gridHelper.material.transparent = true;
     scene.add(gridHelper);
+    gridRef.current = gridHelper;
 
     // 6. Orbit Controls
     const orbitControls = new OrbitControls(camera, renderer.domElement);
@@ -384,11 +465,15 @@ export default function ThreeScene({
     orbitControls.dampingFactor = 0.08;
     orbitControls.maxPolarAngle = Math.PI / 2 - 0.05;
     orbitControls.minDistance = 20;
-    orbitControls.maxDistance = 800;
+    // Ish maydoni kengaygach kamera ham uzoqroqqa chiqa olishi kerak, aks
+    // holda butun sahnani bir kadrga sig'dirib bo'lmaydi.
+    orbitControls.maxDistance = 2400;
     orbitControls.target.set(0, 20, 0);
+    orbitControls.screenSpacePanning = true;
     orbitControlsRef.current = orbitControls;
 
-    focusSceneRef.current = () => {
+    /** Sahnadagi barcha ko'rinadigan detallarning chegara qutisi. */
+    const measureScene = () => {
       const bounds = new THREE.Box3();
       let hasParts = false;
       objectsMapRef.current.forEach((part) => {
@@ -397,28 +482,51 @@ export default function ThreeScene({
         bounds.expandByObject(part);
         hasParts = true;
       });
-      if (!hasParts || bounds.isEmpty()) return;
+      return hasParts && !bounds.isEmpty() ? bounds : null;
+    };
 
-      const size = bounds.getSize(new THREE.Vector3());
-      const center = bounds.getCenter(new THREE.Vector3());
+    /**
+     * Kamerani sahnaga qaratadi.
+     *
+     * @param direction  Qaysi tomondan qarash (normallanmagan bo'lsa ham bo'ladi).
+     *                   null bo'lsa hozirgi qarash burchagi saqlanadi — "sig'dir"
+     *                   tugmasi shu bilan ishlaydi.
+     * @param options.duration  Animatsiya davomiyligi (ms). Yig'ish vaqtida
+     *                   qisqaroq: har detalda 900 ms cho'zilsa, kamera detal
+     *                   qo'shilishidan orqada qolib ketadi.
+     */
+    const frameScene = (direction = null, { duration = 850, padding = 1.35 } = {}) => {
+      const bounds = measureScene();
+      // Sahna bo'sh bo'lsa ham "reset" ishlashi kerak: o'shanda ish maydonining
+      // o'ziga qaraymiz, aks holda tugma hech nima qilmagandek tuyuladi.
+      const size = bounds ? bounds.getSize(new THREE.Vector3()) : new THREE.Vector3(300, 120, 300);
+      const center = bounds ? bounds.getCenter(new THREE.Vector3()) : new THREE.Vector3(0, 20, 0);
       center.y = Math.max(18, center.y * 0.82);
+
       const verticalFov = THREE.MathUtils.degToRad(camera.fov);
       const fitHeight = size.y / (2 * Math.tan(verticalFov / 2));
       const fitWidth = size.x / (2 * Math.tan(verticalFov / 2) * camera.aspect);
-      const distance = Math.max(fitHeight, fitWidth, size.z * 1.25, 95) * 1.35;
-      const direction = camera.position.clone().sub(orbitControls.target).normalize();
-      if (direction.lengthSq() < 0.01) direction.set(0.7, 0.45, 1).normalize();
+      const distance = Math.max(fitHeight, fitWidth, size.z * 1.25, 95) * padding;
+
+      const dir = direction
+        ? direction.clone().normalize()
+        : camera.position.clone().sub(orbitControls.target).normalize();
+      if (dir.lengthSq() < 0.01) dir.set(0.7, 0.45, 1).normalize();
 
       cameraTweenRef.current = {
         startedAt: performance.now(),
-        duration: 900,
+        duration,
         fromPosition: camera.position.clone(),
-        toPosition: center.clone().add(direction.multiplyScalar(Math.min(distance, 760))),
+        toPosition: center.clone().add(dir.multiplyScalar(Math.min(distance, 1800))),
         fromTarget: orbitControls.target.clone(),
         toTarget: center,
       };
       requestRenderRef.current?.();
     };
+
+    frameSceneRef.current = frameScene;
+    // Eski nom bilan chaqiriladigan joylar (yig'ish tugagandagi fokus) uchun.
+    focusSceneRef.current = () => frameScene(null);
 
     // Snap visual indicators container group
     const snapGroup = new THREE.Group();
@@ -537,7 +645,9 @@ export default function ThreeScene({
 
       if (intersects.length > 0) {
         let topObj = intersects[0].object;
-        while (topObj.parent && topObj.parent !== scene && !topObj.userData?.id) {
+        // Detallar robot tanasi ostidagi guruhlarda turadi, shuning uchun
+        // yuqoriga chiqish shu ildiz guruhlarda to'xtashi kerak.
+        while (topObj.parent && !topObj.userData?.id && !topObj.parent.userData?.isRoot && topObj.parent !== scene) {
           topObj = topObj.parent;
         }
         if (topObj.userData && topObj.userData.id) {
@@ -553,6 +663,9 @@ export default function ThreeScene({
     // Keyboard Shortcuts
     const handleKeyDown = (event) => {
       if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA' || event.target.tagName === 'SELECT') return;
+      // Sinov paytida W/A/S/D robotni haydaydi — ular bir vaqtning o'zida
+      // gizmo rejimini ham almashtirsa, boshqaruv umuman ishlamay qoladi.
+      if (isSimulatingRef.current) return;
 
       switch (event.key.toLowerCase()) {
         case 'g':
@@ -613,7 +726,25 @@ export default function ThreeScene({
     renderer.domElement.addEventListener('mousemove', handleMouseMove);
 
     let needsRender = true;
+
+    /**
+     * Kadrni qayta chizishni so'raydi — soyaga tegmasdan.
+     *
+     * Soya kartasi 2048x2048 va uni qayta chizish butun sahnani yana bir marta
+     * render qilish demakdir. Avval har qanday `requestRender` soyani ham
+     * "iflos" deb belgilardi, shu jumladan OrbitControls ning har bir
+     * `change` hodisasi — ya'ni sichqonchani surganda har kadrda soya
+     * qaytadan hisoblanardi. Kamera harakati esa soyani umuman
+     * o'zgartirmaydi: soya faqat jismlar yoki yorug'lik siljiganda o'zgaradi.
+     * Avtomatik yig'ish paytida (u har kadrda render qiladi) kamerani
+     * qimirlatish shu sababdan sezilarli lag berardi.
+     */
     const requestRender = () => {
+      needsRender = true;
+    };
+
+    /** Jismlar siljigan/qo'shilgan/o'chirilgan payt — soya ham yangilanadi. */
+    const requestShadowUpdate = () => {
       needsRender = true;
       if (rendererRef.current) {
         rendererRef.current.shadowMap.needsUpdate = true;
@@ -622,21 +753,51 @@ export default function ThreeScene({
 
     orbitControls.addEventListener('change', requestRender);
     transformControls.addEventListener('change', requestRender);
-    transformControls.addEventListener('objectChange', requestRender);
+    transformControls.addEventListener('objectChange', requestShadowUpdate);
 
     // Modellar asinxron yuklanadi (3MF, GLTF, STL, LDraw) va yuklanish tugaganda
     // sahna o'zgaradi — lekin bu hodisa emas, shuning uchun requestRender ni
     // boshqa useEffect ichidan ham chaqirish kerak. Ref orqali tashqariga
     // chiqaramiz, aks holda detal qo'shilganda u kamerani harakatlantirmaguncha
     // ekranda paydo bo'lmaydi.
-    requestRenderRef.current = requestRender;
+    requestRenderRef.current = requestShadowUpdate;
+    requestShadowUpdateRef.current = requestShadowUpdate;
 
     let animationFrameId;
-    let frameCount = 0;
+
+    // Simulyatsiya uchun bir marta yaratiladigan yordamchilar. Har kadrda
+    // yangi Raycaster/Vector3 yaratish sekundiga yuzlab ob'ekt demakdir.
+    const simRaycaster = new THREE.Raycaster();
+    let lastSimTime = performance.now();
+    const camDesired = new THREE.Vector3();
+    const camLook = new THREE.Vector3();
+
+    /** Sinov paytidagi kamera. 'orbit' da kamera foydalanuvchida qoladi. */
+    const applySimulationCamera = (state, delta) => {
+      const mode = simCameraModeRef.current;
+      if (mode === 'orbit') return;
+      const blend = Math.min(1, delta * 6);
+
+      if (mode === 'top') {
+        camDesired.set(state.x, 2400, state.z + 260);
+        camLook.set(state.x, 0, state.z);
+      } else {
+        // Robot ortidan ergashuvchi kamera: yo'nalish bo'yicha orqaga va tepaga.
+        camDesired.set(
+          state.x - Math.cos(state.heading) * 620,
+          390,
+          state.z + Math.sin(state.heading) * 620,
+        );
+        camLook.set(state.x, 55, state.z);
+      }
+
+      camera.position.lerp(camDesired, blend);
+      orbitControls.target.lerp(camLook, blend);
+      camera.lookAt(orbitControls.target);
+    };
 
     const animate = () => {
       animationFrameId = requestAnimationFrame(animate);
-      frameCount++;
 
       const hasAssemblyMotion = Array.from(objectsMapRef.current.values()).some(
         (part) => part && part !== 'loading' && part.userData?.assemblyAnimation,
@@ -645,7 +806,17 @@ export default function ThreeScene({
       if (!needsRender && !continuous) return;
       needsRender = false;
 
-      orbitControls.update();
+      // Soya faqat jismlar harakatlanayotganda yangilanadi. Kamera tweeni
+      // bunga kirmaydi — u jismlarni qimirlatmaydi.
+      if (hasAssemblyMotion || isSimulatingRef.current || isDraggingRef.current) {
+        renderer.shadowMap.needsUpdate = true;
+      }
+
+      // Ergashuvchi kamera rejimida kamerani applySimulationCamera boshqaradi.
+      // OrbitControls.update() ni ham chaqirsak, ikkalasi har kadrda bir-birini
+      // qaytarib, kamera titrab turadi.
+      const cameraLocked = isSimulatingRef.current && arenaRef.current && simCameraModeRef.current !== 'orbit';
+      if (!cameraLocked) orbitControls.update();
 
       const cameraTween = cameraTweenRef.current;
       if (cameraTween) {
@@ -676,30 +847,98 @@ export default function ThreeScene({
         }
       });
 
-      // Real-time 3D Simulation Harakat Animatsiyasi
-      if (isSimulatingRef.current) {
-        const speed = simStateRef.current?.motorSpeed || 0;
-        const angleDeg = simStateRef.current?.servoAngle || 90;
+      // ── Sinov xonasidagi real-vaqt simulyatsiyasi ──
+      const arena = arenaRef.current;
+      const robotState = robotStateRef.current;
+      if (isSimulatingRef.current && arena && robotState) {
+        // Kadrlar orasidagi haqiqiy vaqt. Fizika kadr tezligiga bog'liq
+        // bo'lmasligi uchun shart; 100 ms bilan cheklaymiz, aks holda tab
+        // fondan qaytganda robot bir kadrda devor ichidan o'tib ketadi.
+        const deltaSeconds = Math.min(0.1, (now - lastSimTime) / 1000) || 0;
+        lastSimTime = now;
+
+        const live = simStateRef.current || {};
+        const motorSpeed = Number(live.motorSpeed) || 0;
+        // `?? 90` bu yerda ishlamaydi: Number(undefined) NaN qaytaradi, NaN esa
+        // null ham, undefined ham emas — sensor burchagi NaN bo'lib qolardi.
+        const rawServo = Number(live.servoAngle);
+        const servoAngle = Number.isFinite(rawServo) ? rawServo : 90;
+
+        const result = stepRobot({
+          state: robotState,
+          delta: deltaSeconds,
+          arena,
+          raycaster: simRaycaster,
+          radius: robotRadiusRef.current,
+          sensorY: sensorYRef.current,
+          motorSpeed,
+          servoAngle,
+          stopCm: simStopCmRef.current,
+          manual: simDriveModeRef.current === 'manual',
+          keys: driveKeysRef.current,
+        });
+
+        const body = robotBodyRef.current;
+        if (body) {
+          body.position.set(robotState.x, 0, robotState.z);
+          body.rotation.y = robotState.heading;
+        }
 
         objectsMapRef.current.forEach((obj3d) => {
           if (!obj3d || obj3d === 'loading') return;
           const type = (obj3d.userData?.type || '').toLowerCase();
 
-          // Sinov stendida faqat erkin aylanuvchi elementlar harakatlanadi.
+          // G'ildiraklar robotning haqiqiy tezligiga qarab aylanadi: turgan
+          // joyida g'ildirak ham aylanmaydi, orqaga yurganda teskari aylanadi.
           if (!type.includes('caster') && (type.includes('wheel') || type.includes('gear') || type.includes('tire'))) {
-            const spin = speed * 0.0008;
+            const spin = (robotState.speed * deltaSeconds) / 26;
             // TT wheel CAD models are authored around their local X axle.
             // Changing Euler Z rotated the whole tyre sideways after its kit
             // orientation was applied. Local-axis rotation preserves the axle.
             if (type.includes('tt-wheel')) obj3d.rotateOnAxis(LOCAL_X_AXIS, spin);
             else obj3d.rotateZ(spin);
           }
-          // Servoni berilgan burchak bo'yicha burish
+          // Servo sensor kallagini buradi (90° = to'g'ri oldinga).
           if (type.includes('servo') || type.includes('sg90') || type.includes('mg90s')) {
             const baseY = obj3d.userData?.baseRotation?.[1] || 0;
-            obj3d.rotation.y = THREE.MathUtils.lerp(obj3d.rotation.y, baseY + (angleDeg - 90) * Math.PI / 180, 0.12);
+            obj3d.rotation.y = THREE.MathUtils.lerp(obj3d.rotation.y, baseY + (servoAngle - 90) * Math.PI / 180, 0.12);
           }
         });
+
+        applySimulationCamera(robotState, deltaSeconds);
+
+        // Telemetriya sekundiga ~5 marta — har kadrda React ni yangilash
+        // sahnani sekinlashtiradi va ekranda o'qib bo'lmaydigan raqam beradi.
+        telemetryClockRef.current += deltaSeconds;
+        if (telemetryClockRef.current >= 0.2) {
+          telemetryClockRef.current = 0;
+          const elapsed = ((robotState.finishedAt || now) - robotState.startedAt) / 1000;
+          const snapshot = {
+            distanceCm: Number(result.distanceCm.toFixed(1)),
+            speedMmS: Math.round(Math.abs(robotState.speed) * 0.4),
+            collisions: robotState.collisions,
+            elapsed: Number(elapsed.toFixed(1)),
+            goalReached: robotState.goalReached,
+            goalDistanceCm: Number(
+              (Math.hypot(robotState.x - arena.goal.x, robotState.z - arena.goal.z) * LDU_TO_CM).toFixed(0),
+            ),
+            justReachedGoal: result.justReachedGoal,
+          };
+          setHud(snapshot);
+          onTelemetryRef.current?.(snapshot);
+        } else if (result.justReachedGoal) {
+          onTelemetryRef.current?.({
+            distanceCm: Number(result.distanceCm.toFixed(1)),
+            speedMmS: Math.round(Math.abs(robotState.speed) * 0.4),
+            collisions: robotState.collisions,
+            elapsed: Number(((robotState.finishedAt - robotState.startedAt) / 1000).toFixed(1)),
+            goalReached: true,
+            goalDistanceCm: 0,
+            justReachedGoal: true,
+          });
+        }
+      } else {
+        lastSimTime = now;
       }
 
       // Shartli render pass: faqat detal tanlangandagina composer ishlaydi
@@ -710,16 +949,6 @@ export default function ThreeScene({
         renderer.render(scene, camera);
       }
 
-      // §1 O'lchov: Har 60 kadrda bir marta konsolga chiqarish
-      if (frameCount % 60 === 0) {
-        const info = renderer.info;
-        console.log('[PERF]',
-          'draw calls:', info.render.calls,
-          '| uchburchak:', info.render.triangles,
-          '| geometriya:', info.memory.geometries,
-          '| tekstura:', info.memory.textures
-        );
-      }
     };
     animate();
 
@@ -797,6 +1026,129 @@ export default function ThreeScene({
       scene.clear();
     };
   }, []);
+
+  /**
+   * Sinov xonasini qurish/yig'ishtirish.
+   *
+   * Simulyatsiya yoqilganda: poligon quriladi, yig'ma bitta jismga aylanadi va
+   * start maydonchasiga qo'yiladi. O'chirilganda hammasi aynan oldingi holiga
+   * qaytadi — detallarning o'z koordinatalariga umuman tegilmagani uchun
+   * "qaytarish" deganimiz shunchaki uchta guruhni nolga qo'yish.
+   */
+  useEffect(() => {
+    const scene = sceneRef.current;
+    const robotBody = robotBodyRef.current;
+    const robotAlign = robotAlignRef.current;
+    const robotCenter = robotCenterRef.current;
+    if (!scene || !robotBody || !robotAlign || !robotCenter) return undefined;
+
+    if (!isSimulating) return undefined;
+
+    // Yig'maning haqiqiy o'lchamini o'lchaymiz: bu robot radiusini (to'qnashuv
+    // uchun), sensor balandligini va markazini beradi.
+    const partsMap = objectsMapRef.current;
+    const bounds = new THREE.Box3();
+    let hasParts = false;
+    partsMap.forEach((part) => {
+      if (!part || part === 'loading' || !part.visible) return;
+      part.updateMatrixWorld(true);
+      bounds.expandByObject(part);
+      hasParts = true;
+    });
+
+    const size = hasParts ? bounds.getSize(new THREE.Vector3()) : new THREE.Vector3(200, 80, 140);
+    const center = hasParts ? bounds.getCenter(new THREE.Vector3()) : new THREE.Vector3();
+    const minY = hasParts ? bounds.min.y : 0;
+
+    // Robotning "oldi" uzun o'qi bo'ylab. Tayyor yig'malarda u +X (kaster
+    // oldinda, motorlar orqada), lekin erkin qurilgan robot ko'ndalang ham
+    // bo'lishi mumkin — o'shanda uni burib qo'yamiz.
+    const yawOffset = size.z > size.x * 1.2 ? Math.PI / 2 : 0;
+    robotAlign.rotation.set(0, yawOffset, 0);
+    robotCenter.position.set(-center.x, -minY, -center.z);
+
+    robotRadiusRef.current = Math.max(60, Math.max(size.x, size.z) * 0.5);
+    sensorYRef.current = Math.max(25, size.y * 0.45);
+
+    const arena = buildArena(simCourse);
+    arenaRef.current = arena;
+    scene.add(arena.group);
+
+    // Poligon o'z poliga ega — yig'ish gridi va zamin bu yerda ortiqcha.
+    if (groundRef.current) groundRef.current.visible = false;
+    if (gridRef.current) gridRef.current.visible = false;
+
+    // Sinov paytida detallarni surib bo'lmaydi: gizmo robot bilan birga
+    // uchib yurishi mantiqsiz, ustiga u har kadrda pozitsiyani state ga
+    // qaytarib yozib, yig'mani buzib yuborardi.
+    transformControlsRef.current?.detach();
+
+    robotStateRef.current = createRobotState(arena.spawn);
+    robotBody.position.set(arena.spawn.x, 0, arena.spawn.z);
+    robotBody.rotation.set(0, arena.spawn.heading, 0);
+
+    // G'ildiraklar aylantiriladi, shuning uchun ularning boshlang'ich
+    // burchagini eslab qolamiz va sinovdan keyin joyiga qaytaramiz.
+    const wheelBase = wheelBaseRotationRef.current;
+    wheelBase.clear();
+    partsMap.forEach((part, id) => {
+      if (!part || part === 'loading') return;
+      wheelBase.set(id, part.rotation.clone());
+    });
+
+    telemetryClockRef.current = 0;
+    requestRenderRef.current?.();
+
+    return () => {
+      scene.remove(arena.group);
+      arena.dispose();
+      arenaRef.current = null;
+      robotStateRef.current = null;
+
+      robotBody.position.set(0, 0, 0);
+      robotBody.rotation.set(0, 0, 0);
+      robotAlign.rotation.set(0, 0, 0);
+      robotCenter.position.set(0, 0, 0);
+
+      wheelBase.forEach((rotation, id) => {
+        const part = partsMap.get(id);
+        if (part && part !== 'loading') part.rotation.copy(rotation);
+      });
+      wheelBase.clear();
+
+      if (groundRef.current) groundRef.current.visible = true;
+      if (gridRef.current) gridRef.current.visible = true;
+      setHud(null);
+      requestRenderRef.current?.();
+    };
+  }, [isSimulating, simCourse]);
+
+  // Qo'lda boshqarish klavishlari (WASD / strelkalar). Faqat qo'lda rejimda
+  // tinglaymiz, aks holda 'S' tugmasi sahna "Masshtab" rejimiga ham tushadi.
+  useEffect(() => {
+    if (!isSimulating || simDriveMode !== 'manual') {
+      driveKeysRef.current = { forward: false, back: false, left: false, right: false };
+      return undefined;
+    }
+
+    const setKey = (event, pressed) => {
+      if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') return;
+      const role = keyRole(event.key);
+      if (!role) return;
+      driveKeysRef.current[role] = pressed;
+      event.preventDefault();
+    };
+
+    const onDown = (event) => setKey(event, true);
+    const onUp = (event) => setKey(event, false);
+    window.addEventListener('keydown', onDown);
+    window.addEventListener('keyup', onUp);
+    return () => {
+      window.removeEventListener('keydown', onDown);
+      window.removeEventListener('keyup', onUp);
+      driveKeysRef.current = { forward: false, back: false, left: false, right: false };
+    };
+  }, [isSimulating, simDriveMode]);
 
   // Dispose helper
   const disposeObject3D = (obj3d) => {
@@ -946,7 +1298,8 @@ export default function ThreeScene({
     for (const [id, obj3d] of map.entries()) {
       if (!currentIds.includes(id)) {
         if (obj3d && obj3d !== 'loading') {
-          sceneRef.current.remove(obj3d);
+          // Detal robot tanasi ostidagi guruhlardan birida turadi, sahnada emas.
+          obj3d.parent?.remove(obj3d);
           disposeObject3D(obj3d);
         }
         map.delete(id);
@@ -1039,6 +1392,8 @@ export default function ThreeScene({
           
           if (isLDraw && ldrawRootGroupRef.current) {
             ldrawRootGroupRef.current.add(object3d);
+          } else if (partsRootRef.current) {
+            partsRootRef.current.add(object3d);
           } else if (sceneRef.current) {
             sceneRef.current.add(object3d);
           }
@@ -1055,9 +1410,18 @@ export default function ThreeScene({
           // so'raymiz — bitta joy hammasini qoplaydi.
           requestRenderRef.current?.();
 
-          if (obj.assemblyLast) {
+          // Avtomatik yig'ish davomida kamera o'sib borayotgan yig'mani
+          // kadrda ushlab turadi. Avval fokus faqat oxirgi detaldan keyin
+          // bir marta chaqirilardi — shu sababli birinchi detallar kadr
+          // chetida yoki umuman tashqarida qo'yilar, foydalanuvchi nima
+          // yig'ilayotganini ko'rmasdi. Qisqa tween (420 ms) har detalda
+          // qayta boshlanadi va sakrash o'rniga silliq ergashish beradi.
+          if (obj.assemblySpawn && frameSceneRef.current) {
             if (assemblyFocusTimerRef.current) clearTimeout(assemblyFocusTimerRef.current);
-            assemblyFocusTimerRef.current = setTimeout(() => focusSceneRef.current?.(), 850);
+            assemblyFocusTimerRef.current = setTimeout(
+              () => frameSceneRef.current?.(null, { duration: obj.assemblyLast ? 800 : 420, padding: 1.6 }),
+              obj.assemblyLast ? 780 : 120,
+            );
           }
         };
 
@@ -1371,10 +1735,13 @@ export default function ThreeScene({
   useEffect(() => {
     if (!transformControlsRef.current || !objectsMapRef.current) return;
 
+    // Sinov paytida gizmo biriktirilmaydi: u harakatdagi detal bilan birga
+    // uchib yuradi va har kadrda pozitsiyani state ga qaytarib yozib, yig'mani
+    // buzib yuboradi. Kontur (outline) esa qoladi — u zararsiz.
     if (selectedId) {
       const obj3d = objectsMapRef.current.get(selectedId);
       if (obj3d && obj3d !== 'loading') {
-        transformControlsRef.current.attach(obj3d);
+        if (!isSimulating) transformControlsRef.current.attach(obj3d);
         transformControlsRef.current.setMode(transformMode);
         if (outlinePassRef.current) {
           const meshes = [];
@@ -1391,7 +1758,24 @@ export default function ThreeScene({
         outlinePassRef.current.selectedObjects = [];
       }
     }
-  }, [selectedId, transformMode]);
+  }, [selectedId, transformMode, isSimulating]);
+
+  /** Kamera ko'rinishlari. Yo'nalish vektori — kameradan sahnaga emas,
+   * sahnadan kameraga qarab (frameScene uni shunday kutadi). */
+  const applyCameraView = (view) => {
+    const frame = frameSceneRef.current;
+    if (!frame) return;
+    const dirs = {
+      reset: new THREE.Vector3(0.7, 0.45, 1),
+      iso: new THREE.Vector3(0.7, 0.45, 1),
+      front: new THREE.Vector3(0, 0.12, 1),
+      side: new THREE.Vector3(1, 0.12, 0),
+      // Sof tepadan qaralganda OrbitControls ning "up" vektori aniqlanmay
+      // qoladi va kamera sakraydi, shuning uchun ozgina egiltiramiz.
+      top: new THREE.Vector3(0.001, 1, 0.14),
+    };
+    frame(dirs[view] ?? null, { duration: 700, padding: view === 'fit' ? 1.35 : 1.5 });
+  };
 
   const selectedObj = objects.find(o => o.id === selectedId);
   const catalogEntry = selectedObj ? getCatalogEntry(selectedObj.type) : null;
@@ -1408,7 +1792,9 @@ export default function ThreeScene({
         if (!event.currentTarget.contains(event.relatedTarget)) clearDropPreview();
       }}
     >
-      {/* 1. 3D Rejim Mode Bar (Aylantirish R / Surish G / Masshtab S + Local/World) */}
+      {/* 1. 3D Rejim Mode Bar (Aylantirish R / Surish G / Masshtab S + Local/World)
+          Sinov xonasida yashiriladi: u yerda detal surilmaydi ham, aylantirilmaydi
+          ham, shuning uchun bu panel faqat ekranni band qilib turadi. */}
       <div
         className="glass-panel"
         style={{
@@ -1416,7 +1802,7 @@ export default function ThreeScene({
           top: '20px',
           left: '20px',
           zIndex: 10,
-          display: 'flex',
+          display: isSimulating ? 'none' : 'flex',
           gap: '4px',
           padding: '6px',
           borderRadius: '10px',
@@ -1521,8 +1907,10 @@ export default function ThreeScene({
 
       </div>
 
-      {/* 2. Tanlangan Detal O'lchamlari va Tezkor Aylantirish Paneli (Floating Card) */}
-      {selectedObj && (
+      {/* 2. Tanlangan Detal O'lchamlari va Tezkor Aylantirish Paneli (Floating Card).
+          Sinov paytida ham yashiriladi — o'lcham/burchak o'zgartirish sinovni
+          o'rtasida yig'mani buzib yuborardi. */}
+      {selectedObj && !isSimulating && (
         <div
           className="glass-panel"
           style={{
@@ -1644,6 +2032,105 @@ export default function ThreeScene({
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* 2b. Kamera boshqaruvi — yig'ish rejimlarida.
+          Sinovda o'z tanlagichi bor (pastda), shuning uchun takrorlanmaydi. */}
+      {!isSimulating && (
+        <div className="scene-camera-bar">
+          <button type="button" onClick={() => applyCameraView('reset')} title="Boshlang‘ich ko‘rinishga qaytarish">
+            <IconRefresh size={15} />
+            <span>Reset</span>
+          </button>
+          <button type="button" onClick={() => applyCameraView('fit')} title="Yig‘mani kadrga sig‘dirish">
+            <Maximize2 size={15} />
+            <span>Sig‘dirish</span>
+          </button>
+          <span className="scene-camera-sep" />
+          {[
+            { id: 'front', label: 'Old' },
+            { id: 'side', label: 'Yon' },
+            { id: 'top', label: 'Tepa' },
+            { id: 'iso', label: 'Izo' },
+          ].map((preset) => (
+            <button key={preset.id} type="button" onClick={() => applyCameraView(preset.id)} title={`${preset.label} ko‘rinish`}>
+              {preset.label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* 3. Sinov xonasi HUD — faqat simulyatsiya paytida */}
+      {isSimulating && hud && (
+        <div className="sim-hud">
+          <div className="sim-hud-row">
+            <div className={`sim-hud-stat${hud.distanceCm < simStopCm ? ' is-alert' : ''}`}>
+              <IconRadar2 size={15} />
+              <div>
+                <span className="sim-hud-label">To‘siq</span>
+                <strong>{hud.distanceCm} sm</strong>
+              </div>
+            </div>
+            <div className="sim-hud-stat">
+              <IconClock size={15} />
+              <div>
+                <span className="sim-hud-label">Vaqt</span>
+                <strong>{hud.elapsed.toFixed(1)} s</strong>
+              </div>
+            </div>
+            <div className={`sim-hud-stat${hud.collisions > 0 ? ' is-warn' : ''}`}>
+              <IconAlertTriangle size={15} />
+              <div>
+                <span className="sim-hud-label">Urilish</span>
+                <strong>{hud.collisions}</strong>
+              </div>
+            </div>
+            <div className={`sim-hud-stat${hud.goalReached ? ' is-done' : ''}`}>
+              <IconFlag size={15} />
+              <div>
+                <span className="sim-hud-label">Finishgacha</span>
+                <strong>{hud.goalReached ? 'YETDI' : `${hud.goalDistanceCm} sm`}</strong>
+              </div>
+            </div>
+          </div>
+
+          {/* Sensor masofasi chizig'i — 0..100 sm oralig'ida */}
+          <div className="sim-hud-gauge">
+            <div
+              className="sim-hud-gauge-fill"
+              style={{
+                width: `${Math.max(3, Math.min(100, hud.distanceCm))}%`,
+                background: hud.distanceCm < simStopCm ? '#ef4444' : hud.distanceCm < simStopCm * 2.5 ? '#f59e0b' : '#22c55e',
+              }}
+            />
+          </div>
+
+          <div className="sim-hud-foot">
+            <span>{Math.round(hud.speedMmS)} mm/s</span>
+            <span>{simDriveMode === 'manual' ? 'W/A/S/D — haydash' : 'Avtonom: kod boshqarmoqda'}</span>
+          </div>
+        </div>
+      )}
+
+      {/* 4. Sinov kamerasi tanlagichi */}
+      {isSimulating && (
+        <div className="sim-camera-switch">
+          <IconVideo size={15} />
+          {[
+            { id: 'chase', label: 'Ergashuvchi' },
+            { id: 'top', label: 'Yuqoridan' },
+            { id: 'orbit', label: 'Erkin' },
+          ].map((option) => (
+            <button
+              key={option.id}
+              type="button"
+              onClick={() => setSimCameraMode(option.id)}
+              className={simCameraMode === option.id ? 'is-active' : ''}
+            >
+              {option.label}
+            </button>
+          ))}
         </div>
       )}
 

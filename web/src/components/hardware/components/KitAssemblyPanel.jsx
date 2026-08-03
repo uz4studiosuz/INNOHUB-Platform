@@ -28,6 +28,16 @@ const KIT_SCENARIOS = [
   },
 ];
 
+/** Murakkablik yorlig'ining rangi uchun daraja. Matn o'zbekcha yozilgani
+ * uchun uni to'g'ridan-to'g'ri CSS klassiga aylantirib bo'lmaydi. */
+const DIFFICULTY_RANK = {
+  "Boshlang'ich": 0,
+  "Boshlang'ich+": 1,
+  "O'rta": 2,
+  "O'rta+": 3,
+  Murakkab: 4,
+};
+
 export default function KitAssemblyPanel({ sceneObjects, onAddComponent, onLoadKit, assemblyProgress }) {
   const { t } = useI18n();
   const [selectedScenarioId, setSelectedScenarioId] = useState('2wd_car');
@@ -97,21 +107,27 @@ export default function KitAssemblyPanel({ sceneObjects, onAddComponent, onLoadK
           <p style={{ fontSize: '11.5px', opacity: 0.75, margin: '0 0 10px 0', lineHeight: 1.5 }}>
             {t('kit.loadReadyDesc')}
           </p>
-          <select
-            className="pin-select"
-            style={{ width: '100%', padding: '8px', marginBottom: '8px' }}
-            value={selectedKitId}
-            onChange={(e) => setSelectedKitId(e.target.value)}
-          >
-            {ROBOT_KITS.map(k => (
-              <option key={k.id} value={k.id}>{k.title} — {k.difficulty}</option>
+          {/* Yig'malar kartochka ko'rinishida: ochiladigan ro'yxatda har birining
+              tavsifi ham, murakkabligi ham ko'rinmasdi — o'quvchi nomiga qarab
+              tanlashga majbur bo'lardi. */}
+          <div className="kit-card-list">
+            {ROBOT_KITS.map((k) => (
+              <button
+                key={k.id}
+                type="button"
+                className={`kit-card${selectedKitId === k.id ? ' is-active' : ''}`}
+                onClick={() => setSelectedKitId(k.id)}
+                disabled={isAssembling}
+              >
+                <span className="kit-card-head">
+                  <strong>{k.title}</strong>
+                  <span className={`kit-card-badge lvl-${DIFFICULTY_RANK[k.difficulty] ?? 1}`}>{k.difficulty}</span>
+                </span>
+                <span className="kit-card-desc">{k.description}</span>
+                <span className="kit-card-meta">{k.partCount} detal</span>
+              </button>
             ))}
-          </select>
-          {activeKit && (
-            <p style={{ fontSize: '11px', opacity: 0.65, margin: '0 0 10px 0', lineHeight: 1.45 }}>
-              {activeKit.description} · <strong>{activeKit.partCount} detal</strong>
-            </p>
-          )}
+          </div>
           <button
             className="btn-primary"
             style={{ width: '100%', padding: '9px', fontSize: '13px' }}

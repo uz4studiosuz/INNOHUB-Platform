@@ -104,6 +104,10 @@ export default function TrussBuilder() {
       setNodes(saved.nodes);
       setMembers(saved.members);
       setDesignName(saved.name);
+      // A restored design carries whatever canvas coordinates it was drawn at,
+      // which on a different viewport size can be off in a corner. Ask for one
+      // fit so the user sees their bridge, not an empty grid.
+      setFitRequest((request) => request + 1);
     }
     setHydrated(true);
   }
@@ -337,6 +341,9 @@ export default function TrussBuilder() {
         onViewChange={(nextView) => {
           setView(nextView);
           setMemberFirstNode(null);
+          // Coming back from 3D remounts the canvas at the current viewport
+          // size, so re-centre rather than restoring a stale offset.
+          if (nextView === "2d") setFitRequest((request) => request + 1);
         }}
       />
 

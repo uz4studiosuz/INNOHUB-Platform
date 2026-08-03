@@ -46,8 +46,11 @@ const D = Math.PI / 180;
  */
 const TYPE_FIX = {
   'tt-wheel-65mm': [0, 90, 0],
+  'tt-wheel-80mm': [0, 90, 0],
+  'mecanum-wheel': [0, 90, 0],
   'battery-18650-4': [90, 0, 0],
   sg90: [90, 0, 0],
+  mg90s: [90, 0, 0],
   'hc-sr04': [0, 90, 0],
 };
 
@@ -149,6 +152,109 @@ const KITS = [
       { type: 'sg90', name: 'SG90 servo (radar)', pos: [55, 12, 0] },
       // Burilish TYPE_FIX da berilgan, shuning uchun bu yerda takrorlanmaydi.
       { type: 'hc-sr04', name: 'HC-SR04 sensor', pos: [55, 28, 0] },
+    ],
+  },
+
+  {
+    id: 'mecanum_omni',
+    title: 'Mecanum Omni-Robot',
+    description: 'To\'rt mecanum g\'ildirak — yon tomonga ham yura oladi. ESP32 + 2 ta L298N + MPU6050',
+    difficulty: 'O\'rta+',
+    // Mecanum g'ildiraklar rolikli: to'rttasi har xil yo'nalishda aylansa
+    // robot joyidan burilmasdan yon tomonga suriladi. Shuning uchun kaster
+    // kerak emas — to'rt nuqta tayanch.
+    parts: [
+      { type: 'robot-chassis', name: 'Shassi', pos: [0, 0, 0],
+        params: { lengthMm: 200, widthMm: 130, thickMm: 3, scalePercent: 100 } },
+
+      { type: 'dc-tt-yellow', name: 'Motor (old chap)',   pos: [ 58, -22, -50], rot: [0, 0, 90] },
+      { type: 'dc-tt-yellow', name: 'Motor (old o\'ng)',  pos: [ 58, -22,  50], rot: [0, 0, 90] },
+      { type: 'dc-tt-yellow', name: 'Motor (orqa chap)',  pos: [-58, -22, -50], rot: [0, 0, 90] },
+      { type: 'dc-tt-yellow', name: 'Motor (orqa o\'ng)', pos: [-58, -22,  50], rot: [0, 0, 90] },
+
+      { type: 'mecanum-wheel', name: 'Mecanum (old chap)',   pos: [ 58, -22, -76] },
+      { type: 'mecanum-wheel', name: 'Mecanum (old o\'ng)',  pos: [ 58, -22,  76] },
+      { type: 'mecanum-wheel', name: 'Mecanum (orqa chap)',  pos: [-58, -22, -76] },
+      { type: 'mecanum-wheel', name: 'Mecanum (orqa o\'ng)', pos: [-58, -22,  76] },
+
+      { type: 'esp32', name: 'ESP32 kontroller', pos: [0, 8, -28], rot: [0, 90, 0] },
+      { type: 'mpu6050', name: 'MPU6050 giroskop', pos: [0, 8, 24] },
+      { type: 'l298n', name: 'L298N (old)',  pos: [ 64, 8, 0] },
+      { type: 'l298n', name: 'L298N (orqa)', pos: [-64, 8, 0] },
+      { type: 'battery-18650-4', name: 'Batareya boksi', pos: [0, 16, 44] },
+    ],
+  },
+
+  {
+    id: 'line_follower',
+    title: 'Chiziq Kuzatuvchi Robot',
+    description: 'Kichik va yengil: Arduino Nano + kichik shassi + 2 motor. Old tomonda sensor ko\'zi',
+    difficulty: 'Boshlang\'ich',
+    // Chiziq kuzatuvchi robot iloji boricha yengil va past bo'lishi kerak:
+    // sensor polga qanchalik yaqin bo'lsa, chiziqni shunchalik aniq o'qiydi.
+    parts: [
+      { type: 'robot-chassis', name: 'Shassi (kichik)', pos: [0, 0, 0],
+        params: { lengthMm: 120, widthMm: 110, thickMm: 3, scalePercent: 100 } },
+
+      { type: 'dc-tt-yellow', name: 'TT motor (chap)',  pos: [-22, -22, -48], rot: [0, 0, 90] },
+      { type: 'dc-tt-yellow', name: 'TT motor (o\'ng)', pos: [-22, -22,  48], rot: [0, 0, 90] },
+      { type: 'tt-wheel-65mm', name: 'G\'ildirak (chap)',  pos: [-22, -22, -70] },
+      { type: 'tt-wheel-65mm', name: 'G\'ildirak (o\'ng)', pos: [-22, -22,  70] },
+      { type: 'caster-wheel', name: 'Kaster g\'ildirak', pos: [44, -20, 0] },
+
+      { type: 'arduino-nano', name: 'Arduino Nano', pos: [-8, 8, 0], rot: [0, 90, 0] },
+      { type: 'l298n', name: 'L298N drayver', pos: [-40, 8, 0] },
+      { type: 'battery-18650-4', name: 'Batareya boksi', pos: [16, 14, 0] },
+
+      // Sensor old chekkada, polga yaqin — chiziqni shu "ko'z" o'qiydi.
+      { type: 'ultrasonic_sensor', name: 'Chiziq sensori (old)', pos: [52, -6, 0] },
+    ],
+  },
+
+  {
+    id: 'pan_tilt_scanner',
+    title: 'Pan-Tilt Skaner',
+    description: 'Ikki servo ustidagi sensor: gorizontal va vertikal skanerlaydi. Raspberry Pi 4 + MG90S',
+    difficulty: 'O\'rta+',
+    // Pan-tilt: pastki servo gorizontal buradi (pan), uning ustidagi ikkinchi
+    // servo tepaga-pastga qiyalatadi (tilt). Sensor eng ustida.
+    parts: [
+      { type: 'robot-chassis', name: 'Asos plitasi', pos: [0, 0, 0],
+        params: { lengthMm: 140, widthMm: 110, thickMm: 3, scalePercent: 100 } },
+
+      { type: 'raspberry-pi4', name: 'Raspberry Pi 4', pos: [-30, 10, 0], rot: [0, 90, 0] },
+      { type: 'battery-18650-4', name: 'Batareya boksi', pos: [-30, 26, 0] },
+
+      { type: 'mg90s', name: 'MG90S servo (pan)',  pos: [40, 10, 0] },
+      { type: 'mg90s', name: 'MG90S servo (tilt)', pos: [40, 28, 0], rot: [90, 0, 0] },
+      { type: 'hc-sr04', name: 'HC-SR04 sensor', pos: [40, 46, 0] },
+      { type: 'mpu6050', name: 'MPU6050 giroskop', pos: [4, 8, 0] },
+    ],
+  },
+
+  {
+    id: 'stepper_rover',
+    title: 'Qadamli Motorli Rover',
+    description: 'NEMA17 qadamli motorlar — aniq masofaga yuradi. Katta g\'ildiraklar + ESP32',
+    difficulty: 'Murakkab',
+    // Qadamli motor har qadamda aniq burchakka buriladi, shuning uchun robot
+    // "50 sm oldinga yur" buyrug'ini enkodersiz ham bajara oladi. Evaziga
+    // og'irroq va sekinroq — shuning uchun katta g'ildirak va katta shassi.
+    parts: [
+      { type: 'robot-chassis', name: 'Shassi (katta)', pos: [0, 0, 0],
+        params: { lengthMm: 220, widthMm: 130, thickMm: 3, scalePercent: 100 } },
+
+      { type: 'stepper-nema17', name: 'NEMA17 (chap)',  pos: [-45, -18, -46], rot: [0, 0, 90] },
+      { type: 'stepper-nema17', name: 'NEMA17 (o\'ng)', pos: [-45, -18,  46], rot: [0, 0, 90] },
+      { type: 'tt-wheel-80mm', name: 'G\'ildirak 80mm (chap)',  pos: [-45, -18, -78] },
+      { type: 'tt-wheel-80mm', name: 'G\'ildirak 80mm (o\'ng)', pos: [-45, -18,  78] },
+      { type: 'caster-wheel', name: 'Kaster g\'ildirak', pos: [78, -18, 0] },
+
+      { type: 'esp32', name: 'ESP32 kontroller', pos: [10, 8, 0], rot: [0, 90, 0] },
+      { type: 'l298n', name: 'L298N (chap motor)',  pos: [-70, 8, -30] },
+      { type: 'l298n', name: 'L298N (o\'ng motor)', pos: [-70, 8,  30] },
+      { type: 'battery-18650-4', name: 'Batareya boksi', pos: [52, 14, 0] },
+      { type: 'hc-sr04', name: 'HC-SR04 sensor', pos: [95, 6, 0] },
     ],
   },
 ];

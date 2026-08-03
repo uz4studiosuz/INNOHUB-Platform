@@ -68,6 +68,14 @@ type Phase = "STAGING" | "LAUNCHING" | "RESULTS";
  */
 type ScoreBy = "time" | "height";
 
+/** Mezon nomlari bitta joyda: sarlavha, tanlagich va natijalar jadvali
+ * ustunlari bir xil so'zni ishlatishi kerak, aks holda o'quvchi qaysi ustun
+ * bo'yicha g'olib aniqlanganini tushunmaydi. */
+const SCORE_LABEL: Record<ScoreBy, string> = {
+  time: "Uchish vaqti",
+  height: "Balandlik",
+};
+
 interface Entrant { name: string; design: RocketDesign; analysis: RocketAnalysis; isPlayer: boolean; colour: string }
 
 function RocketMiniMap({ entrants, phase }: { entrants: Entrant[]; phase: Phase }) {

@@ -3,10 +3,16 @@
 import { useMemo } from "react";
 import type { ThreeEvent } from "@react-three/fiber";
 import * as THREE from "three";
+import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { TrussNode, TrussMemberDraft, SolvedMember, BuilderMode } from "./types";
 import { GRID_SIZE, UNIT_METERS } from "./trussApiParams";
 
 export const SCALE = 1 / 15; // canvas px -> 3D units
+
+/** 3D units per real metre. Everything with a real-world size - the deck
+ * width, the vehicle that drives across - has to derive from this, otherwise
+ * it is only guessing at the scene's scale. */
+export const UNITS_PER_METER = (GRID_SIZE / UNIT_METERS) * SCALE;
 
 /** Real bridges aren't a single flat truss - they have two parallel truss
  * sides (the ones the user draws in 2D), spaced apart by the deck width and
@@ -14,9 +20,20 @@ export const SCALE = 1 / 15; // canvas px -> 3D units
  * joint. This is a rendering-only extrusion: the analyzed structure is still
  * the single 2D truss (both sides carry an identical, symmetric copy of it).
  */
-export const BRIDGE_DEPTH_METERS = 3.5;
-const DEPTH_UNITS = BRIDGE_DEPTH_METERS * (GRID_SIZE / UNIT_METERS) * SCALE;
-const HALF_DEPTH = DEPTH_UNITS / 2;
+export const MAX_BRIDGE_DEPTH_METERS = 3.5;
+
+/**
+ * Deck width for a given span, in metres.
+ *
+ * A fixed 3.5 m carriageway made short spans look wrong: the 4 m example
+ * bridge came out 4 m long and 3.5 m wide - very nearly square, which is why
+ * it read as a stubby platform rather than a bridge. Real footbridges and
+ * model spans are narrow; only a span long enough to carry two lanes gets the
+ * full width.
+ */
+export function deckWidthMeters(spanMeters: number): number {
+  return Math.max(1.2, Math.min(MAX_BRIDGE_DEPTH_METERS, spanMeters * 0.42));
+}
 
 export function toVec3(n: TrussNode, centerX: number, centerY: number): THREE.Vector3 {
   // Screen y grows downward; flip so "up" on screen is +Y in 3D too.
@@ -32,13 +49,25 @@ export function fromVec3XY(x: number, y: number, centerX: number, centerY: numbe
 
 export function useTrussBounds(nodes: TrussNode[]) {
   return useMemo(() => {
-    if (nodes.length === 0) return { center: { x: 0, y: 0 }, radius: 5 };
+    if (nodes.length === 0) {
+      const fallbackDepth = deckWidthMeters(2) * UNITS_PER_METER;
+      return { center: { x: 0, y: 0 }, radius: 5, spanMeters: 2, depthUnits: fallbackDepth, halfDepth: fallbackDepth / 2 };
+    }
     const xs = nodes.map((n) => n.x);
     const ys = nodes.map((n) => n.y);
     const cx = (Math.min(...xs) + Math.max(...xs)) / 2;
     const cy = (Math.min(...ys) + Math.max(...ys)) / 2;
-    const span = Math.max(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys), 60);
-    return { center: { x: cx, y: cy }, radius: (span * SCALE) / 2 + 2 };
+    const spanPx = Math.max(...xs) - Math.min(...xs);
+    const span = Math.max(spanPx, Math.max(...ys) - Math.min(...ys), 60);
+    const spanMeters = Math.max((spanPx / GRID_SIZE) * UNIT_METERS, 0.5);
+    const depthUnits = deckWidthMeters(spanMeters) * UNITS_PER_METER;
+    return {
+      center: { x: cx, y: cy },
+      radius: (span * SCALE) / 2 + 2,
+      spanMeters,
+      depthUnits,
+      halfDepth: depthUnits / 2,
+    };
   }, [nodes]);
 }
 
@@ -114,6 +143,132 @@ function getWoodTexture(): THREE.CanvasTexture {
   texture.repeat.set(1, 3);
   woodTextureCache = texture;
   return texture;
+}
+
+/** Deterministic pseudo-random in [0,1). The procedural textures below are
+ * generated once per page load, but a shared cache means the *first* caller's
+ * result is what every later beam sees - so the noise has to be reproducible,
+ * not Math.random(), or a hot reload silently repaints the whole bridge. */
+function seeded(n: number): number {
+  const s = Math.sin(n * 127.1 + 311.7) * 43758.5453;
+  return s - Math.floor(s);
+}
+
+let concreteTextureCache: THREE.CanvasTexture | null = null;
+
+/** Weathered cast concrete: a mid-grey base with form-board seams, aggregate
+ * speckle and vertical staining. Used by the abutments and the deck slab. */
+function getConcreteTexture(): THREE.CanvasTexture {
+  if (concreteTextureCache) return concreteTextureCache;
+  const canvas = document.createElement("canvas");
+  canvas.width = 128;
+  canvas.height = 128;
+  const ctx = canvas.getContext("2d")!;
+  ctx.fillStyle = "#8d9195";
+  ctx.fillRect(0, 0, 128, 128);
+  // aggregate / pitting
+  for (let i = 0; i < 2200; i++) {
+    const shade = seeded(i * 3 + 1);
+    ctx.fillStyle = shade > 0.5 ? `rgba(255,255,255,${0.03 + shade * 0.07})` : `rgba(20,24,28,${0.03 + shade * 0.1})`;
+    ctx.fillRect(seeded(i * 3 + 2) * 128, seeded(i * 3 + 3) * 128, 1.4, 1.4);
+  }
+  // horizontal form-board seams (concrete is poured in lifts)
+  for (let y = 16; y < 128; y += 32) {
+    ctx.fillStyle = "rgba(45,52,58,0.22)";
+    ctx.fillRect(0, y, 128, 1.5);
+    ctx.fillStyle = "rgba(255,255,255,0.07)";
+    ctx.fillRect(0, y + 1.5, 128, 1);
+  }
+  // vertical rain staining
+  for (let i = 0; i < 26; i++) {
+    const x = seeded(i * 11 + 5) * 128;
+    ctx.fillStyle = `rgba(56,62,66,${0.04 + seeded(i * 11 + 6) * 0.08})`;
+    ctx.fillRect(x, 0, 1 + seeded(i * 11 + 7) * 4, 128);
+  }
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+  concreteTextureCache = texture;
+  return texture;
+}
+
+let asphaltTextureCache: THREE.CanvasTexture | null = null;
+
+/** Asphalt wearing course: dark bitumen with light aggregate grains and a
+ * couple of faint wheel-path polish streaks running along the carriageway. */
+function getAsphaltTexture(): THREE.CanvasTexture {
+  if (asphaltTextureCache) return asphaltTextureCache;
+  const canvas = document.createElement("canvas");
+  canvas.width = 128;
+  canvas.height = 128;
+  const ctx = canvas.getContext("2d")!;
+  ctx.fillStyle = "#2c3033";
+  ctx.fillRect(0, 0, 128, 128);
+  for (let i = 0; i < 3200; i++) {
+    const g = seeded(i * 5 + 9);
+    const tone = 60 + Math.floor(g * 80);
+    ctx.fillStyle = `rgba(${tone},${tone + 3},${tone + 6},${0.25 + g * 0.4})`;
+    ctx.fillRect(seeded(i * 5 + 10) * 128, seeded(i * 5 + 11) * 128, 1 + g * 1.4, 1 + g * 1.4);
+  }
+  // wheel paths (slightly polished, so lighter)
+  [30, 98].forEach((x) => {
+    ctx.fillStyle = "rgba(150,158,164,0.06)";
+    ctx.fillRect(x - 9, 0, 18, 128);
+  });
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+  asphaltTextureCache = texture;
+  return texture;
+}
+
+let rivetRingCache: THREE.BufferGeometry | null = null;
+
+/** One merged ring of eight rivet heads on a unit-radius circle in the XY
+ * plane, protruding along +Z. Merged into a single geometry on purpose: a
+ * 30-joint bridge renders two gusset plates per joint, and eight separate
+ * rivet meshes each would put ~500 extra draw calls on the frame for detail
+ * that is only a few pixels across. */
+function getRivetRingGeometry(): THREE.BufferGeometry {
+  if (rivetRingCache) return rivetRingCache;
+  const parts: THREE.BufferGeometry[] = [];
+  for (let i = 0; i < 8; i++) {
+    const angle = (i / 8) * Math.PI * 2 + Math.PI / 8;
+    const head = new THREE.SphereGeometry(0.12, 8, 6);
+    head.scale(1, 1, 0.62);
+    head.translate(Math.cos(angle) * 0.66, Math.sin(angle) * 0.66, 0.5);
+    parts.push(head);
+  }
+  rivetRingCache = mergeGeometries(parts, false) ?? parts[0];
+  parts.forEach((p) => p.dispose());
+  return rivetRingCache;
+}
+
+/** The steel connection plate every real truss joint is built around: members
+ * are never welded end-to-end, they all bolt onto a shared gusset. Purely a
+ * rendering detail - the analysis still treats the joint as a single pin. */
+function GussetPlate({ radius, side, materialLabel }: { radius: number; side: "front" | "back"; materialLabel?: string }) {
+  const plateR = Math.max(radius * 0.075, 0.2);
+  const plateT = Math.max(radius * 0.012, 0.04);
+  const outward = side === "front" ? -1 : 1;
+  const profile = materialProfileFor(materialLabel);
+  const plateColor = profile.wood ? "#5d6a72" : profile.color;
+  return (
+    <group>
+      {/* octagonal plate, its axis along Z so the flat face reads from the side */}
+      <mesh rotation={[Math.PI / 2, Math.PI / 8, 0]} castShadow receiveShadow>
+        <cylinderGeometry args={[plateR, plateR, plateT, 8]} />
+        <meshStandardMaterial color={plateColor} roughness={0.34} metalness={0.86} envMapIntensity={1.2} />
+      </mesh>
+      {/* bolt heads around the plate edge */}
+      <mesh geometry={getRivetRingGeometry()} scale={[plateR, plateR, plateT * 1.6]} position={[0, 0, outward * plateT * 0.5]}>
+        <meshStandardMaterial color="#cfd6db" roughness={0.24} metalness={0.94} />
+      </mesh>
+      {/* the pin itself, capped on the outer face */}
+      <mesh position={[0, 0, outward * plateT * 0.9]} rotation={[Math.PI / 2, 0, 0]} castShadow>
+        <cylinderGeometry args={[plateR * 0.34, plateR * 0.34, plateT * 1.9, 14]} />
+        <meshStandardMaterial color="#dee4e8" roughness={0.16} metalness={0.95} />
+      </mesh>
+    </group>
+  );
 }
 
 export function MemberBeam({
@@ -211,60 +366,235 @@ export function SupportGlyph3D({
   );
 }
 
-function BridgeDeck({ nodes, centerX, centerY, radius }: { nodes: TrussNode[]; centerX: number; centerY: number; radius: number }) {
-  const dimensions = useMemo(() => {
+/** The one place the bridge's overall extents are derived. Every piece of
+ * scenery below (deck, railings, abutments) has to agree on where the
+ * carriageway sits, and they used to each recompute it slightly differently. */
+function useDeckGeometry(nodes: TrussNode[], centerX: number, centerY: number, radius: number) {
+  return useMemo(() => {
     if (nodes.length < 2) return null;
     const points = nodes.map((node) => toVec3(node, centerX, centerY));
     const minX = Math.min(...points.map((point) => point.x));
     const maxX = Math.max(...points.map((point) => point.x));
-    const minY = Math.min(...points.map((point) => point.y));
-    return { minX, maxX, y: minY - Math.max(radius * 0.045, 0.1) };
+    const chordY = Math.min(...points.map((point) => point.y));
+    const slabThickness = Math.max(radius * 0.04, 0.09);
+    // Roadway hangs just under the bottom chord, on top of the floor beams.
+    const surfaceY = chordY - Math.max(radius * 0.045, 0.1);
+    return {
+      minX,
+      maxX,
+      chordY,
+      surfaceY,
+      slabThickness,
+      span: maxX - minX,
+      floorY: -radius * 1.075,
+    };
   }, [centerX, centerY, nodes, radius]);
-  if (!dimensions) return null;
+}
 
-  const width = dimensions.maxX - dimensions.minX;
-  const plankCount = Math.max(8, Math.min(28, Math.round(width / Math.max(radius * 0.16, 0.28))));
-  const plankWidth = width / plankCount;
-  const texture = getWoodTexture();
+type DeckStyle = "timber" | "asphalt";
+
+/** The carriageway: a running surface between two raised kerbs, carried on
+ * transverse floor beams. Timber decks get individual planks (the balsa
+ * competition bridges); metal decks get an asphalt wearing course with lane
+ * markings, which is what a real steel or aluminium truss span carries. */
+function BridgeDeck({
+  nodes,
+  centerX,
+  centerY,
+  radius,
+  depthUnits,
+  style,
+}: {
+  nodes: TrussNode[];
+  centerX: number;
+  centerY: number;
+  radius: number;
+  depthUnits: number;
+  style: DeckStyle;
+}) {
+  const deck = useDeckGeometry(nodes, centerX, centerY, radius);
+  const asphalt = useMemo(() => (style === "asphalt" ? getAsphaltTexture() : null), [style]);
+  const concrete = useMemo(() => (style === "asphalt" ? getConcreteTexture() : null), [style]);
+  const wood = useMemo(() => (style === "timber" ? getWoodTexture() : null), [style]);
+  if (!deck) return null;
+
+  const { minX, maxX, surfaceY, slabThickness, span } = deck;
+  const midX = (minX + maxX) / 2;
+  const roadWidth = depthUnits * 1.08;
+  const kerbHeight = Math.max(radius * 0.03, 0.07);
+  const kerbWidth = roadWidth * 0.07;
+
+  // Lane markings: a dashed centre line plus a continuous edge line each side.
+  const dashCount = Math.max(4, Math.min(24, Math.round(span / Math.max(radius * 0.34, 0.6))));
+  const dashLength = (span / dashCount) * 0.5;
+  const markingY = surfaceY + slabThickness / 2 + 0.004;
+
   return (
-    <group position={[(dimensions.minX + dimensions.maxX) / 2, dimensions.y, 0]}>
-      {Array.from({ length: plankCount }, (_, index) => (
-        <mesh key={index} position={[-width / 2 + plankWidth * (index + 0.5), 0, 0]} castShadow receiveShadow>
-          <boxGeometry args={[plankWidth * 0.9, Math.max(radius * 0.035, 0.08), DEPTH_UNITS * 1.08]} />
-          <meshStandardMaterial color="#a77a4d" map={texture} roughness={0.86} metalness={0.01} />
+    <group>
+      {/* running surface */}
+      {style === "timber" ? (
+        (() => {
+          const plankCount = Math.max(8, Math.min(30, Math.round(span / Math.max(radius * 0.16, 0.28))));
+          const plankWidth = span / plankCount;
+          return (
+            <group position={[midX, surfaceY, 0]}>
+              {Array.from({ length: plankCount }, (_, index) => (
+                <mesh key={index} position={[-span / 2 + plankWidth * (index + 0.5), 0, 0]} castShadow receiveShadow>
+                  <boxGeometry args={[plankWidth * 0.9, slabThickness, roadWidth]} />
+                  <meshStandardMaterial color="#a77a4d" map={wood} roughness={0.88} metalness={0.01} />
+                </mesh>
+              ))}
+            </group>
+          );
+        })()
+      ) : (
+        <>
+          <mesh position={[midX, surfaceY, 0]} castShadow receiveShadow>
+            <boxGeometry args={[span, slabThickness, roadWidth]} />
+            <meshStandardMaterial color="#5c6367" map={asphalt} roughness={0.95} metalness={0.03} />
+          </mesh>
+          {/* dashed centre line */}
+          {Array.from({ length: dashCount }, (_, index) => (
+            <mesh key={`dash-${index}`} position={[minX + (span / dashCount) * (index + 0.5), markingY, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+              <planeGeometry args={[dashLength, roadWidth * 0.035]} />
+              <meshStandardMaterial color="#e8e2cf" roughness={0.8} metalness={0} />
+            </mesh>
+          ))}
+          {/* edge lines */}
+          {[roadWidth * 0.38, -roadWidth * 0.38].map((z) => (
+            <mesh key={`edge-${z}`} position={[midX, markingY, z]} rotation={[-Math.PI / 2, 0, 0]}>
+              <planeGeometry args={[span, roadWidth * 0.03]} />
+              <meshStandardMaterial color="#dcd6c4" roughness={0.85} metalness={0} />
+            </mesh>
+          ))}
+        </>
+      )}
+
+      {/* kerbs / safety curbs down both edges */}
+      {[roadWidth / 2 - kerbWidth / 2, -roadWidth / 2 + kerbWidth / 2].map((z) => (
+        <mesh key={`kerb-${z}`} position={[midX, surfaceY + slabThickness / 2 + kerbHeight / 2, z]} castShadow receiveShadow>
+          <boxGeometry args={[span, kerbHeight, kerbWidth]} />
+          <meshStandardMaterial
+            color={style === "timber" ? "#8f6a41" : "#9aa0a4"}
+            map={style === "timber" ? wood : concrete}
+            roughness={0.9}
+            metalness={0.02}
+          />
         </mesh>
       ))}
     </group>
   );
 }
 
-function BridgeInfrastructure({ nodes, centerX, centerY, radius }: { nodes: TrussNode[]; centerX: number; centerY: number; radius: number }) {
-  const geometry = useMemo(() => {
-    if (nodes.length < 2) return null;
-    const points = nodes.map((node) => toVec3(node, centerX, centerY));
-    const minX = Math.min(...points.map((point) => point.x));
-    const maxX = Math.max(...points.map((point) => point.x));
-    const deckY = Math.min(...points.map((point) => point.y));
-    const floorY = -radius * 1.075;
-    return { minX, maxX, deckY, floorY, width: maxX - minX };
-  }, [centerX, centerY, nodes, radius]);
-  if (!geometry) return null;
+/** Pedestrian parapet down both sides of the deck: a post at every panel point
+ * with a top rail and a mid rail threaded through them. */
+function BridgeRailings({ nodes, centerX, centerY, radius, depthUnits }: { nodes: TrussNode[]; centerX: number; centerY: number; radius: number; depthUnits: number }) {
+  const deck = useDeckGeometry(nodes, centerX, centerY, radius);
+  if (!deck) return null;
 
-  const { minX, maxX, deckY, floorY } = geometry;
-  const abutmentHeight = Math.max(0.4, deckY - floorY - radius * 0.08);
+  const { minX, maxX, surfaceY, slabThickness, span } = deck;
+  const midX = (minX + maxX) / 2;
+  const roadWidth = depthUnits * 1.08;
+  const baseY = surfaceY + slabThickness / 2;
+  const postHeight = Math.max(radius * 0.14, 0.32);
+  const postSide = Math.max(radius * 0.014, 0.035);
+  const railSide = postSide * 0.78;
+  const postCount = Math.max(4, Math.min(26, Math.round(span / Math.max(radius * 0.3, 0.5))));
+  const railZ = roadWidth / 2 - postSide;
 
   return (
     <group>
-      {[minX - radius * 0.11, maxX + radius * 0.11].map((x) => (
-        <group key={`abutment-${x}`}>
-          <mesh position={[x, floorY + abutmentHeight / 2, 0]} castShadow receiveShadow>
-            <boxGeometry args={[radius * 0.38, abutmentHeight, DEPTH_UNITS * 1.35]} />
-            <meshStandardMaterial color="#73797c" roughness={0.94} metalness={0.01} />
+      {[railZ, -railZ].map((z) => (
+        <group key={`rail-side-${z}`}>
+          {Array.from({ length: postCount + 1 }, (_, index) => (
+            <mesh key={`post-${index}`} position={[minX + (span / postCount) * index, baseY + postHeight / 2, z]} castShadow>
+              <boxGeometry args={[postSide, postHeight, postSide]} />
+              <meshStandardMaterial color="#8d979e" roughness={0.4} metalness={0.8} />
+            </mesh>
+          ))}
+          {[postHeight * 0.98, postHeight * 0.55].map((h) => (
+            <mesh key={`rail-${h}`} position={[midX, baseY + h, z]} rotation={[0, 0, Math.PI / 2]} castShadow>
+              <cylinderGeometry args={[railSide, railSide, span, 10]} />
+              <meshStandardMaterial color="#a3adb4" roughness={0.32} metalness={0.88} />
+            </mesh>
+          ))}
+        </group>
+      ))}
+    </group>
+  );
+}
+
+/** Concrete substructure at both ends: a battered (sloping-faced) abutment
+ * wall with wing walls, a bearing pedestal the truss actually sits on, and the
+ * approach slab that carries the road onto the bank. */
+function BridgeInfrastructure({ nodes, centerX, centerY, radius, depthUnits }: { nodes: TrussNode[]; centerX: number; centerY: number; radius: number; depthUnits: number }) {
+  const deck = useDeckGeometry(nodes, centerX, centerY, radius);
+  const concrete = getConcreteTexture();
+
+  const abutmentGeometry = useMemo(() => {
+    if (!deck) return null;
+    const height = Math.max(0.4, deck.chordY - deck.floorY - radius * 0.05);
+    const topHalf = radius * 0.13;
+    const baseHalf = radius * 0.3;
+    const depth = depthUnits * 1.42;
+    const shape = new THREE.Shape();
+    shape.moveTo(-topHalf, height);
+    shape.lineTo(topHalf, height);
+    shape.lineTo(baseHalf, 0);
+    shape.lineTo(-baseHalf, 0);
+    shape.closePath();
+    const geo = new THREE.ExtrudeGeometry(shape, { depth, bevelEnabled: false, curveSegments: 1 });
+    geo.translate(0, 0, -depth / 2);
+    geo.computeVertexNormals();
+    return { geo, height, topHalf };
+  }, [deck, radius]);
+
+  if (!deck || !abutmentGeometry) return null;
+
+  const { minX, maxX, chordY, floorY, surfaceY, slabThickness } = deck;
+  const { geo, height, topHalf } = abutmentGeometry;
+
+  return (
+    <group>
+      {[
+        { x: minX - radius * 0.06, sign: -1 },
+        { x: maxX + radius * 0.06, sign: 1 },
+      ].map(({ x, sign }) => (
+        <group key={`abutment-${sign}`}>
+          {/* battered abutment wall */}
+          <mesh geometry={geo} position={[x, floorY, 0]} castShadow receiveShadow>
+            <meshStandardMaterial color="#8b9094" map={concrete} roughness={0.96} metalness={0.01} />
           </mesh>
-          <mesh position={[x, deckY - radius * 0.07, 0]} castShadow receiveShadow>
-            <boxGeometry args={[radius * 0.48, Math.max(0.12, radius * 0.08), DEPTH_UNITS * 1.18]} />
-            <meshStandardMaterial color="#3f494f" roughness={0.52} metalness={0.45} />
+          {/* bearing shelf the truss ends land on */}
+          <mesh position={[x, chordY - radius * 0.035, 0]} castShadow receiveShadow>
+            <boxGeometry args={[topHalf * 2.6, Math.max(0.1, radius * 0.055), depthUnits * 1.24]} />
+            <meshStandardMaterial color="#6f767b" map={concrete} roughness={0.9} metalness={0.03} />
           </mesh>
+          {/* elastomeric bearing pads under each truss line */}
+          {[depthUnits / 2, -depthUnits / 2].map((z) => (
+            <mesh key={`pad-${z}`} position={[x, chordY - radius * 0.005, z]} castShadow>
+              <boxGeometry args={[topHalf * 0.9, Math.max(0.05, radius * 0.025), depthUnits * 0.16]} />
+              <meshStandardMaterial color="#22282c" roughness={0.85} metalness={0.1} />
+            </mesh>
+          ))}
+          {/* approach slab carrying the road off the bridge and onto the bank */}
+          <mesh position={[x + sign * radius * 0.34, surfaceY, 0]} receiveShadow castShadow>
+            <boxGeometry args={[radius * 0.62, slabThickness * 1.1, depthUnits * 1.1]} />
+            <meshStandardMaterial color="#7e8489" map={concrete} roughness={0.94} metalness={0.02} />
+          </mesh>
+          {/* wing walls flaring back into the embankment */}
+          {[1, -1].map((zs) => (
+            <mesh
+              key={`wing-${zs}`}
+              position={[x + sign * radius * 0.2, floorY + height * 0.42, zs * depthUnits * 0.66]}
+              rotation={[0, sign * zs * 0.24, 0]}
+              castShadow
+              receiveShadow
+            >
+              <boxGeometry args={[radius * 0.5, height * 0.84, Math.max(0.08, radius * 0.045)]} />
+              <meshStandardMaterial color="#868c90" map={concrete} roughness={0.96} metalness={0.01} />
+            </mesh>
+          ))}
         </group>
       ))}
     </group>
@@ -308,19 +638,23 @@ export function TrussSceneContents({
   colorByForce,
   keepWood,
 }: TrussSceneContentsProps) {
-  const { center, radius } = useTrussBounds(nodes);
+  const { center, radius, depthUnits, halfDepth } = useTrussBounds(nodes);
   // The design (nodes/members) is drawn as one 2D truss; rendered as the two
   // real physical sides of the bridge, offset +-halfDepth in Z. Editing only
   // ever targets the front side - the back side is a pure visual mirror.
   const frontNodeMap = useMemo(
-    () => new Map(nodes.map((n) => [n.id, toVec3(n, center.x, center.y).setZ(-HALF_DEPTH)])),
-    [nodes, center]
+    () => new Map(nodes.map((n) => [n.id, toVec3(n, center.x, center.y).setZ(-halfDepth)])),
+    [nodes, center, halfDepth]
   );
   const backNodeMap = useMemo(
-    () => new Map(nodes.map((n) => [n.id, toVec3(n, center.x, center.y).setZ(HALF_DEPTH)])),
-    [nodes, center]
+    () => new Map(nodes.map((n) => [n.id, toVec3(n, center.x, center.y).setZ(halfDepth)])),
+    [nodes, center, halfDepth]
   );
   const interactive = !!onAddNode || !!onNodeClick || !!onMemberClick;
+  // A timber truss carries a plank deck; a steel or aluminium one carries an
+  // asphalt carriageway. keepWood (the Truck Rally arena) forces the timber
+  // deck regardless, because there the bridge is always a balsa model.
+  const deckStyle: DeckStyle = keepWood || materialProfileFor(members[0]?.materialLabel).wood ? "timber" : "asphalt";
 
   const renderMembers = (nodeMap: Map<string, THREE.Vector3>, side: "front" | "back") =>
     members.map((m) => {
@@ -377,14 +711,7 @@ export function TrussSceneContents({
                 : undefined
             }
           >
-            <mesh rotation={[Math.PI / 2, 0, 0]} castShadow receiveShadow>
-              <cylinderGeometry args={[Math.max(radius * 0.052, 0.16), Math.max(radius * 0.052, 0.16), Math.max(radius * 0.02, 0.06), 20]} />
-              <meshStandardMaterial color="#59656e" roughness={0.28} metalness={0.82} />
-            </mesh>
-            <mesh position={[0, 0, side === "front" ? -Math.max(radius * 0.024, 0.075) : Math.max(radius * 0.024, 0.075)]} rotation={[Math.PI / 2, 0, 0]} castShadow>
-              <cylinderGeometry args={[Math.max(radius * 0.028, 0.08), Math.max(radius * 0.028, 0.08), Math.max(radius * 0.035, 0.09), 16]} />
-              <meshStandardMaterial color="#c8d0d5" roughness={0.18} metalness={0.92} />
-            </mesh>
+            <GussetPlate radius={radius} side={side} materialLabel={members[0]?.materialLabel} />
           </group>
           {side === "front" && memberFirstNode === n.id && (
             <mesh position={pos} rotation={[Math.PI / 2, 0, 0]}>
@@ -446,8 +773,9 @@ export function TrussSceneContents({
         </mesh>
       )}
 
-      <BridgeDeck nodes={nodes} centerX={center.x} centerY={center.y} radius={radius} />
-      <BridgeInfrastructure nodes={nodes} centerX={center.x} centerY={center.y} radius={radius} />
+      <BridgeDeck nodes={nodes} centerX={center.x} centerY={center.y} radius={radius} depthUnits={depthUnits} style={deckStyle} />
+      <BridgeRailings nodes={nodes} centerX={center.x} centerY={center.y} radius={radius} depthUnits={depthUnits} />
+      <BridgeInfrastructure nodes={nodes} centerX={center.x} centerY={center.y} radius={radius} depthUnits={depthUnits} />
       {renderMembers(frontNodeMap, "front")}
       {renderMembers(backNodeMap, "back")}
       {crossBraces}
