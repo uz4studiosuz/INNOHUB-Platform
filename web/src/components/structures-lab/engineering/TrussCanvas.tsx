@@ -83,6 +83,8 @@ interface TrussCanvasProps {
   readOnly?: boolean;
   /** Color members by how close each is to ITS OWN failure point instead of the flat safetyFactor<1 scheme. */
   intensityMode?: boolean;
+  /** Re-centres the current truss whenever this token changes. */
+  fitRequest?: number;
 }
 
 export default function TrussCanvas({
@@ -99,9 +101,12 @@ export default function TrussCanvas({
   onDeleteMember,
   readOnly = false,
   intensityMode = false,
+  fitRequest = 0,
 }: TrussCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 800, height: 500 });
+  const [viewportOffset, setViewportOffset] = useState({ x: 0, y: 0 });
+  const appliedFitRef = useRef("");
 
   useEffect(() => {
     const el = containerRef.current;
@@ -118,15 +123,30 @@ export default function TrussCanvas({
     return () => observer.disconnect();
   }, []);
 
+  useEffect(() => {
+    if (fitRequest <= 0 || nodes.length === 0) return;
+    const fitKey = `${fitRequest}:${dimensions.width}:${dimensions.height}`;
+    if (appliedFitRef.current === fitKey) return;
+    appliedFitRef.current = fitKey;
+    const minX = Math.min(...nodes.map((node) => node.x));
+    const maxX = Math.max(...nodes.map((node) => node.x));
+    const minY = Math.min(...nodes.map((node) => node.y));
+    const maxY = Math.max(...nodes.map((node) => node.y));
+    setViewportOffset({
+      x: dimensions.width / 2 - (minX + maxX) / 2,
+      y: dimensions.height / 2 - (minY + maxY) / 2,
+    });
+  }, [dimensions.height, dimensions.width, fitRequest, nodes]);
+
   const handleStageClick = useCallback(
     (e: KonvaEventObject<MouseEvent>) => {
       const stage = e.target.getStage();
       if (!readOnly && e.target === stage && mode === "node" && stage) {
         const pos = stage.getPointerPosition();
-        if (pos) onAddNode(snap(pos.x), snap(pos.y));
+        if (pos) onAddNode(snap(pos.x - viewportOffset.x), snap(pos.y - viewportOffset.y));
       }
     },
-    [mode, onAddNode, readOnly]
+    [mode, onAddNode, readOnly, viewportOffset]
   );
 
   const nodeMap = new Map(nodes.map((n) => [n.id, n]));
@@ -152,6 +172,7 @@ export default function TrussCanvas({
         </Layer>
 
         <Layer>
+          <Group x={viewportOffset.x} y={viewportOffset.y}>
           {members.map((m) => {
             const a = nodeMap.get(m.nodeA);
             const b = nodeMap.get(m.nodeB);
@@ -193,9 +214,11 @@ export default function TrussCanvas({
               </Group>
             );
           })}
+          </Group>
         </Layer>
 
         <Layer>
+          <Group x={viewportOffset.x} y={viewportOffset.y}>
           {memberFirstNode && nodeMap.get(memberFirstNode) && (
             <Circle x={nodeMap.get(memberFirstNode)!.x} y={nodeMap.get(memberFirstNode)!.y} radius={12} stroke="#facc15" strokeWidth={2} />
           )}
@@ -222,6 +245,7 @@ export default function TrussCanvas({
               />
             </Group>
           ))}
+          </Group>
         </Layer>
       </Stage>
       {!readOnly && (

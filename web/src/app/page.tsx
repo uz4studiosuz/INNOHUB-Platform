@@ -51,8 +51,8 @@ export default function Home() {
           </div>
           <div className="mt-12 border-t border-[var(--line-strong)] pt-5">
             <div className="flex items-center justify-between gap-4 text-sm">
-              <span className="text-[var(--ink-muted)]">Platforma holati</span>
-              <span className="font-medium text-[var(--accent)]">Faol</span>
+              <span className="text-[var(--ink-muted)]">{t("dash.platformStatus")}</span>
+              <span className="font-medium text-[var(--accent)]">{t("dash.active")}</span>
             </div>
             <p className="mt-2 text-xs leading-5 text-[var(--ink-muted)]">
               {t("dash.engineStatus", { n: MODULES.length })}
@@ -64,7 +64,7 @@ export default function Home() {
       <section>
         <div className="mb-5">
           <h2 className="text-xl font-semibold tracking-tight text-[var(--ink)]">{t("dash.modulesHeading")}</h2>
-          <p className="mt-1 text-sm text-[var(--ink-muted)]">Yo&apos;nalishni tanlang va amaliy ishni davom ettiring.</p>
+          <p className="mt-1 text-sm text-[var(--ink-muted)]">{t("dash.modulesHint")}</p>
         </div>
 
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-6">

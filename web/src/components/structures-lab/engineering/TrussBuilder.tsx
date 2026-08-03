@@ -49,6 +49,7 @@ export default function TrussBuilder() {
   const [solving, setSolving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [history, setHistory] = useState<{ past: TrussSnapshot[]; future: TrussSnapshot[] }>({ past: [], future: [] });
+  const [fitRequest, setFitRequest] = useState(0);
   const currentSnapshotRef = useRef<TrussSnapshot>({ nodes: [], members: [] });
 
   const material = MATERIALS.find((m) => m.id === materialId) ?? MATERIALS[0];
@@ -248,6 +249,7 @@ export default function TrussBuilder() {
     setDesignName(example.name);
     setSolved(null);
     setError(null);
+    setFitRequest((request) => request + 1);
   }, [checkpoint]);
 
   const handleSolve = useCallback(async () => {
@@ -352,6 +354,7 @@ export default function TrussBuilder() {
             onMemberClick={handleMemberClick}
             onDeleteNode={handleDeleteNode}
             onDeleteMember={handleMemberClick}
+            fitRequest={fitRequest}
           />
         ) : (
           <TrussViewport3D

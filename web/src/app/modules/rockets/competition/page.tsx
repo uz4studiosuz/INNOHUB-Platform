@@ -1,8 +1,10 @@
 "use client";
 
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
+import { IconRefresh, IconRocket } from "@tabler/icons-react";
+import { useI18n } from "@/i18n";
 import { useRocketStore } from "../../../../store/rocketStore";
 import { RocketModel } from "../../../../components/rocket-viewport/RocketModel";
 import { StadiumArena } from "../../../../components/rocket-viewport/StadiumArena";
@@ -31,7 +33,7 @@ interface Opponent { name: string; design: RocketDesign; colour: string }
  */
 const OPPONENTS: Opponent[] = [
   {
-    name: "Sardor (loysiz nos)",
+    name: "Sardor",
     colour: "#f59e0b",
     design: {
       ...DEFAULT_DESIGN,
@@ -39,7 +41,7 @@ const OPPONENTS: Opponent[] = [
     },
   },
   {
-    name: "Nilufar (kichik parashyut)",
+    name: "Nilufar",
     colour: "#a855f7",
     design: {
       ...DEFAULT_DESIGN,
@@ -47,7 +49,7 @@ const OPPONENTS: Opponent[] = [
     },
   },
   {
-    name: "Bekzod (6 qanot)",
+    name: "Bekzod",
     colour: "#22d3ee",
     design: {
       ...DEFAULT_DESIGN,
@@ -66,12 +68,63 @@ type Phase = "STAGING" | "LAUNCHING" | "RESULTS";
  */
 type ScoreBy = "time" | "height";
 
-const SCORE_LABEL: Record<ScoreBy, string> = {
-  time: "Umumiy uchish vaqti",
-  height: "Maksimal balandlik",
-};
-
 interface Entrant { name: string; design: RocketDesign; analysis: RocketAnalysis; isPlayer: boolean; colour: string }
+
+function RocketMiniMap({ entrants, phase }: { entrants: Entrant[]; phase: Phase }) {
+  const { t } = useI18n();
+  const markerRefs = useRef<Array<HTMLDivElement | null>>([]);
+  const valueRefs = useRef<Array<HTMLSpanElement | null>>([]);
+  const maxAltitude = Math.max(10, ...entrants.map((entrant) => entrant.analysis.maxHeightM)) * 1.08;
+
+  useEffect(() => {
+    let frame = 0;
+    const startedAt = performance.now();
+    const render = (now: number) => {
+      const elapsed = phase === "LAUNCHING" ? (now - startedAt) / 1000 : 0;
+      entrants.forEach((entrant, index) => {
+        const sample = sampleFlight(entrant.analysis.flightPath, Math.min(elapsed, entrant.analysis.totalFlightTimeS));
+        const altitude = phase === "RESULTS" ? entrant.analysis.maxHeightM : Math.max(0, sample?.h ?? 0);
+        const ratio = Math.min(1, altitude / maxAltitude);
+        const marker = markerRefs.current[index];
+        const value = valueRefs.current[index];
+        if (marker) marker.style.bottom = `${8 + ratio * 78}%`;
+        if (value) value.textContent = `${altitude.toFixed(1)} m`;
+      });
+      if (phase === "LAUNCHING") frame = requestAnimationFrame(render);
+    };
+    render(performance.now());
+    return () => cancelAnimationFrame(frame);
+  }, [entrants, maxAltitude, phase]);
+
+  return (
+    <section className="absolute inset-x-4 bottom-4 z-10 h-36 overflow-hidden rounded-2xl border border-white/15 bg-[#101923]/92 text-white shadow-xl backdrop-blur-md" aria-label={t("rocket.minimap")}>
+      <div className="absolute inset-y-0 left-0 w-24 border-r border-white/10 bg-[#0c141d] px-3 py-3">
+        <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">{t("rocket.minimap")}</p>
+        <p className="mt-2 font-mono text-sm font-semibold text-white">{maxAltitude.toFixed(0)} m</p>
+        <p className="mt-1 text-[10px] text-slate-400">{t("rocket.altitude")}</p>
+      </div>
+      <div className="absolute inset-y-0 left-24 right-0">
+        {[0, 0.25, 0.5, 0.75, 1].map((tick) => (
+          <div key={tick} className="absolute inset-x-0 border-t border-white/10" style={{ bottom: `${8 + tick * 78}%` }}>
+            <span className="absolute left-2 -top-3 font-mono text-[9px] text-slate-500">{(maxAltitude * tick).toFixed(0)} m</span>
+          </div>
+        ))}
+        {entrants.map((entrant, index) => (
+          <div key={entrant.name} className="absolute inset-y-0" style={{ left: `${((index + 0.5) / entrants.length) * 100}%` }}>
+            <div className="absolute bottom-[8%] top-[14%] border-l border-dashed border-white/10" />
+            <div ref={(node) => { markerRefs.current[index] = node; }} className="absolute -translate-x-1/2 translate-y-1/2 transition-[bottom] duration-75" style={{ bottom: "8%", color: entrant.colour }}>
+              <IconRocket size={22} stroke={2} className="-rotate-45 drop-shadow" />
+            </div>
+            <div className="absolute bottom-1 -translate-x-1/2 whitespace-nowrap text-center">
+              <span className={`block text-[10px] ${entrant.isPlayer ? "font-bold text-white" : "text-slate-300"}`}>{entrant.name}</span>
+              <span ref={(node) => { valueRefs.current[index] = node; }} className="block font-mono text-[9px] text-slate-400">0.0 m</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
 
 function FlyingRocket({ entrant, phase, onLanded, x }: {
   entrant: Entrant;
