@@ -21,7 +21,7 @@ export default function TrussViewport3D({ nodes, members, solved }: TrussViewpor
         shadows={{ type: PCFSoftShadowMap }}
         dpr={[1, 2]}
         gl={{ antialias: true, toneMapping: ACESFilmicToneMapping, toneMappingExposure: 1.05 }}
-        camera={{ position: [radius * 1.75, radius * 1.25, radius * 1.85], fov: 42, near: 0.1, far: radius * 30 }}
+        camera={{ position: [radius * 1.7, radius * 0.9, radius * 2.65], fov: 40, near: 0.1, far: radius * 30 }}
       >
         <color attach="background" args={["#17212b"]} />
         <fog attach="fog" args={["#17212b", radius * 5.5, radius * 15]} />
@@ -47,10 +47,10 @@ export default function TrussViewport3D({ nodes, members, solved }: TrussViewpor
           <meshStandardMaterial color="#222c31" roughness={0.96} metalness={0.02} />
         </mesh>
         <gridHelper args={[radius * 8, 36, "#397565", "#2a3a40"]} position={[0, -radius * 1.075, 0]} />
-        <ContactShadows position={[0, -radius * 1.065, 0]} opacity={0.48} scale={radius * 6} blur={2.4} far={radius * 4} color="#09100e" />
+        <ContactShadows frames={1} position={[0, -radius * 1.065, 0]} opacity={0.38} scale={radius * 6} blur={2.6} far={radius * 4} color="#09100e" />
         <OrbitControls
           makeDefault
-          target={[0, 0, 0]}
+          target={[0, -radius * 0.12, 0]}
           enableDamping
           dampingFactor={0.075}
           minDistance={Math.max(2, radius * 0.8)}

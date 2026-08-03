@@ -1,89 +1,41 @@
 "use client";
 
+import { IconAlertTriangle, IconCircleCheck } from "@tabler/icons-react";
 import { useGliderStore } from "../../store/gliderStore";
-import { normalizeMetric, normalizeMetricCentered, SPEC_LIMITS } from "../../lib/physics/gliderPhysics";
-
-interface OptParam {
-  id: string;
-  label: string;
-  /** Current value (0-1 scale, where 0 = worst / red, 1 = best / green) */
-  value: number;
-  isOutOfSpec?: boolean;
-  /** Color used for the label text */
-  labelColor?: string;
-}
-
-function OptBar({ param }: { param: OptParam }) {
-  const pct = Math.max(0, Math.min(100, param.value * 100));
-
-  return (
-    <div className="opt-row">
-      {/* Triangle indicator */}
-      <div className="opt-bar-track">
-        <div className="opt-bar-gradient" />
-        {/* Tick marks for visual reference */}
-        {[20, 40, 60, 80].map((tick) => (
-          <div
-            key={tick}
-            className="opt-bar-tick"
-            style={{ left: `${tick}%` }}
-          />
-        ))}
-        {/* Indicator triangle */}
-        <div
-          className="opt-triangle"
-          style={{ left: `${pct}%` }}
-        />
-      </div>
-      {/* Label on the right */}
-      <span
-        className="opt-label"
-        style={{ color: param.labelColor || (param.isOutOfSpec ? "#ef4444" : "#22c55e") }}
-      >
-        {param.label}
-      </span>
-    </div>
-  );
-}
 
 export function OptimizationPanel() {
-  const getComputedMetrics = useGliderStore(state => state.getComputedMetrics);
-  const metrics = getComputedMetrics();
-
-  // Normalize metrics for the bars (0.0 to 1.0)
-  const weightScore = normalizeMetric(metrics.mass, SPEC_LIMITS.mass, false);
-  const liftScore = normalizeMetric(metrics.liftEfficiencyRatio, SPEC_LIMITS.liftEfficiency, true);
-  const dragScore = Math.max(0, Math.min(1, liftScore * 0.8 + 0.2));
-  const rollScore = normalizeMetricCentered(metrics.effectiveDihedral, SPEC_LIMITS.effectiveDihedral.min, SPEC_LIMITS.effectiveDihedral.max);
-  const pitchCgScore = normalizeMetricCentered(metrics.staticMarginMm, 5, 15);
-  const pitchNpScore = normalizeMetricCentered(metrics.neutralPoint / 300, 0.4, 0.6);
-  const pitchHsScore = normalizeMetricCentered(metrics.hsToWingAreaRatio, SPEC_LIMITS.hsToWarRatio.min, SPEC_LIMITS.hsToWarRatio.max);
-  const yawScore = normalizeMetricCentered(metrics.vhStabAreaRatio, SPEC_LIMITS.vhStabRatio.min, SPEC_LIMITS.vhStabRatio.max);
-
-  const params: OptParam[] = [
-    { id: "weight",   label: "Weight",                     value: weightScore,  isOutOfSpec: metrics.specViolations.includes("mass"),             labelColor: "#22c55e" },
-    { id: "lift",     label: "Lift",                       value: liftScore,    isOutOfSpec: metrics.specViolations.includes("liftEfficiency"),    labelColor: "#22c55e" },
-    { id: "drag",     label: "Drag",                       value: dragScore,                                                                      labelColor: "#22c55e" },
-    { id: "roll",     label: "Roll",                       value: rollScore,    isOutOfSpec: metrics.specViolations.includes("effectiveDihedral"), labelColor: "#f59e0b" },
-    { id: "pitch-cg", label: "Pitch (Center of Gravity)",  value: pitchCgScore, isOutOfSpec: metrics.specViolations.includes("staticMargin"),     labelColor: "#22c55e" },
-    { id: "pitch-np", label: "Pitch (Neutral Point)",      value: pitchNpScore,                                                                   labelColor: "#ef4444" },
-    { id: "pitch-hs", label: "Pitch (Horizontal Stabilizer)", value: pitchHsScore, isOutOfSpec: metrics.specViolations.includes("hsToWarRatio"), labelColor: "#ef4444" },
-    { id: "yaw",      label: "Yaw",                        value: yawScore,                                                                       labelColor: "#22c55e" },
+  const store = useGliderStore();
+  const metrics = store.getComputedMetrics();
+  const values = [
+    { label: "Massa", value: `${metrics.mass.toFixed(1)} g`, ok: !metrics.specViolations.includes("mass") },
+    { label: "Ko'tarish", value: metrics.liftEfficiencyRatio.toFixed(1), ok: !metrics.specViolations.includes("liftEfficiency") },
+    { label: "Dihedral", value: `${metrics.effectiveDihedral.toFixed(1)}°`, ok: !metrics.specViolations.includes("effectiveDihedral") },
+    { label: "Statik zaxira", value: `${metrics.staticMarginMm.toFixed(1)} mm`, ok: !metrics.specViolations.includes("staticMargin") },
+    { label: "H-dum nisbati", value: metrics.hsToWingAreaRatio.toFixed(2), ok: !metrics.specViolations.includes("hsToWarRatio") },
+    { label: "Parvoz vaqti", value: `${metrics.flightTimeSec.toFixed(2)} s`, ok: metrics.flightTimeSec > 0 },
   ];
+  const issueCount = values.filter((item) => !item.ok).length;
 
   return (
-    <div className="opt-panel">
-      <h3 className="opt-title">Optimization</h3>
-      <div className="opt-bars-container">
-        {params.map((p) => (
-          <OptBar key={p.id} param={p} />
+    <section className="border-b border-[var(--line)] bg-[var(--surface)] px-3 py-2.5 md:px-4" aria-label="Dizayn holati">
+      <div className="flex items-center gap-3 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="w-36 shrink-0 border-r border-[var(--line)] pr-3">
+          <p className="text-xs font-semibold text-[var(--ink)]">Dizayn holati</p>
+          <div className={`mt-1 flex items-center gap-1.5 text-[10px] font-medium ${issueCount ? "text-amber-700" : "text-[var(--accent)]"}`}>
+            {issueCount ? <IconAlertTriangle size={13} stroke={1.8} /> : <IconCircleCheck size={13} stroke={1.8} />}
+            {issueCount ? `${issueCount} parametrni sozlang` : "Asosiy limitlar bajarildi"}
+          </div>
+        </div>
+        {values.map((item) => (
+          <div key={item.label} className="min-w-[118px] shrink-0 px-1.5">
+            <p className="text-[10px] font-medium text-[var(--ink-muted)]">{item.label}</p>
+            <div className="mt-0.5 flex items-center gap-1.5">
+              <span className="font-mono text-sm font-semibold text-[var(--ink)]">{item.value}</span>
+              <span className={`h-1.5 w-1.5 rounded-full ${item.ok ? "bg-emerald-500" : "bg-amber-500"}`} aria-label={item.ok ? "Limit ichida" : "Sozlash kerak"} />
+            </div>
+          </div>
         ))}
       </div>
-      {/* WhiteBox-style legend */}
-      <div className="opt-legend">
-        <span className="opt-legend-unstable">Unstable</span>
-        <span className="opt-legend-scale">OK &lt;-- Better --&gt; Best</span>
-      </div>
-    </div>
+    </section>
   );
 }

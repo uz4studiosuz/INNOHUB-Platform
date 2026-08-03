@@ -811,3 +811,20 @@ input[type="range"] {
 }
 
 /* touch to force a CSS rebuild */
+
+/* Glider workspace final cascade overrides. */
+.dock-header { min-height: 46px; padding: 8px 10px; border-bottom-color: var(--line); background: var(--surface); }
+.dock-header-nav { width: 100%; justify-content: space-between; gap: 6px; color: var(--ink); font-size: 11px; letter-spacing: 0; text-transform: none; }
+.dock-header-nav button { display: inline-flex; width: 30px; height: 30px; align-items: center; justify-content: center; border-radius: 8px; color: var(--ink-muted); }
+.dock-header-nav button:hover:not(:disabled) { color: var(--accent); background: var(--accent-soft); }
+.dock-header-nav button:disabled { cursor: default; opacity: .3; }
+.dock-component-name { padding: 9px 12px; border-bottom-color: var(--line); background: var(--surface-muted); color: var(--ink); text-align: left; }
+.dock-field-row { gap: 7px; padding: 8px 12px; border-bottom-color: var(--line); }
+.dock-field-label { min-width: 92px; color: var(--ink-muted); font-weight: 550; }
+.dock-field-input, .dock-field-select { min-height: 32px; border-color: var(--line-strong); border-radius: 8px; background: var(--surface); color: var(--ink); }
+.dock-field-input:focus, .dock-field-select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.dock-actions { gap: 6px; padding: 10px; border-top-color: var(--line); background: var(--surface); }
+.dock-btn { display: inline-flex; min-width: 0; align-items: center; justify-content: center; gap: 4px; padding: 8px 6px; border-color: var(--line-strong); border-radius: 8px; background: var(--surface); color: var(--ink-muted); font-size: 10px; letter-spacing: 0; text-transform: none; }
+.dock-btn:hover { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+.dock-btn-primary, .dock-btn-primary:hover { border-color: var(--accent); background: var(--accent); color: white; }
+.dock-category { margin-top: 4px; border-color: var(--line); background: var(--surface-muted); color: var(--ink-muted); }

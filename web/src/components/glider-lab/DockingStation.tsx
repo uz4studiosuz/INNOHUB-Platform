@@ -1,7 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useGliderStore } from "../../store/gliderStore";
+import { IconArrowLeft, IconArrowRight, IconCheck, IconRotateClockwise2, IconX } from "@tabler/icons-react";
+import type { HStabParams, VStabParams, WingParams } from "../../lib/physics/gliderPhysics";
+
+type SurfaceShape = NonNullable<WingParams["shape"]>;
+type SandingLevel = NonNullable<WingParams["sandingLevel"]>;
 
 function NumericField({ label, value, onChange, unit = "mm" }: {
   label: string;
@@ -52,18 +57,22 @@ export function DockingStation() {
   const store = useGliderStore();
   const { activePanel, setActivePanel } = store;
 
-  // Local state to store initial values for RESET
-  const [initialWing, setInitialWing] = useState(store.wing);
-  const [initialFuse, setInitialFuse] = useState(store.fuselage);
-  const [initialHStab, setInitialHStab] = useState(store.horizontalStabilizer);
-  const [initialVStab, setInitialVStab] = useState(store.verticalStabilizer);
+  const initialRef = useRef({
+    wing: store.wing,
+    fuselage: store.fuselage,
+    horizontalStabilizer: store.horizontalStabilizer,
+    verticalStabilizer: store.verticalStabilizer,
+  });
 
   // Sync initial state when panel changes
   useEffect(() => {
-    setInitialWing(store.wing);
-    setInitialFuse(store.fuselage);
-    setInitialHStab(store.horizontalStabilizer);
-    setInitialVStab(store.verticalStabilizer);
+    const current = useGliderStore.getState();
+    initialRef.current = {
+      wing: current.wing,
+      fuselage: current.fuselage,
+      horizontalStabilizer: current.horizontalStabilizer,
+      verticalStabilizer: current.verticalStabilizer,
+    };
   }, [activePanel]);
 
   if (!activePanel || activePanel === "design-model" || activePanel === "optimization") return null;
@@ -77,10 +86,10 @@ export function DockingStation() {
   };
 
   const handleReset = () => {
-    if (activePanel === "wing") store.updateWing(initialWing);
-    if (activePanel === "fuselage") store.updateFuselage(initialFuse);
-    if (activePanel === "h-stab") store.updateHStab(initialHStab);
-    if (activePanel === "v-stab") store.updateVStab(initialVStab);
+    if (activePanel === "wing") store.updateWing(initialRef.current.wing);
+    if (activePanel === "fuselage") store.updateFuselage(initialRef.current.fuselage);
+    if (activePanel === "h-stab") store.updateHStab(initialRef.current.horizontalStabilizer);
+    if (activePanel === "v-stab") store.updateVStab(initialRef.current.verticalStabilizer);
   };
 
   const handleDone = () => {
@@ -128,18 +137,18 @@ export function DockingStation() {
               <div className="dock-field-row" style={{ fontWeight: 700, fontSize: 12, color: "#1e293b", borderBottom: "1px solid #c0c0c0", marginTop: 4 }}>
                 Features
               </div>
-              <SelectField label="Shape" value={store.wing.shape} onChange={(v) => store.updateWing({ shape: v as any })} options={[
+              <SelectField label="Shape" value={store.wing.shape} onChange={(v) => store.updateWing({ shape: v as SurfaceShape })} options={[
                 { value: "rectangular", label: "Rectangular" },
                 { value: "tapered", label: "Tapered" },
                 { value: "elliptical", label: "Elliptical" },
               ]} />
-              <SelectField label="Sanding Level" value={store.wing.sandingLevel} onChange={(v) => store.updateWing({ sandingLevel: v as any })} options={[
+              <SelectField label="Sanding Level" value={store.wing.sandingLevel} onChange={(v) => store.updateWing({ sandingLevel: v as SandingLevel })} options={[
                 { value: "none", label: "None" },
                 { value: "light", label: "Light" },
                 { value: "medium", label: "Medium" },
                 { value: "heavy", label: "Heavy" },
               ]} />
-              <SelectField label="Dihedral Type" value={store.wing.dihedralType} onChange={(v) => store.updateWing({ dihedralType: v as any })} options={[
+              <SelectField label="Dihedral Type" value={store.wing.dihedralType} onChange={(v) => store.updateWing({ dihedralType: v as WingParams["dihedralType"] })} options={[
                 { value: "dihedral", label: "Dihedral" },
                 { value: "tipDihedral", label: "Tip Dihedral" },
               ]} />
@@ -178,12 +187,12 @@ export function DockingStation() {
               <NumericField label="Chord" value={store.horizontalStabilizer.chord} onChange={(v) => store.updateHStab({ chord: v || 0 })} />
               
               <div className="dock-category" style={{ marginTop: 8 }}>Features</div>
-              <SelectField label="Shape" value={store.horizontalStabilizer.shape || "rectangular"} onChange={(v) => store.updateHStab({ shape: v as any })} options={[
+              <SelectField label="Shape" value={store.horizontalStabilizer.shape || "rectangular"} onChange={(v) => store.updateHStab({ shape: v as NonNullable<HStabParams["shape"]> })} options={[
                 { value: "rectangular", label: "Rectangular" },
                 { value: "tapered", label: "Tapered" },
                 { value: "elliptical", label: "Elliptical" },
               ]} />
-              <SelectField label="Sanding Level" value={store.horizontalStabilizer.sandingLevel || "none"} onChange={(v) => store.updateHStab({ sandingLevel: v as any })} options={[
+              <SelectField label="Sanding Level" value={store.horizontalStabilizer.sandingLevel || "none"} onChange={(v) => store.updateHStab({ sandingLevel: v as NonNullable<HStabParams["sandingLevel"]> })} options={[
                 { value: "none", label: "None" },
                 { value: "light", label: "Light" },
                 { value: "medium", label: "Medium" },
@@ -208,12 +217,12 @@ export function DockingStation() {
               <NumericField label="Chord" value={store.verticalStabilizer.chord} onChange={(v) => store.updateVStab({ chord: v || 0 })} />
               
               <div className="dock-category" style={{ marginTop: 8 }}>Features</div>
-              <SelectField label="Shape" value={store.verticalStabilizer.shape || "rectangular"} onChange={(v) => store.updateVStab({ shape: v as any })} options={[
+              <SelectField label="Shape" value={store.verticalStabilizer.shape || "rectangular"} onChange={(v) => store.updateVStab({ shape: v as NonNullable<VStabParams["shape"]> })} options={[
                 { value: "rectangular", label: "Rectangular" },
                 { value: "tapered", label: "Tapered" },
                 { value: "elliptical", label: "Elliptical" },
               ]} />
-              <SelectField label="Sanding Level" value={store.verticalStabilizer.sandingLevel || "none"} onChange={(v) => store.updateVStab({ sandingLevel: v as any })} options={[
+              <SelectField label="Sanding Level" value={store.verticalStabilizer.sandingLevel || "none"} onChange={(v) => store.updateVStab({ sandingLevel: v as NonNullable<VStabParams["sandingLevel"]> })} options={[
                 { value: "none", label: "None" },
                 { value: "light", label: "Light" },
                 { value: "medium", label: "Medium" },
@@ -234,21 +243,13 @@ export function DockingStation() {
   };
 
   return (
-    <aside style={{
-      width: 240,
-      display: "flex",
-      flexDirection: "column",
-      borderRight: "1px solid #c0c0c0",
-      background: "#ececec",
-      flexShrink: 0,
-      overflow: "hidden",
-    }}>
+    <aside className="hidden w-[270px] shrink-0 flex-col overflow-hidden border-r border-[var(--line)] bg-[var(--surface)] lg:flex">
       {/* WhiteBox-style DOCKING STATION header */}
       <div className="dock-header">
         <div className="dock-header-nav">
-          <button onClick={goPrev} disabled={currentIdx <= 0}>◀</button>
-          <span>DOCKING STATION</span>
-          <button onClick={goNext} disabled={currentIdx >= PANEL_ORDER.length - 1}>▶</button>
+          <button type="button" aria-label="Previous component" onClick={goPrev} disabled={currentIdx <= 0}><IconArrowLeft size={16} stroke={1.8} /></button>
+          <span>Component settings</span>
+          <button type="button" aria-label="Next component" onClick={goNext} disabled={currentIdx >= PANEL_ORDER.length - 1}><IconArrowRight size={16} stroke={1.8} /></button>
         </div>
       </div>
 
@@ -258,23 +259,23 @@ export function DockingStation() {
         padding: "3px 0",
         fontSize: 12,
         fontWeight: 600,
-        color: "#475569",
-        background: "#ddd",
-        borderBottom: "1px solid #c0c0c0",
+        color: "var(--ink)",
+        background: "var(--surface-muted)",
+        borderBottom: "1px solid var(--line)",
       }}>
         {titleMap[activePanel] || "Parameters"}
       </div>
 
       {/* Content */}
-      <div style={{ flex: 1, overflowY: "auto", background: "#f0f0f0" }}>
+      <div className="custom-scrollbar flex-1 overflow-y-auto bg-[var(--surface)]">
         {renderContent()}
       </div>
 
       {/* Action buttons */}
       <div className="dock-actions">
-        <button className="dock-btn" onClick={handleApply}>APPLY</button>
-        <button className="dock-btn" onClick={handleReset}>RESET</button>
-        <button className="dock-btn" onClick={handleDone}>DONE</button>
+        <button className="dock-btn" onClick={handleApply}><IconCheck size={14} stroke={1.8} /> Apply</button>
+        <button className="dock-btn" onClick={handleReset}><IconRotateClockwise2 size={14} stroke={1.8} /> Reset</button>
+        <button className="dock-btn dock-btn-primary" onClick={handleDone}><IconX size={14} stroke={1.8} /> Close</button>
       </div>
     </aside>
   );

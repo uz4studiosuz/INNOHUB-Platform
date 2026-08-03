@@ -147,6 +147,7 @@ function createMaterial(color: string | undefined, sandingLevel: string | undefi
     color: baseColor,
     roughness: roughness,
     metalness: 0.0,
+    side: THREE.DoubleSide,
     emissive: isHovered ? "#38bdf8" : "#000000",
     emissiveIntensity: isHovered ? 0.35 : 0.0,
   });
@@ -204,7 +205,7 @@ function DimensionLine({ start, end, label, color = "#f5a623", offset = 0 }: {
   );
 }
 
-export function GliderModel({ designOverride, hideUI = false }: { designOverride?: GliderShape; hideUI?: boolean }) {
+export function GliderModel({ designOverride, hideUI = false, displayColor }: { designOverride?: GliderShape; hideUI?: boolean; displayColor?: string }) {
   const store = useGliderStore();
   const source = designOverride || store;
   const fuselage = source.fuselage;
@@ -365,24 +366,28 @@ export function GliderModel({ designOverride, hideUI = false }: { designOverride
 
   // Materials with Interactive Glow Highlight (Three.js Materials & Interaction Skills)
   const woodMaterial = useMemo(() => new THREE.MeshStandardMaterial({
-    color: WOOD_COLOR,
-    roughness: 0.6,
-    metalness: 0.05,
+    color: displayColor || WOOD_COLOR,
+    roughness: displayColor ? 0.46 : 0.6,
+    metalness: displayColor ? 0.12 : 0.05,
+    side: THREE.DoubleSide,
     emissive: hoveredComponent === "fuselage" || activePanel === "fuselage" ? "#38bdf8" : "#000000",
     emissiveIntensity: hoveredComponent === "fuselage" || activePanel === "fuselage" ? 0.35 : 0.0,
-  }), [hoveredComponent, activePanel]);
+  }), [displayColor, hoveredComponent, activePanel]);
 
-  const wingMaterial = useMemo(() => 
-    createMaterial(wing.color, wing.sandingLevel, hoveredComponent === "wing" || activePanel === "wing"), 
-  [wing.color, wing.sandingLevel, hoveredComponent, activePanel]);
+  const wingMaterial = useMemo(() => displayColor
+    ? new THREE.MeshStandardMaterial({ color: displayColor, roughness: 0.46, metalness: 0.12, side: THREE.DoubleSide })
+    : createMaterial(wing.color, wing.sandingLevel, hoveredComponent === "wing" || activePanel === "wing"),
+  [displayColor, wing.color, wing.sandingLevel, hoveredComponent, activePanel]);
 
-  const hStabMaterial = useMemo(() => 
-    createMaterial(horizontalStabilizer.color, horizontalStabilizer.sandingLevel, hoveredComponent === "h-stab" || activePanel === "h-stab"), 
-  [horizontalStabilizer.color, horizontalStabilizer.sandingLevel, hoveredComponent, activePanel]);
+  const hStabMaterial = useMemo(() => displayColor
+    ? new THREE.MeshStandardMaterial({ color: displayColor, roughness: 0.5, metalness: 0.08, side: THREE.DoubleSide })
+    : createMaterial(horizontalStabilizer.color, horizontalStabilizer.sandingLevel, hoveredComponent === "h-stab" || activePanel === "h-stab"),
+  [displayColor, horizontalStabilizer.color, horizontalStabilizer.sandingLevel, hoveredComponent, activePanel]);
 
-  const vStabMaterial = useMemo(() => 
-    createMaterial(verticalStabilizer.color, verticalStabilizer.sandingLevel, hoveredComponent === "v-stab" || activePanel === "v-stab"), 
-  [verticalStabilizer.color, verticalStabilizer.sandingLevel, hoveredComponent, activePanel]);
+  const vStabMaterial = useMemo(() => displayColor
+    ? new THREE.MeshStandardMaterial({ color: displayColor, roughness: 0.5, metalness: 0.08, side: THREE.DoubleSide })
+    : createMaterial(verticalStabilizer.color, verticalStabilizer.sandingLevel, hoveredComponent === "v-stab" || activePanel === "v-stab"),
+  [displayColor, verticalStabilizer.color, verticalStabilizer.sandingLevel, hoveredComponent, activePanel]);
 
   const hStabGeometry = useMemo(() => 
     createTailGeometry(hStabSpan, hStabChord, horizontalStabilizer.shape, horizontalStabilizer.sandingLevel, false), 

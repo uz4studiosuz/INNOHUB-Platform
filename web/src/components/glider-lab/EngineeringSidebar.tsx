@@ -1,54 +1,46 @@
 "use client";
 
+import type { ComponentType } from "react";
+import {
+  IconAdjustmentsHorizontal,
+  IconAirBalloon,
+  IconArrowsUp,
+  IconAxisX,
+  IconAxisY,
+  IconEye,
+  IconEyeOff,
+  IconFeather,
+  IconPencil,
+  IconPlaneTilt,
+  IconScale,
+  IconWind,
+} from "@tabler/icons-react";
 import { useGliderStore } from "../../store/gliderStore";
-
-/* ─── SVG Icons (WhiteBox Style) ─── */
-const PencilIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
-  </svg>
-);
-
-const VisibleIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-    <circle cx="12" cy="12" r="3" />
-  </svg>
-);
-
-const HiddenIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" strokeWidth="2">
-    <circle cx="7" cy="7" r="5" fill="#ef4444" />
-  </svg>
-);
-
-/* ─── Data ─── */
 
 interface SidebarItem {
   id: string;
   label: string;
-  noWrench?: boolean;
+  hint: string;
+  icon: ComponentType<{ size?: number; stroke?: number }>;
+  readOnly?: boolean;
 }
 
 const DESIGN_ITEMS: SidebarItem[] = [
-  { id: "fuselage",     label: "Fuselage" },
-  { id: "wing",         label: "Wing" },
-  { id: "h-stab",       label: "Horizontal Stabilizer" },
-  { id: "v-stab",       label: "Vertical Stabilizer" },
-  { id: "design-model", label: "Design Model", noWrench: true },
+  { id: "fuselage", label: "Fyuzelyaj", hint: "Uzunlik va korpus profili", icon: IconAirBalloon },
+  { id: "wing", label: "Asosiy qanot", hint: "Kenglik, xorda va dihedral", icon: IconPlaneTilt },
+  { id: "h-stab", label: "Gorizontal dum", hint: "Pitch barqarorlik yuzasi", icon: IconFeather },
+  { id: "v-stab", label: "Vertikal dum", hint: "Yaw barqarorlik yuzasi", icon: IconAxisY },
 ];
 
 const ANALYSIS_ITEMS: SidebarItem[] = [
-  { id: "weight",       label: "Weight" },
-  { id: "lift",         label: "Lift" },
-  { id: "drag",         label: "Drag" },
-  { id: "roll",         label: "Roll" },
-  { id: "pitch",        label: "Pitch" },
-  { id: "yaw",          label: "Yaw" },
-  { id: "optimization", label: "Optimization", noWrench: true },
+  { id: "weight", label: "Og'irlik", hint: "Massa taqsimoti", icon: IconScale },
+  { id: "lift", label: "Ko'tarish", hint: "Qanot samaradorligi", icon: IconArrowsUp },
+  { id: "drag", label: "Qarshilik", hint: "Aerodinamik qarshilik", icon: IconWind },
+  { id: "roll", label: "Roll", hint: "Yon barqarorlik", icon: IconAxisX },
+  { id: "pitch", label: "Pitch", hint: "Og'irlik va neytral nuqta", icon: IconFeather },
+  { id: "yaw", label: "Yaw", hint: "Yo'nalish barqarorligi", icon: IconAxisY },
+  { id: "optimization", label: "Optimallashtirish", hint: "Umumiy dizayn holati", icon: IconAdjustmentsHorizontal, readOnly: true },
 ];
-
-/* ─── Component ─── */
 
 export function EngineeringSidebar() {
   const activePanel = useGliderStore((state) => state.activePanel);
@@ -56,113 +48,58 @@ export function EngineeringSidebar() {
   const visibility = useGliderStore((state) => state.visibility);
   const toggleVisibility = useGliderStore((state) => state.toggleVisibility);
 
-  const handleItemClick = (item: SidebarItem) => {
-    if (item.noWrench) {
-      setActivePanel(null);
-    } else {
-      setActivePanel(item.id);
-    }
-  };
-
-  const renderItem = (item: SidebarItem) => {
-    const isActive = activePanel === item.id;
-    const isVisible = visibility[item.id] !== false;
-
+  const renderItem = (item: SidebarItem, allowVisibility: boolean) => {
+    const active = activePanel === item.id;
+    const visible = visibility[item.id] !== false;
+    const ItemIcon = item.icon;
     return (
-      <div key={item.id} className="flex items-center group">
-        {/* Main clickable item */}
-        <div
-          className={`eng-sidebar-item flex-1 ${isActive ? "active" : ""}`}
-          onClick={() => handleItemClick(item)}
+      <div key={item.id} className="group flex items-center gap-1">
+        <button
+          type="button"
+          onClick={() => setActivePanel(active ? null : item.id)}
+          aria-pressed={active}
+          className={`flex min-w-0 flex-1 items-center gap-2.5 rounded-xl px-3 py-2.5 text-left transition-colors ${active ? "bg-[var(--accent-soft)] text-[var(--accent)]" : "text-[var(--ink)] hover:bg-[var(--surface-muted)]"}`}
         >
-          <span className="flex-1 truncate">{item.label}</span>
-        </div>
-
-        {/* Action buttons — pencil & visibility toggle (WhiteBox style) */}
-        <div className={`flex items-center gap-0.5 pr-1 transition-opacity ${isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}>
-          {!item.noWrench && (
-            <button
-              className="eng-sidebar-icon-btn"
-              title="Edit"
-              onClick={(e) => { e.stopPropagation(); setActivePanel(item.id); }}
-            >
-              <PencilIcon />
-            </button>
-          )}
+          <ItemIcon size={18} stroke={1.7} />
+          <span className="min-w-0 flex-1">
+            <span className="block truncate text-xs font-semibold">{item.label}</span>
+            <span className={`block truncate text-[10px] font-normal ${active ? "text-[var(--accent)] opacity-75" : "text-[var(--ink-muted)]"}`}>{item.hint}</span>
+          </span>
+          {!item.readOnly && <IconPencil size={14} stroke={1.8} className="shrink-0 opacity-0 transition-opacity group-hover:opacity-70" />}
+        </button>
+        {allowVisibility && (
           <button
-            className={`eng-sidebar-icon-btn`}
-            title={isVisible ? "Hide overlay" : "Show overlay"}
-            onClick={(e) => { e.stopPropagation(); toggleVisibility(item.id); }}
+            type="button"
+            aria-label={visible ? `${item.label}ni yashirish` : `${item.label}ni ko'rsatish`}
+            title={visible ? "Komponentni yashirish" : "Komponentni ko'rsatish"}
+            onClick={() => toggleVisibility(item.id)}
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-[var(--ink-muted)] transition-colors hover:bg-[var(--surface-muted)] hover:text-[var(--ink)]"
           >
-            {isVisible ? <VisibleIcon /> : <HiddenIcon />}
+            {visible ? <IconEye size={16} stroke={1.7} /> : <IconEyeOff size={16} stroke={1.7} />}
           </button>
-        </div>
+        )}
       </div>
     );
   };
 
   return (
-    <aside style={{
-      width: 180,
-      display: "flex",
-      flexDirection: "column",
-      borderRight: "1px solid #c0c0c0",
-      background: "#e0e0e0",
-      flexShrink: 0,
-      overflowY: "auto",
-    }}>
-      {/* Header */}
-      <div style={{
-        padding: "10px 12px 4px",
-        fontSize: 13,
-        fontWeight: 800,
-        color: "#1e293b",
-        letterSpacing: "0.04em",
-        textTransform: "uppercase",
-      }}>
-        ENGINEERING
+    <aside className="hidden w-60 shrink-0 flex-col overflow-y-auto border-r border-[var(--line)] bg-[var(--surface)] md:flex">
+      <div className="border-b border-[var(--line)] px-4 py-4">
+        <h2 className="text-sm font-semibold text-[var(--ink)]">Planyor muhandisligi</h2>
+        <p className="mt-1 text-[11px] leading-4 text-[var(--ink-muted)]">Tahrirlash uchun komponentni yoki aerodinamik tahlilni tanlang.</p>
       </div>
 
-      {/* Design Section */}
-      <div style={{ padding: "4px 8px" }}>
-        <div style={{
-          fontSize: 11,
-          fontWeight: 700,
-          color: "#475569",
-          padding: "4px 6px 2px",
-          textAlign: "center",
-          borderBottom: "1px solid #b0b0b0",
-          marginBottom: 4,
-        }}>
-          Design
-        </div>
-        <div className="flex flex-col gap-0.5">
-          {DESIGN_ITEMS.map(renderItem)}
-        </div>
+      <div className="px-2.5 py-3">
+        <p className="px-3 pb-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--ink-muted)]">Korpus</p>
+        <div className="space-y-1">{DESIGN_ITEMS.map((item) => renderItem(item, true))}</div>
       </div>
 
-      {/* Divider */}
-      <div style={{ margin: "4px 12px", height: 1, background: "#c0c0c0" }} />
+      <div className="mx-4 border-t border-[var(--line)]" />
 
-      {/* Analysis Section */}
-      <div style={{ padding: "4px 8px" }}>
-        <div style={{
-          fontSize: 11,
-          fontWeight: 700,
-          color: "#475569",
-          padding: "4px 6px 2px",
-          textAlign: "center",
-          borderBottom: "1px solid #b0b0b0",
-          marginBottom: 4,
-        }}>
-          Analysis
-        </div>
-        <div className="flex flex-col gap-0.5">
-          {ANALYSIS_ITEMS.map(renderItem)}
-        </div>
+      <div className="px-2.5 py-3">
+        <p className="px-3 pb-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--ink-muted)]">Tahlil</p>
+        <div className="space-y-1">{ANALYSIS_ITEMS.map((item) => renderItem(item, false))}</div>
       </div>
-
-      <div className="flex-1" />
     </aside>
   );
 }

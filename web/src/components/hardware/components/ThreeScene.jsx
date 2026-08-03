@@ -42,6 +42,7 @@ import {
 } from '../utils/proceduralGeometries';
 
 const TARGET_SIZE = 50;
+const LOCAL_X_AXIS = new THREE.Vector3(1, 0, 0);
 
 // Elektronika modellari (.3mf) millimetrda keladi, sahna esa LDraw birligida
 // ishlaydi (1 LDU = 0.4 mm), chunki LEGO detallari shu birlikda. Shuning uchun
@@ -497,9 +498,11 @@ export default function ThreeScene({
       camera
     );
     outlinePass.edgeStrength = 4;
-    outlinePass.edgeGlow = 0.5;
+    outlinePass.edgeGlow = 0.18;
     outlinePass.edgeThickness = 2;
-    outlinePass.pulsePeriod = 2;
+    // A pulsing outline re-rendered its off-screen pass during RUN and looked
+    // like object flicker on lower-end GPUs. Keep selection feedback steady.
+    outlinePass.pulsePeriod = 0;
     outlinePass.visibleEdgeColor.set('#2563eb');
     outlinePass.hiddenEdgeColor.set('#1d4ed8');
     composer.addPass(outlinePass);
@@ -683,8 +686,13 @@ export default function ThreeScene({
           const type = (obj3d.userData?.type || '').toLowerCase();
 
           // Sinov stendida faqat erkin aylanuvchi elementlar harakatlanadi.
-          if (type.includes('wheel') || type.includes('gear') || type.includes('tire')) {
-            obj3d.rotation.z += (speed * 0.0008);
+          if (!type.includes('caster') && (type.includes('wheel') || type.includes('gear') || type.includes('tire'))) {
+            const spin = speed * 0.0008;
+            // TT wheel CAD models are authored around their local X axle.
+            // Changing Euler Z rotated the whole tyre sideways after its kit
+            // orientation was applied. Local-axis rotation preserves the axle.
+            if (type.includes('tt-wheel')) obj3d.rotateOnAxis(LOCAL_X_AXIS, spin);
+            else obj3d.rotateZ(spin);
           }
           // Servoni berilgan burchak bo'yicha burish
           if (type.includes('servo') || type.includes('sg90') || type.includes('mg90s')) {

@@ -1,7 +1,7 @@
 import { spawn } from "child_process";
 import path from "path";
 
-export async function runPythonSimulation(moduleName: string, params: any): Promise<any> {
+export async function runPythonSimulation(moduleName: string, params: unknown): Promise<unknown> {
   return new Promise((resolve, reject) => {
     // Resolve engine paths
     const cwd = /* turbopackIgnore: true */ process.cwd();

@@ -151,7 +151,7 @@ export function MemberBeam({
     return { position: mid, quaternion: quat, length: len };
   }, [a, b]);
 
-  const side = Math.max(sceneRadius * (thick ? 0.09 : 0.065), 0.14);
+  const side = Math.max(sceneRadius * (thick ? 0.06 : 0.042), 0.11);
   const profile = materialProfileFor(materialLabel);
   const woodTexture = isWood && profile.wood ? getWoodTexture() : null;
 
@@ -250,42 +250,23 @@ function BridgeInfrastructure({ nodes, centerX, centerY, radius }: { nodes: Trus
   }, [centerX, centerY, nodes, radius]);
   if (!geometry) return null;
 
-  const { minX, maxX, deckY, floorY, width } = geometry;
+  const { minX, maxX, deckY, floorY } = geometry;
   const abutmentHeight = Math.max(0.4, deckY - floorY - radius * 0.08);
-  const railY = deckY + Math.max(radius * 0.22, 0.65);
-  const postCount = Math.max(5, Math.min(18, Math.round(width / Math.max(radius * 0.3, 0.8))));
-  const steel = "Po'lat";
 
   return (
     <group>
       {[minX - radius * 0.11, maxX + radius * 0.11].map((x) => (
-        <mesh key={`abutment-${x}`} position={[x, floorY + abutmentHeight / 2, 0]} castShadow receiveShadow>
-          <boxGeometry args={[radius * 0.42, abutmentHeight, DEPTH_UNITS * 1.55]} />
-          <meshStandardMaterial color="#6d7376" roughness={0.92} metalness={0.02} />
-        </mesh>
-      ))}
-      <group position={[0, 0, 0]}>
-        <mesh position={[0, floorY + (deckY - floorY) * 0.46, 0]} castShadow receiveShadow>
-          <boxGeometry args={[radius * 0.62, Math.max(0.22, radius * 0.16), DEPTH_UNITS * 1.1]} />
-          <meshStandardMaterial color="#747a7c" roughness={0.9} />
-        </mesh>
-        {[-DEPTH_UNITS * 0.24, DEPTH_UNITS * 0.24].map((z) => (
-          <mesh key={`pier-${z}`} position={[0, floorY + (deckY - floorY) * 0.23, z]} castShadow receiveShadow>
-            <cylinderGeometry args={[radius * 0.095, radius * 0.12, Math.max(0.3, deckY - floorY - radius * 0.2), 18]} />
-            <meshStandardMaterial color="#7b8082" roughness={0.88} />
+        <group key={`abutment-${x}`}>
+          <mesh position={[x, floorY + abutmentHeight / 2, 0]} castShadow receiveShadow>
+            <boxGeometry args={[radius * 0.38, abutmentHeight, DEPTH_UNITS * 1.35]} />
+            <meshStandardMaterial color="#73797c" roughness={0.94} metalness={0.01} />
           </mesh>
-        ))}
-      </group>
-      {[-HALF_DEPTH * 1.13, HALF_DEPTH * 1.13].flatMap((z, sideIndex) => {
-        const rails = [railY, railY - radius * 0.1].map((y, railIndex) => (
-          <MemberBeam key={`rail-${sideIndex}-${railIndex}`} a={new THREE.Vector3(minX, y, z)} b={new THREE.Vector3(maxX, y, z)} color="#aeb8bf" thick={false} isWood={false} materialLabel={steel} sceneRadius={radius * 0.44} />
-        ));
-        const posts = Array.from({ length: postCount + 1 }, (_, index) => {
-          const x = minX + (width * index) / postCount;
-          return <MemberBeam key={`rail-post-${sideIndex}-${index}`} a={new THREE.Vector3(x, deckY, z)} b={new THREE.Vector3(x, railY, z)} color="#aeb8bf" thick={false} isWood={false} materialLabel={steel} sceneRadius={radius * 0.44} />;
-        });
-        return [...rails, ...posts];
-      })}
+          <mesh position={[x, deckY - radius * 0.07, 0]} castShadow receiveShadow>
+            <boxGeometry args={[radius * 0.48, Math.max(0.12, radius * 0.08), DEPTH_UNITS * 1.18]} />
+            <meshStandardMaterial color="#3f494f" roughness={0.52} metalness={0.45} />
+          </mesh>
+        </group>
+      ))}
     </group>
   );
 }
@@ -397,7 +378,7 @@ export function TrussSceneContents({
             }
           >
             <mesh rotation={[Math.PI / 2, 0, 0]} castShadow receiveShadow>
-              <cylinderGeometry args={[Math.max(radius * 0.085, 0.22), Math.max(radius * 0.085, 0.22), Math.max(radius * 0.025, 0.07), 24]} />
+              <cylinderGeometry args={[Math.max(radius * 0.052, 0.16), Math.max(radius * 0.052, 0.16), Math.max(radius * 0.02, 0.06), 20]} />
               <meshStandardMaterial color="#59656e" roughness={0.28} metalness={0.82} />
             </mesh>
             <mesh position={[0, 0, side === "front" ? -Math.max(radius * 0.024, 0.075) : Math.max(radius * 0.024, 0.075)]} rotation={[Math.PI / 2, 0, 0]} castShadow>
@@ -431,10 +412,11 @@ export function TrussSceneContents({
   // ends sit at the same height in the original 2D drawing; only those get
   // crossed diagonally between the front and back sides.
   const nodeById = useMemo(() => new Map(nodes.map((n) => [n.id, n])), [nodes]);
+  const topRowY = nodes.length ? Math.min(...nodes.map((node) => node.y)) : 0;
   const xBracing = members.flatMap((m) => {
     const na = nodeById.get(m.nodeA);
     const nb = nodeById.get(m.nodeB);
-    if (!na || !nb || Math.abs(na.y - nb.y) >= GRID_SIZE / 2) return [];
+    if (!na || !nb || Math.abs(na.y - nb.y) >= GRID_SIZE / 2 || Math.abs(na.y - topRowY) >= GRID_SIZE / 2) return [];
     const fa = frontNodeMap.get(m.nodeA);
     const bb = backNodeMap.get(m.nodeB);
     const ba = backNodeMap.get(m.nodeA);

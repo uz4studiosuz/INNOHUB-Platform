@@ -1,52 +1,45 @@
 "use client";
 
-import React from "react";
+import { IconCircleCheck, IconPrinter, IconRuler2, IconTools } from "@tabler/icons-react";
 import { useGliderStore } from "../../../../store/gliderStore";
-import { IconDownload, IconPrinter } from "@tabler/icons-react";
+
+const MATERIALS = ["Balsa listi 1/16 × 3 × 36 in", "Balsa tayoqchasi 1/4 × 1/4 × 36 in", "CA yelimi", "220 va 400 grit jilvir qog'ozi", "Model pichog'i", "Burun balasti uchun plastilin"];
 
 export default function BuildTestPage() {
   const store = useGliderStore();
+  const dimensions = [
+    ["Qanot kengligi", store.wing.span], ["Qanot xordasi", store.wing.chord], ["Fyuzelyaj", store.fuselage.length],
+    ["Gorizontal dum", store.horizontalStabilizer.span], ["Vertikal dum", store.verticalStabilizer.height],
+  ] as const;
 
   return (
-    <div className="flex-1 p-8 bg-[var(--canvas)] text-[var(--ink)] overflow-y-auto">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8">Build & Test</h1>
-        
-        <div className="bg-[var(--surface)] border border-[var(--line)] rounded-xl p-8 mb-8 text-center">
-          <IconPrinter size={42} stroke={1.6} className="mx-auto mb-4 text-[var(--accent)]" />
-          <h2 className="text-2xl font-bold mb-4">Print Design Templates</h2>
-          <p className="text-[var(--ink-muted)] mb-6 max-w-lg mx-auto">
-            Ready to bring your digital design into the real world? Print your exact 1:1 scale templates to cut your balsa wood.
-          </p>
-          <button className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white font-semibold rounded-lg transition-colors active:scale-[0.98]">
-            <IconDownload size={17} stroke={1.8} /> Download PDF Templates
-          </button>
-        </div>
+    <main className="flex-1 overflow-y-auto bg-[var(--canvas)] px-4 py-7 md:px-8 md:py-10">
+      <div className="mx-auto max-w-6xl">
+        <header className="max-w-3xl">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--accent-soft)] text-[var(--accent)]"><IconTools size={22} stroke={1.7} /></div>
+          <h1 className="mt-5 text-3xl font-semibold tracking-[-0.03em] text-[var(--ink)] md:text-4xl">Yig'ish va sinov</h1>
+          <p className="mt-3 text-sm leading-6 text-[var(--ink-muted)]">Raqamli dizaynni 1:1 o‘lchamdagi shablon yordamida balsa modelga aylantiring.</p>
+        </header>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-[var(--surface)] border border-[var(--line)] rounded-xl p-6">
-            <h3 className="text-lg font-bold mb-2 text-[var(--accent)]">Material List</h3>
-            <ul className="list-disc list-inside text-[var(--ink-muted)] space-y-2">
-              <li>1x Balsa Wood Sheet (1/16&quot; x 3&quot; x 36&quot;)</li>
-              <li>1x Balsa Wood Stick (1/4&quot; x 1/4&quot; x 36&quot;)</li>
-              <li>Cyanoacrylate (CA) Glue</li>
-              <li>Sandpaper (220 and 400 grit)</li>
-              <li>Modeling Knife</li>
-              <li>Modeling Clay (for nose ballast)</li>
-            </ul>
+        <section className="mt-8 grid gap-5 lg:grid-cols-[1.25fr_0.75fr]">
+          <div className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-5 md:p-7">
+            <div className="flex items-center gap-3"><IconPrinter size={22} stroke={1.8} className="text-[var(--accent)]" /><div><h2 className="font-semibold text-[var(--ink)]">1:1 chop etish shabloni</h2><p className="mt-1 text-xs text-[var(--ink-muted)]">Chop etish masshtabini 100% qilib belgilang.</p></div></div>
+            <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
+              {dimensions.map(([label, value]) => <div key={label} className="rounded-xl bg-[var(--surface-muted)] p-3"><p className="text-[10px] text-[var(--ink-muted)]">{label}</p><p className="mt-1 font-mono text-sm font-semibold text-[var(--ink)]">{value.toFixed(1)} mm</p></div>)}
+            </div>
+            <button type="button" onClick={() => window.print()} className="mt-6 inline-flex h-11 items-center gap-2 rounded-xl bg-[var(--accent)] px-5 text-sm font-semibold text-white hover:bg-[var(--accent-hover)] active:scale-[0.98]"><IconPrinter size={17} stroke={1.8} /> Shablonlarni chop etish</button>
           </div>
-          <div className="bg-[var(--surface)] border border-[var(--line)] rounded-xl p-6">
-            <h3 className="text-lg font-bold mb-2 text-[var(--accent)]">Build Dimensions</h3>
-            <ul className="list-disc list-inside text-[var(--ink-muted)] space-y-2">
-              <li>Wing Span: {store.wing.span.toFixed(1)} mm</li>
-              <li>Wing Chord: {store.wing.chord.toFixed(1)} mm</li>
-              <li>Fuselage Length: {store.fuselage.length.toFixed(1)} mm</li>
-              <li>H-Stab Span: {store.horizontalStabilizer.span.toFixed(1)} mm</li>
-              <li>V-Stab Height: {store.verticalStabilizer.height.toFixed(1)} mm</li>
-            </ul>
-          </div>
-        </div>
+
+          <aside className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-5 md:p-7">
+            <div className="flex items-center gap-2"><IconRuler2 size={20} stroke={1.8} className="text-[var(--accent)]" /><h2 className="font-semibold text-[var(--ink)]">Materiallar ro'yxati</h2></div>
+            <div className="mt-5 space-y-3">{MATERIALS.map((item) => <label key={item} className="flex cursor-pointer items-center gap-3 text-sm text-[var(--ink-muted)]"><input type="checkbox" className="h-4 w-4 rounded accent-[var(--accent)]" /><span>{item}</span></label>)}</div>
+          </aside>
+        </section>
+
+        <section className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
+          <div className="flex gap-3"><IconCircleCheck size={20} stroke={1.8} className="mt-0.5 shrink-0 text-emerald-700" /><div><h2 className="text-sm font-semibold text-emerald-950">Uchirishdan oldin</h2><p className="mt-1 text-sm leading-6 text-emerald-900/80">Qanot simmetriyasini tekshiring, old qirralarni silliqlang, og'irlik markazini tasdiqlang va musobaqadan oldin past energiyali qo'l parvozini bajaring.</p></div></div>
+        </section>
       </div>
-    </div>
+    </main>
   );
 }

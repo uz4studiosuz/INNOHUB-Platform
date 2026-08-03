@@ -3,7 +3,6 @@
 import React, { useMemo } from "react";
 import * as THREE from "three";
 import { Grid, Sky } from "@react-three/drei";
-import { EffectComposer, Bloom, Vignette } from "@react-three/postprocessing";
 
 export function StadiumArena() {
   // Ground Texture/Material (Dirt/Sand color with realistic roughness)
@@ -143,11 +142,6 @@ export function StadiumArena() {
       <primitive object={bleachers} />
       <primitive object={lights} />
 
-      {/* Postprocessing Stack: Bloom & Vignette (Three.js Postprocessing Skill) */}
-      <EffectComposer>
-        <Bloom luminanceThreshold={0.8} luminanceSmoothing={0.3} intensity={0.6} />
-        <Vignette eskil={false} offset={0.2} darkness={0.6} />
-      </EffectComposer>
     </group>
   );
 }

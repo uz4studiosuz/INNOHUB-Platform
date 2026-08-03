@@ -17,19 +17,25 @@ export function WindTunnel() {
   const wPosZ = noseZ + wing.leadingEdgeXOffset * SCALE + wChord / 2;
   
   const alpha = 5; // Angle of attack (degrees)
-  const count = 50000;
+  // 18k points remain visually dense while avoiding the large upload and
+  // fragment cost that made analysis mode stutter on integrated GPUs.
+  const count = 18000;
   
   const [positions, randoms] = useMemo(() => {
     const pos = new Float32Array(count * 3);
     const rand = new Float32Array(count * 3);
+    const seeded = (index: number, salt: number) => {
+      const value = Math.sin((index + 1) * 12.9898 + salt * 78.233) * 43758.5453;
+      return value - Math.floor(value);
+    };
     for (let i = 0; i < count; i++) {
-      pos[i * 3 + 0] = (Math.random() - 0.5) * 160;
-      pos[i * 3 + 1] = (Math.random() - 0.5) * 65;
-      pos[i * 3 + 2] = (Math.random() - 0.5) * 220;
+      pos[i * 3 + 0] = (seeded(i, 1) - 0.5) * 160;
+      pos[i * 3 + 1] = (seeded(i, 2) - 0.5) * 65;
+      pos[i * 3 + 2] = (seeded(i, 3) - 0.5) * 220;
       
-      rand[i * 3 + 0] = Math.random();
-      rand[i * 3 + 1] = Math.random();
-      rand[i * 3 + 2] = Math.random();
+      rand[i * 3 + 0] = seeded(i, 4);
+      rand[i * 3 + 1] = seeded(i, 5);
+      rand[i * 3 + 2] = seeded(i, 6);
     }
     return [pos, rand];
   }, []);
