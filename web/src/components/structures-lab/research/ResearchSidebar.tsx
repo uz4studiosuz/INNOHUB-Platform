@@ -1,6 +1,7 @@
 "use client";
 
 import { RESEARCH_GROUPS } from "./sections";
+import { IconFileText } from "@tabler/icons-react";
 
 export function ResearchSidebar({
   activeId,
@@ -30,7 +31,7 @@ export function ResearchSidebar({
                   }`}
                 >
                   <span>{item.title}</span>
-                  <span className={isActive ? "text-white" : "text-gray-400"}>📄</span>
+                  <IconFileText size={15} stroke={1.8} className={isActive ? "text-white" : "text-gray-400"} />
                 </button>
               );
             })}

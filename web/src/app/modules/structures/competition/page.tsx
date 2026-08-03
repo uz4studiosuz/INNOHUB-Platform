@@ -9,6 +9,7 @@ import { SolvedMember } from "../../../../components/structures-lab/engineering/
 import { addBridgeResult, getBridgeResults } from "../../../../store/bridgeLeaderboardStore";
 import { useHasMounted } from "../../../../lib/useHasMounted";
 import { computeStability, stabilityErrorMessage } from "../../../../components/structures-lab/engineering/trussStability";
+import { IconBox, IconRulerMeasure, IconSettings, IconTruck, IconTrophy } from "@tabler/icons-react";
 
 const TrussCanvas = dynamic(() => import("../../../../components/structures-lab/engineering/TrussCanvas"), {
   ssr: false,
@@ -169,7 +170,7 @@ export default function StructuresCompetitionPage() {
     return (
       <div className="flex-1 p-8 bg-[#080b11] text-white overflow-y-auto flex items-center justify-center">
         <div className="text-center max-w-lg">
-          <div className="text-5xl mb-4">🏆</div>
+          <IconTrophy size={42} stroke={1.6} className="mx-auto mb-4" />
           <h1 className="text-2xl font-bold mb-2">Competition — Monster Truck Rally</h1>
           <p className="text-slate-400 text-sm mb-4">
             Hali ko&apos;prik qurilmagan. Avval ENGINEERING tab&apos;ida kamida 2 ta tugun, 1 ta a&apos;zo
@@ -179,7 +180,7 @@ export default function StructuresCompetitionPage() {
             href="/modules/structures"
             className="inline-block px-4 py-2 rounded-lg bg-violet-600 text-white text-sm font-bold hover:bg-violet-700"
           >
-            ⚙️ Engineering&apos;ga o&apos;tish
+            <IconSettings size={16} stroke={1.8} /> Engineering&apos;ga o&apos;tish
           </Link>
         </div>
       </div>
@@ -190,7 +191,7 @@ export default function StructuresCompetitionPage() {
     <div className="flex-1 flex flex-col min-h-0 bg-[#080b11] text-white">
       <div className="flex items-center justify-between flex-wrap gap-3 px-6 py-3 border-b border-[rgba(255,255,255,0.08)]">
         <div>
-          <h1 className="text-xl font-bold">🏆 Monster Truck Rally</h1>
+          <h1 className="flex items-center gap-2 text-xl font-bold"><IconTrophy size={21} stroke={1.8} /> Monster Truck Rally</h1>
           <p className="text-xs text-slate-400">
             Dizayn: <span className="text-white font-semibold">{design!.name}</span>
           </p>
@@ -207,7 +208,7 @@ export default function StructuresCompetitionPage() {
               onClick={() => setView("3d")}
               className={`px-3 py-1 rounded text-xs font-bold cursor-pointer ${view === "3d" ? "bg-violet-600 text-white" : "text-slate-400 hover:text-white"}`}
             >
-              🔄 3D
+              <IconBox size={16} stroke={1.8} /> 3D
             </button>
           </div>
           <button
@@ -215,7 +216,7 @@ export default function StructuresCompetitionPage() {
             disabled={testing}
             className="px-5 py-2 rounded-xl bg-violet-600 text-white font-bold hover:bg-violet-700 disabled:opacity-50 cursor-pointer"
           >
-            {testing ? "Sinov ketmoqda..." : "🚚 Sinovni boshlash"}
+            {testing ? "Sinov ketmoqda..." : <><IconTruck size={16} stroke={1.8} /> Sinovni boshlash</>}
           </button>
         </div>
       </div>
@@ -261,7 +262,7 @@ export default function StructuresCompetitionPage() {
               className="absolute top-2 text-3xl pointer-events-none transition-none"
               style={{ left: `${5 + truckX * 0.9}%`, transform: "translateX(-50%)" }}
             >
-              🚚
+              <IconTruck size={44} stroke={1.5} />
             </div>
           )}
           {(testing || result) && (
@@ -331,7 +332,7 @@ export default function StructuresCompetitionPage() {
           </div>
 
           <div>
-            <h3 className="font-bold text-sm mb-2">🏁 Reyting (samaradorlik bo&apos;yicha)</h3>
+            <h3 className="flex items-center gap-2 font-bold text-sm mb-2"><IconRulerMeasure size={16} stroke={1.8} /> Reyting (samaradorlik bo&apos;yicha)</h3>
             {rankedLeaderboard.length === 0 ? (
               <p className="text-gray-500">Hali sinov o&apos;tkazilmagan.</p>
             ) : (

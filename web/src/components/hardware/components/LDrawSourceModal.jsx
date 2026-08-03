@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Folder, Globe, X, Check, HardDrive } from 'lucide-react';
+import { IconFolder as Folder, IconWorld as Globe, IconX as X, IconCheck as Check, IconDatabase as HardDrive, IconAlertTriangle as AlertTriangle } from '@tabler/icons-react';
 import { setLocalLDrawFolder, setCdnFallbackUrl, getLDrawLibraryStatus } from '../library/ldrawLibrary';
 import { useI18n } from '../i18n/index.jsx';
 
@@ -97,10 +97,10 @@ export default function LDrawSourceModal({ isOpen, onClose }) {
 
                 <span className="status-badge">
                    {status.isLocal
-                     ? `✓ Boshqarilmoqda (${status.fileCount} ta fayl)`
+                     ? <><Check size={14} /> Boshqarilmoqda ({status.fileCount} ta fayl)</>
                      : status.cdnUrl === '/ldraw/'
-                       ? '✓ O\'rnatilgan lokal kutubxona faol'
-                       : '✗ Mahalliy papka biriktirilmagan'}
+                       ? <><Check size={14} /> O&apos;rnatilgan lokal kutubxona faol</>
+                       : <><X size={14} /> Mahalliy papka biriktirilmagan</>}
                  </span>
               </div>
             </div>
@@ -120,7 +120,7 @@ export default function LDrawSourceModal({ isOpen, onClose }) {
 
             <div className="option-body">
               <div className="alert-box alert-warning" style={{ margin: '0 0 10px 0', fontSize: '11px', padding: '8px 12px' }}>
-                <span>⚠️ CDN orqali yuklash har bir primitivni alohida HTTP so&apos;rov bilan yuklaydi. Sekin bo&apos;lishi va rate-limit yuzaga kelishi mumkin. Mahalliy papkadan foydalanish tavsiya etiladi.</span>
+                <span className="flex items-start gap-2"><AlertTriangle size={15} className="shrink-0" /> CDN orqali yuklash har bir primitivni alohida HTTP so&apos;rov bilan yuklaydi. Sekin bo&apos;lishi va rate-limit yuzaga kelishi mumkin. Mahalliy papkadan foydalanish tavsiya etiladi.</span>
               </div>
               <div className="cdn-input-group">
                 <input
@@ -148,4 +148,3 @@ export default function LDrawSourceModal({ isOpen, onClose }) {
     </div>
   );
 }
-

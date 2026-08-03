@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Cpu, X, Copy, Download, AlertTriangle, Check, Zap, Cable, Code } from 'lucide-react';
+import { IconCpu as Cpu, IconX as X, IconCopy as Copy, IconDownload as Download, IconAlertTriangle as AlertTriangle, IconCheck as Check, IconBolt as Zap, IconPlugConnected as Cable, IconCode as Code } from '@tabler/icons-react';
 import { generateArduinoCode } from '../arduino/codeGenerator';
 import { useI18n } from '../i18n/index.jsx';
 
@@ -241,4 +241,3 @@ export default function ArduinoPanel({ isOpen, onClose, objects, pinMappings, on
     </div>
   );
 }
-

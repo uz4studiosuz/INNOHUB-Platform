@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { Cpu, Save, FolderOpen, Trash2, PackageCheck, Bot, Download, Upload, HardDrive, Box, Play } from 'lucide-react';
+import { IconCpu as Cpu, IconDeviceFloppy as Save, IconFolderOpen as FolderOpen, IconTrash as Trash2, IconPackage as PackageCheck, IconRobot as Bot, IconDownload as Download, IconUpload as Upload, IconDatabase as HardDrive, IconBox as Box, IconPlayerPlay as Play } from '@tabler/icons-react';
 import { exportProjectToJson, importProjectFromJson } from '../utils/projectStorage';
 import { importFromLdr } from '../utils/ldrConverter';
 import { useI18n } from '../i18n/index.jsx';
@@ -196,5 +196,3 @@ export default function Header({
     </header>
   );
 }
-
-

@@ -99,7 +99,7 @@ const HAND_TUNED: Record<string, ComponentDef> = {
     width: uno(212.372),
     height: uno(151.2),
     terminals: [...digitalTop(), ...bottomRow()],
-    icon: "🟩",
+    icon: "",
   },
 
   led: {
@@ -115,7 +115,7 @@ const HAND_TUNED: Record<string, ComponentDef> = {
       { id: "anode", label: "+", x: led(16.29), y: led(55) },
     ],
     defaults: { color: "red" },
-    icon: "💡",
+    icon: "",
   },
 
   "rgb-led": {
@@ -132,7 +132,7 @@ const HAND_TUNED: Record<string, ComponentDef> = {
       { id: "g", label: "G", x: rgb(15.48), y: rgb(42) },
       { id: "b", label: "B", x: rgb(22.68), y: rgb(42) },
     ],
-    icon: "🌈",
+    icon: "",
   },
 
   resistor: {
@@ -165,7 +165,7 @@ const HAND_TUNED: Record<string, ComponentDef> = {
       { id: "2b", label: "2b", x: btn(22.106), y: btn(31.502) },
     ],
     internalGroups: [["1a", "1b"], ["2a", "2b"]],
-    icon: "🔘",
+    icon: "",
   },
 
   buzzer: {
@@ -180,7 +180,7 @@ const HAND_TUNED: Record<string, ComponentDef> = {
       { id: "neg", label: "-", x: pzo(35.687), y: pzo(76.004) },
       { id: "pos", label: "+", x: pzo(42.928), y: pzo(76.004) },
     ],
-    icon: "🔊",
+    icon: "",
   },
 
   potentiometer: {
@@ -196,7 +196,7 @@ const HAND_TUNED: Record<string, ComponentDef> = {
       { id: "t2", label: "2", x: pot(35.67), y: pot(84.66) },
     ],
     defaults: { value: 512 }, // 0..1023
-    icon: "🎛️",
+    icon: "",
   },
 
   servo: {
@@ -212,7 +212,7 @@ const HAND_TUNED: Record<string, ComponentDef> = {
       { id: "vcc", label: "+", x: srv(113.42), y: srv(74.439) },
       { id: "sig", label: "S", x: srv(113.42), y: srv(64.439) },
     ],
-    icon: "⚙️",
+    icon: "",
   },
 
   "bb-node": {

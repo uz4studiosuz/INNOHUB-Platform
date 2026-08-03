@@ -1,7 +1,7 @@
 export interface ModuleConfig {
   title: string;
   basePath: string;
-  accent: string; // CSS background (gradient) for the navbar logo badge
+  accent: string;
 }
 
 /**
@@ -12,26 +12,26 @@ export const MODULES: Record<string, ModuleConfig> = {
   glider: {
     title: "Planyor",
     basePath: "/modules/glider",
-    accent: "linear-gradient(135deg, #0284c7, #0c4a6e)",
+    accent: "#126b55",
   },
   rockets: {
     title: "Raketalar",
     basePath: "/modules/rockets",
-    accent: "linear-gradient(135deg, #dc2626, #7f1d1d)",
+    accent: "#126b55",
   },
   electronics: {
     title: "Elektronika",
     basePath: "/modules/electronics",
-    accent: "linear-gradient(135deg, #059669, #064e3b)",
+    accent: "#126b55",
   },
   structures: {
     title: "Tuzilmalar",
     basePath: "/modules/structures",
-    accent: "linear-gradient(135deg, #7c3aed, #4c1d95)",
+    accent: "#126b55",
   },
   hardware: {
     title: "3D Konstruktor",
     basePath: "/modules/hardware",
-    accent: "linear-gradient(135deg, #f59e0b, #92400e)",
+    accent: "#126b55",
   },
 };

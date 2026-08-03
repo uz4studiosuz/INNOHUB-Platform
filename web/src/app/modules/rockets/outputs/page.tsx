@@ -3,6 +3,7 @@
 import React from "react";
 import { useRocketStore } from "../../../../store/rocketStore";
 import { BOTTLE_INFO, SPEC, finGeometry } from "../../../../lib/physics/rocketPhysics";
+import { IconCheck, IconX } from "@tabler/icons-react";
 
 const BOTTLE_LABEL: Record<string, string> = {
   "20oz_coke": "20 oz",
@@ -199,7 +200,7 @@ function Row({ label, limit, value, ok }: { label: string; limit: string; value:
       <td className="p-2 text-gray-700">{label}</td>
       <td className="p-2 font-mono text-gray-500">{limit}</td>
       <td className={`p-2 font-mono font-bold ${ok ? "text-gray-800" : "text-red-600"}`}>{value}</td>
-      <td className="p-2 w-8 text-center">{ok ? <span className="text-green-600">✓</span> : <span className="text-red-600">✖</span>}</td>
+      <td className="p-2 w-8 text-center">{ok ? <IconCheck size={16} stroke={2} className="mx-auto text-green-600" /> : <IconX size={16} stroke={2} className="mx-auto text-red-600" />}</td>
     </tr>
   );
 }

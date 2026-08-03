@@ -5,6 +5,7 @@ import { useRocketStore } from "../../store/rocketStore";
 import {
   BOTTLE_INFO, SPEC, TUBE_STOCK, FIN_STOCK, FIN_COLORS, finGeometry,
 } from "../../lib/physics/rocketPhysics";
+import { IconBulb, IconTool } from "@tabler/icons-react";
 
 function SliderField({ label, value, onChange, unit, min, max, step }: {
   label: string; value: number; onChange: (v: number) => void;
@@ -454,7 +455,7 @@ export function RocketDockingStation() {
   return (
     <div className="dock-panel">
       <div className="dock-header">
-        <span className="dock-header-icon">🔧</span>
+        <span className="dock-header-icon"><IconTool size={16} stroke={1.8} /></span>
         SOZLASH PANELI
         <button className="dock-header-close" onClick={() => store.setDockOpen(false)} title="Yopish">›</button>
       </div>
@@ -465,7 +466,7 @@ export function RocketDockingStation() {
         {(a.specErrors.length > 0 || a.hints.length > 0) && (
           <div className="dock-messages">
             {a.specErrors.map((e, i) => <div key={`e${i}`} className="dock-error">✖ {e}</div>)}
-            {a.hints.map((h, i) => <div key={`h${i}`} className="dock-hint">💡 {h}</div>)}
+            {a.hints.map((h, i) => <div key={`h${i}`} className="dock-hint flex items-start gap-1.5"><IconBulb size={14} stroke={1.8} className="mt-0.5 shrink-0" /> {h}</div>)}
           </div>
         )}
       </div>

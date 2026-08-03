@@ -6,6 +6,7 @@ import { OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 import { TrussNode, TrussMemberDraft, SolvedMember } from "./types";
 import { toVec3, useTrussBounds, TrussSceneContents } from "./trussScene3D";
+import { IconDeviceGamepad2 } from "@tabler/icons-react";
 
 const WHEEL_RADIUS = 0.62; // monster-truck sized wheel
 const WHEEL_WIDTH = 0.52;
@@ -553,7 +554,7 @@ export default function TrussRally3D({ nodes, members, solved, truckProgress }: 
             manualMode ? "bg-violet-600 text-white" : "bg-[#141a2b] text-slate-300 border border-[rgba(255,255,255,0.15)] hover:bg-[#1c2438]"
           }`}
         >
-          🎮 {manualMode ? "Qo'lda boshqarish: yoniq" : "Qo'lda boshqarish"}
+          <IconDeviceGamepad2 size={16} stroke={1.8} /> {manualMode ? "Qo'lda boshqarish: yoniq" : "Qo'lda boshqarish"}
         </button>
       </div>
 

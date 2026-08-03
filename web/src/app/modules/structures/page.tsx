@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from "react";
 import dynamic from "next/dynamic";
+import { IconAlertTriangle, IconBuildingBridge, IconChartLine, IconCircleCheck, IconExclamationCircle, IconPlayerPlay, IconRulerMeasure, IconShieldCheck, IconSparkles, IconVariable } from "@tabler/icons-react";
 
 const TrussBuilder = dynamic(() => import("../../../components/structures-lab/engineering/TrussBuilder"), {
   ssr: false,
@@ -12,17 +13,17 @@ export default function StructuresPage() {
   const [tab, setTab] = useState<"truss" | "beam">("truss");
 
   return (
-    <div className="flex-1 bg-[#080b11] flex flex-col min-h-0">
-      <div className="flex gap-1 px-6 pt-4">
+    <div className="flex min-h-0 flex-1 flex-col bg-[var(--canvas)]">
+      <div className="flex gap-1 border-b border-[var(--line)] bg-white px-5 pt-3">
         {(["truss", "beam"] as const).map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
-            className={`px-4 py-2 rounded-t-lg text-sm font-bold cursor-pointer transition-colors ${
-              tab === t ? "bg-[#0f1e3d] text-white" : "bg-transparent text-gray-500 hover:text-gray-300"
+            className={`border-b-2 px-4 py-2.5 text-sm font-semibold transition-colors ${
+              tab === t ? "border-[var(--accent)] text-[var(--accent)]" : "border-transparent text-[var(--ink-muted)] hover:text-[var(--ink)]"
             }`}
           >
-            {t === "truss" ? "🌉 Truss Builder" : "📐 Beam / Column Calculator"}
+            {t === "truss" ? <span className="inline-flex items-center gap-2"><IconBuildingBridge size={16} stroke={1.8} /> Truss Builder</span> : <span className="inline-flex items-center gap-2"><IconRulerMeasure size={16} stroke={1.8} /> Beam / Column Calculator</span>}
           </button>
         ))}
       </div>
@@ -99,7 +100,7 @@ function BeamColumnCalculator() {
   }, [mode, force, length, width, height, Emod]);
 
   return (
-    <div className="flex-1 bg-[#080b11] overflow-y-auto">
+    <div className="flex-1 overflow-y-auto bg-[var(--canvas)]">
     <div className="flex flex-col gap-6 max-w-6xl mx-auto py-2 p-8">
       <div className="flex flex-col gap-1">
         <span className="text-xs font-bold text-violet-500 tracking-wider uppercase">Qurilish & Mexanika Laboratoriyasi</span>
@@ -194,7 +195,7 @@ function BeamColumnCalculator() {
                 </>
               ) : (
                 <>
-                  <span>▶️ Konstruksiyani tahlillash</span>
+                  <span className="inline-flex items-center gap-2"><IconPlayerPlay size={16} stroke={1.8} /> Konstruksiyani tahlillash</span>
                 </>
               )}
             </button>
@@ -205,7 +206,7 @@ function BeamColumnCalculator() {
         <div className="flex-1 flex flex-col gap-6 min-w-[320px]">
           {error && (
             <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-4 text-xs text-red-400">
-              ❌ Xatolik yuz berdi: {error}
+              <span className="inline-flex items-center gap-2"><IconExclamationCircle size={16} stroke={1.8} /> Xatolik yuz berdi: {error}</span>
             </div>
           )}
 
@@ -217,7 +218,7 @@ function BeamColumnCalculator() {
                 : "bg-amber-500/15 border border-amber-500/30 text-amber-400"
             }`}>
               <div className="font-bold">
-                {columnResult.safety_factor < 1.0 ? "🚨 Ustun siqilish/bukilish (Euler Buckling) falokati!" : "⚠️ Ustunning barqarorlik chegarasi juda kam!"}
+                <span className="inline-flex items-center gap-2"><IconAlertTriangle size={16} stroke={1.8} />{columnResult.safety_factor < 1.0 ? "Ustun siqilish yoki bukilish holatida!" : "Ustunning barqarorlik chegarasi juda kam!"}</span>
               </div>
               <p className="text-gray-400 leading-relaxed">
                 Ushbu yuk ostida ustun xavfsizlik chegarasi <span className="font-bold font-mono">{columnResult.safety_factor.toFixed(2)}</span>. 
@@ -236,7 +237,7 @@ function BeamColumnCalculator() {
                     <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Maks. Egilish momenti</div>
                     <div className="text-xl font-extrabold text-violet-400 font-mono mt-1">{beamResult.bending_moment_Nm.toFixed(1)} N·m</div>
                   </div>
-                  <span className="text-xl">🌀</span>
+                  <IconVariable size={21} stroke={1.8} />
                 </div>
                 
                 <div className="bg-[#0f1524]/60 border border-[rgba(255,255,255,0.06)] rounded-2xl p-4 shadow-md flex justify-between items-center">
@@ -244,7 +245,7 @@ function BeamColumnCalculator() {
                     <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Maks. Egilish zo&apos;riqishi</div>
                     <div className="text-xl font-extrabold text-rose-400 font-mono mt-1">{(beamResult.bending_stress_Pa / 1e6).toFixed(2)} MPa</div>
                   </div>
-                  <span className="text-xl">💥</span>
+                  <IconAlertTriangle size={21} stroke={1.8} />
                 </div>
 
                 <div className="bg-[#0f1524]/60 border border-[rgba(255,255,255,0.06)] rounded-2xl p-4 shadow-md flex justify-between items-center">
@@ -252,7 +253,7 @@ function BeamColumnCalculator() {
                     <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Maksimal egilish masofasi</div>
                     <div className="text-xl font-extrabold text-blue-400 font-mono mt-1">{(beamResult.deflection_m * 1000).toFixed(3)} mm</div>
                   </div>
-                  <span className="text-xl">📏</span>
+                  <IconRulerMeasure size={21} stroke={1.8} />
                 </div>
 
                 <div className="bg-[#0f1524]/60 border border-[rgba(255,255,255,0.06)] rounded-2xl p-4 shadow-md flex justify-between items-center">
@@ -260,7 +261,7 @@ function BeamColumnCalculator() {
                     <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Inersiya momenti (I)</div>
                     <div className="text-base font-bold text-emerald-400 font-mono mt-1">{beamResult.moment_of_inertia_m4.toExponential(3)} m⁴</div>
                   </div>
-                  <span className="text-xl">📐</span>
+                  <IconSparkles size={21} stroke={1.8} />
                 </div>
               </div>
             </div>
@@ -276,7 +277,7 @@ function BeamColumnCalculator() {
                     <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Tangidiy bukilish yuki (P_cr)</div>
                     <div className="text-xl font-extrabold text-rose-400 font-mono mt-1">{columnResult.critical_load_N.toFixed(0)} N</div>
                   </div>
-                  <span className="text-xl">📉</span>
+                  <IconChartLine size={21} stroke={1.8} />
                 </div>
 
                 <div className="bg-[#0f1524]/60 border border-[rgba(255,255,255,0.06)] rounded-2xl p-4 shadow-md flex justify-between items-center">
@@ -286,7 +287,7 @@ function BeamColumnCalculator() {
                       {columnResult.safety_factor.toFixed(2)}
                     </div>
                   </div>
-                  <span className="text-xl">🛡️</span>
+                  <IconShieldCheck size={21} stroke={1.8} />
                 </div>
               </div>
             </div>
@@ -312,7 +313,7 @@ function BeamColumnCalculator() {
 
           {!beamResult && !columnResult && !sectionResult && (
             <div className="h-[300px] flex flex-col items-center justify-center glass-panel border border-[rgba(255,255,255,0.06)] bg-[#0d1220]/30 rounded-3xl text-gray-500 shadow-xl border-dashed">
-              <span className="text-4xl animate-bounce mb-3">🏗️</span>
+              <IconCircleCheck size={36} stroke={1.6} className="mb-3" />
               <span className="text-sm font-semibold">Tahlillash uchun &quot;Konstruksiyani tahlillash&quot; tugmasini bosing.</span>
               <span className="text-xs text-gray-600 mt-1">Koeffitsientlar materiallar qarshiligi tenglamalari asosida hisoblanadi.</span>
             </div>

@@ -1,15 +1,6 @@
-"use client";
+import { IconTools } from "@tabler/icons-react";
+import { EmptyModuleState } from "@/components/module-shell/EmptyModuleState";
 
 export default function ElectronicsBuildTestPage() {
-  return (
-    <div className="flex-1 p-8 bg-[#080b11] text-white overflow-y-auto flex items-center justify-center">
-      <div className="text-center max-w-lg">
-        <div className="text-5xl mb-4">🛠️</div>
-        <h1 className="text-2xl font-bold mb-2">Build &amp; Test</h1>
-        <p className="text-slate-400 text-sm">
-          Haqiqiy breadboard&apos;da zanjir yig&apos;ish va multimetr bilan o&apos;lchash bo&apos;yicha qo&apos;llanma tez orada qo&apos;shiladi.
-        </p>
-      </div>
-    </div>
-  );
+  return <EmptyModuleState icon={IconTools} title="Build & Test" description="Haqiqiy breadboard'da zanjir yig'ish va multimetr bilan o'lchash bo'yicha qo'llanma tez orada qo'shiladi." />;
 }

@@ -1,6 +1,16 @@
 "use client";
 
-import { StructuresNavbar } from "../../../components/structures-lab/StructuresNavbar";
+import { ModuleWorkspace } from "../../../components/module-shell/ModuleWorkspace";
+import { MODULES } from "../../../components/module-shell/moduleConfig";
+
+const STRUCTURE_TABS = [
+  { label: "HOME", segment: "home" },
+  { label: "RESEARCH", segment: "research" },
+  { label: "ENGINEERING", segment: "" },
+  { label: "TRUCK RALLY", segment: "competition" },
+  { label: "OUTPUTS", segment: "outputs" },
+  { label: "BUILD AND TEST", segment: "build-test" },
+];
 
 export default function StructuresLayout({
   children,
@@ -8,11 +18,8 @@ export default function StructuresLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="fixed inset-0 z-[60] flex flex-col" style={{ background: "#d0d0d0" }}>
-      <StructuresNavbar />
-      <div className="flex-1 flex flex-col min-w-0 min-h-0 overflow-y-auto">
-        {children}
-      </div>
-    </div>
+    <ModuleWorkspace basePath={MODULES.structures.basePath} accent={MODULES.structures.accent} tabs={STRUCTURE_TABS}>
+      {children}
+    </ModuleWorkspace>
   );
 }

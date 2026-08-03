@@ -10,6 +10,7 @@ import { nextId, mirrorTrussHorizontally } from "./trussMirror";
 import { buildExampleWarrenTruss } from "./trussExample";
 import { loadTrussDesign, saveTrussDesign } from "../../../store/trussDesignStore";
 import { useHasMounted } from "../../../lib/useHasMounted";
+import { IconAlertTriangle, IconCheck } from "@tabler/icons-react";
 
 const TrussCanvas = dynamic(() => import("./TrussCanvas"), {
   ssr: false,
@@ -240,7 +241,10 @@ export default function TrussBuilder() {
         onLoadExample={handleLoadExample}
         solving={solving}
         view={view}
-        onViewChange={setView}
+        onViewChange={(nextView) => {
+          setView(nextView);
+          setMemberFirstNode(null);
+        }}
       />
 
       <div className="flex flex-1 min-h-0">
@@ -261,72 +265,71 @@ export default function TrussBuilder() {
             nodes={nodes}
             members={members}
             solved={solved}
-            mode={mode}
-            memberFirstNode={memberFirstNode}
-            onAddNode={handleAddNode}
-            onNodeClick={handleNodeClick}
-            onMemberClick={handleMemberClick}
           />
         )}
 
-        <aside className="w-64 shrink-0 bg-[#0a0e18] text-white p-4 overflow-y-auto text-xs">
-          <label className="flex flex-col gap-1 mb-3">
-            <span className="text-gray-500">Dizayn nomi</span>
+        <aside className="w-72 shrink-0 overflow-y-auto border-l border-[var(--line)] bg-white p-4 text-xs text-[var(--ink)]">
+          <div className="mb-4">
+            <h2 className="text-sm font-semibold">Loyiha nazorati</h2>
+            <p className="mt-0.5 text-[11px] text-[var(--ink-muted)]">Model va tahlil holati</p>
+          </div>
+          <label className="mb-4 flex flex-col gap-1.5">
+            <span className="font-medium text-[var(--ink-muted)]">Dizayn nomi</span>
             <input
               type="text"
               value={designName}
               onChange={(e) => setDesignName(e.target.value)}
-              className="bg-[#141a2b] border border-[rgba(255,255,255,0.1)] rounded px-2 py-1 text-white"
+              className="h-9 rounded-lg border border-[var(--line)] bg-[var(--surface-muted)] px-3 text-[var(--ink)] outline-none focus:border-[var(--accent)]"
             />
           </label>
 
           {nodes.length > 0 && (
-            <div className="mb-3 bg-[#141a2b] border border-[rgba(255,255,255,0.08)] rounded p-2 flex flex-col gap-1">
-              <div className="flex justify-between text-gray-400">
+            <div className="mb-4 flex flex-col gap-2 rounded-xl border border-[var(--line)] bg-[var(--surface-muted)] p-3">
+              <div className="flex justify-between text-[var(--ink-muted)]">
                 <span>Tugunlar (j)</span>
-                <span className="text-white font-semibold">{stability.joints}</span>
+                <span className="font-mono font-semibold text-[var(--ink)]">{stability.joints}</span>
               </div>
-              <div className="flex justify-between text-gray-400">
+              <div className="flex justify-between text-[var(--ink-muted)]">
                 <span>A&apos;zolar (m)</span>
-                <span className="text-white font-semibold">{stability.members}</span>
+                <span className="font-mono font-semibold text-[var(--ink)]">{stability.members}</span>
               </div>
-              <div className="flex justify-between text-gray-400">
+              <div className="flex justify-between text-[var(--ink-muted)]">
                 <span>Tayanch reaksiyalari (r)</span>
-                <span className="text-white font-semibold">{stability.reactions}</span>
+                <span className="font-mono font-semibold text-[var(--ink)]">{stability.reactions}</span>
               </div>
               <div
-                className={`text-center rounded px-2 py-1 mt-1 font-bold ${
+                className={`mt-1 rounded-lg px-2 py-2 text-center font-semibold ${
                   stability.status === "determinate"
-                    ? "bg-emerald-500/20 text-emerald-300"
+                    ? "bg-emerald-50 text-emerald-700"
                     : stability.status === "unstable"
-                    ? "bg-red-500/20 text-red-300"
-                    : "bg-amber-500/20 text-amber-300"
+                    ? "bg-red-50 text-red-700"
+                    : "bg-amber-50 text-amber-700"
                 }`}
               >
-                {stability.status === "determinate" && `✓ Barqaror (2j = m+r = ${stability.twoJ})`}
-                {stability.status === "unstable" && `⚠ Beqaror: m+r=${stability.mPlusR} < 2j=${stability.twoJ}`}
-                {stability.status === "indeterminate" && `⚠ Ortiqcha: m+r=${stability.mPlusR} > 2j=${stability.twoJ}`}
+                {stability.status === "determinate" && <span className="inline-flex items-center gap-1.5"><IconCheck size={15} stroke={2} /> Barqaror (2j = m+r = {stability.twoJ})</span>}
+                {stability.status === "unstable" && <span className="inline-flex items-center gap-1.5"><IconAlertTriangle size={15} stroke={1.8} /> Beqaror: m+r={stability.mPlusR} &lt; 2j={stability.twoJ}</span>}
+                {stability.status === "indeterminate" && <span className="inline-flex items-center gap-1.5"><IconAlertTriangle size={15} stroke={1.8} /> Ortiqcha: m+r={stability.mPlusR} &gt; 2j={stability.twoJ}</span>}
               </div>
             </div>
           )}
 
-          <h3 className="font-bold text-sm mb-2">Natijalar</h3>
-          {error && <div className="bg-red-500/20 border border-red-500/40 text-red-300 rounded p-2 mb-2">{error}</div>}
+          <h3 className="mb-2 text-sm font-semibold">Natijalar</h3>
+          {error && <div className="mb-3 rounded-lg border border-red-200 bg-red-50 p-3 text-red-700">{error}</div>}
           {!solved && !error && (
-            <p className="text-gray-500">
+            <p className="rounded-xl border border-[var(--line)] bg-[var(--surface-muted)] p-3 leading-5 text-[var(--ink-muted)]">
               Tugun (●) qo&apos;yib, a&apos;zo (╱) bilan ulang, tayanch va yuk belgilang, so&apos;ng &quot;Tahlil qilish&quot;ni bosing.
               Tugagach, COMPETITION tabida &quot;Monster Truck Rally&quot; yuk sinovidan o&apos;tkazing.
             </p>
           )}
           {solved && (
             <div className="flex flex-col gap-2">
-              <div className={`rounded p-2 font-bold ${worstMember && worstMember.safetyFactor < 1 ? "bg-red-500/20 text-red-300" : "bg-emerald-500/20 text-emerald-300"}`}>
-                {worstMember && worstMember.safetyFactor < 1 ? "⚠ Truss sinadi!" : "✓ Truss xavfsiz"}
+              <div className={`rounded-lg p-3 font-semibold ${worstMember && worstMember.safetyFactor < 1 ? "bg-red-50 text-red-700" : "bg-emerald-50 text-emerald-700"}`}>
+                <span className="inline-flex items-center gap-1.5">{worstMember && worstMember.safetyFactor < 1 ? <><IconAlertTriangle size={15} stroke={1.8} /> Truss sinadi!</> : <><IconCheck size={15} stroke={2} /> Truss xavfsiz</>}</span>
               </div>
               {Array.from(solved.values()).map((m) => (
-                <div key={m.id} className="border-b border-gray-800 pb-1">
-                  <span className={m.inTension ? "text-blue-400" : "text-red-400"}>{m.inTension ? "Tension" : "Compression"}</span>
-                  {" "}— {Math.abs(m.forceN).toFixed(1)} N, SF={m.safetyFactor.toFixed(2)}
+                <div key={m.id} className="border-b border-[var(--line)] py-2">
+                  <span className={m.inTension ? "text-blue-600" : "text-red-600"}>{m.inTension ? "Tension" : "Compression"}</span>
+                  {" "}| {Math.abs(m.forceN).toFixed(1)} N, SF={m.safetyFactor.toFixed(2)}
                 </div>
               ))}
             </div>

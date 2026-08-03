@@ -2,6 +2,7 @@
 
 import { useGliderStore } from "../../store/gliderStore";
 import { SPEC_LIMITS } from "../../lib/physics/gliderPhysics";
+import { IconArrowsUp, IconAxisX, IconAxisY, IconFeather, IconScale, IconWind } from "@tabler/icons-react";
 
 interface MetricBarProps {
   label: string;
@@ -21,7 +22,7 @@ function MetricBar({ label, value, unit, min, max, isGood }: MetricBarProps) {
         <span style={{
           fontSize: 12,
           fontWeight: 700,
-          fontFamily: "'JetBrains Mono', monospace",
+          fontFamily: "var(--font-geist-mono), monospace",
           color: isGood ? "#16a34a" : "#dc2626",
         }}>
           {value.toFixed(2)} {unit}
@@ -78,13 +79,16 @@ export function AnalysisView({ mode }: { mode: string }) {
     letterSpacing: "0.05em",
     borderBottom: "2px solid #2563eb",
     paddingBottom: 6,
+    display: "flex",
+    alignItems: "center",
+    gap: 7,
   };
 
   switch (mode) {
     case "weight":
       return (
         <div style={panelStyle}>
-          <div style={titleStyle}>⚖️ Weight Analysis</div>
+          <div style={titleStyle}><IconScale size={18} stroke={1.8} /> Weight Analysis</div>
           <MetricBar
             label="Total Mass"
             value={metrics.mass}
@@ -105,7 +109,7 @@ export function AnalysisView({ mode }: { mode: string }) {
     case "lift":
       return (
         <div style={panelStyle}>
-          <div style={titleStyle}>🔼 Lift Analysis</div>
+          <div style={titleStyle}><IconArrowsUp size={18} stroke={1.8} /> Lift Analysis</div>
           <MetricBar
             label="Lift Efficiency Ratio"
             value={metrics.liftEfficiencyRatio}
@@ -126,7 +130,7 @@ export function AnalysisView({ mode }: { mode: string }) {
     case "drag":
       return (
         <div style={panelStyle}>
-          <div style={titleStyle}>💨 Drag Analysis</div>
+          <div style={titleStyle}><IconWind size={18} stroke={1.8} /> Drag Analysis</div>
           <div style={{ fontSize: 12, color: "#374151", lineHeight: 1.6 }}>
             <p style={{ marginBottom: 8 }}>Drag is influenced by:</p>
             <ul style={{ paddingLeft: 16, listStyle: "disc" }}>
@@ -145,7 +149,7 @@ export function AnalysisView({ mode }: { mode: string }) {
     case "roll":
       return (
         <div style={panelStyle}>
-          <div style={titleStyle}>🔄 Roll Stability</div>
+          <div style={titleStyle}><IconAxisX size={18} stroke={1.8} /> Roll Stability</div>
           <MetricBar
             label="Effective Dihedral"
             value={metrics.effectiveDihedral}
@@ -168,7 +172,7 @@ export function AnalysisView({ mode }: { mode: string }) {
     case "pitch":
       return (
         <div style={panelStyle}>
-          <div style={titleStyle}>↗️ Pitch Stability</div>
+          <div style={titleStyle}><IconFeather size={18} stroke={1.8} /> Pitch Stability</div>
           <MetricBar
             label="Static Margin"
             value={metrics.staticMarginMm}
@@ -204,7 +208,7 @@ export function AnalysisView({ mode }: { mode: string }) {
     case "yaw":
       return (
         <div style={panelStyle}>
-          <div style={titleStyle}>↩️ Yaw Stability</div>
+          <div style={titleStyle}><IconAxisY size={18} stroke={1.8} /> Yaw Stability</div>
           <MetricBar
             label="V/H Stab Area Ratio"
             value={metrics.vhStabAreaRatio}

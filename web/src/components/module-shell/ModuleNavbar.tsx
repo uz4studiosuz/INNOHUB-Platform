@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { IconBook2, IconFileText, IconHelpCircle, IconHome2, IconLogout } from "@tabler/icons-react";
 
-export type ModuleTab = { label: string; segment: string }; // segment "" = ENGINEERING (index)
+export type ModuleTab = { label: string; segment: string };
 
 export const DEFAULT_MODULE_TABS: ModuleTab[] = [
   { label: "HOME", segment: "home" },
@@ -17,97 +18,52 @@ export const DEFAULT_MODULE_TABS: ModuleTab[] = [
 export function ModuleNavbar({
   basePath,
   tabs = DEFAULT_MODULE_TABS,
-  accent = "linear-gradient(135deg, #7c3aed, #4338ca)",
+  accent = "#126b55",
 }: {
   basePath: string;
   tabs?: ModuleTab[];
   accent?: string;
 }) {
   const pathname = usePathname();
-
-  const hrefFor = (segment: string) => (segment ? `${basePath}/${segment}` : basePath);
-
-  const isActive = (segment: string) => {
-    if (segment === "") return pathname === basePath;
-    return pathname.startsWith(hrefFor(segment));
-  };
+  const hrefFor = (segment: string) => segment ? `${basePath}/${segment}` : basePath;
+  const isActive = (segment: string) => segment === "" ? pathname === basePath : pathname.startsWith(hrefFor(segment));
 
   return (
-    <header style={{
-      height: 42,
-      display: "flex",
-      alignItems: "center",
-      gap: 0,
-      paddingLeft: 8,
-      paddingRight: 12,
-      borderBottom: "1px solid #c0c0c0",
-      background: "linear-gradient(180deg, #e8e8e8 0%, #d4d4d4 100%)",
-      flexShrink: 0,
-      zIndex: 50,
-    }}>
-      {/* Logo */}
-      <Link href="/" style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 6,
-        marginRight: 12,
-        flexShrink: 0,
-        textDecoration: "none",
-      }}>
-        <div style={{
-          width: 28,
-          height: 28,
-          borderRadius: 4,
-          background: accent,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontSize: 14,
-        }}>
-          ◆
-        </div>
+    <header className="flex h-14 shrink-0 items-center gap-3 border-b border-[var(--line)] bg-[var(--surface)] px-3" style={{ "--module-accent": accent } as React.CSSProperties}>
+      <Link href="/" aria-label="Bosh sahifa" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-white" style={{ background: accent }}>
+        <IconHome2 size={19} stroke={1.8} />
       </Link>
 
-      {/* Navigation Tabs */}
-      <nav style={{ display: "flex", alignItems: "center", gap: 0 }}>
+      <nav className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto py-1">
         {tabs.map((tab) => (
           <Link
             key={tab.segment}
             href={hrefFor(tab.segment)}
-            className={`glider-nav-tab ${isActive(tab.segment) ? "active" : ""}`}
+            className={`shrink-0 rounded-lg px-3 py-2 text-[11px] font-semibold tracking-[0.025em] transition-colors ${
+              isActive(tab.segment)
+                ? "bg-[var(--accent-soft)] text-[var(--accent)]"
+                : "text-[var(--ink-muted)] hover:bg-[var(--surface-muted)] hover:text-[var(--ink)]"
+            }`}
           >
             {tab.label}
           </Link>
         ))}
       </nav>
 
-      {/* Right side spacer + service buttons */}
-      <div style={{ flex: 1 }} />
-      <div style={{ display: "flex", alignItems: "center", gap: 16, flexShrink: 0 }}>
-        <nav style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 16,
-          fontSize: 12,
-          fontWeight: 700,
-          textTransform: "uppercase",
-          letterSpacing: "0.06em",
-          color: "#475569",
-        }}>
-          <button style={{ background: "none", border: "none", color: "inherit", cursor: "pointer", fontWeight: 700, fontSize: 12 }}>
-            JOURNAL
-          </button>
-          <button style={{ background: "none", border: "none", color: "inherit", cursor: "pointer", fontWeight: 700, fontSize: 12 }}>
-            FILE
-          </button>
-          <button style={{ background: "none", border: "none", color: "inherit", cursor: "pointer", fontWeight: 700, fontSize: 12 }}>
-            HELP
-          </button>
-          <button style={{ background: "none", border: "none", color: "#dc2626", cursor: "pointer", fontWeight: 700, fontSize: 12 }}>
-            LOGOUT
-          </button>
-        </nav>
-      </div>
+      <nav className="hidden shrink-0 items-center gap-1 lg:flex">
+        <UtilityButton label="Journal"><IconBook2 size={17} stroke={1.8} /></UtilityButton>
+        <UtilityButton label="File"><IconFileText size={17} stroke={1.8} /></UtilityButton>
+        <UtilityButton label="Help"><IconHelpCircle size={17} stroke={1.8} /></UtilityButton>
+        <UtilityButton label="Logout" danger><IconLogout size={17} stroke={1.8} /></UtilityButton>
+      </nav>
     </header>
+  );
+}
+
+function UtilityButton({ children, label, danger = false }: { children: React.ReactNode; label: string; danger?: boolean }) {
+  return (
+    <button type="button" title={label} aria-label={label} className={`flex h-9 w-9 items-center justify-center rounded-lg transition-colors ${danger ? "text-[var(--danger)] hover:bg-red-50" : "text-[var(--ink-muted)] hover:bg-[var(--surface-muted)] hover:text-[var(--ink)]"}`}>
+      {children}
+    </button>
   );
 }

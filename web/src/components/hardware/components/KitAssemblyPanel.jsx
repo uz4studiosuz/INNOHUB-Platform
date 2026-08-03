@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { PackageCheck, CheckCircle2, AlertCircle, ArrowRight, RotateCcw, Download } from 'lucide-react';
+import { IconPackage as PackageCheck, IconCircleCheck as CheckCircle2, IconAlertCircle as AlertCircle, IconArrowRight as ArrowRight, IconRotateClockwise2 as RotateCcw, IconDownload as Download } from '@tabler/icons-react';
 import { ROBOT_KITS } from '../data/robotKits';
 import { useI18n } from '../i18n/index.jsx';
 
@@ -222,7 +222,7 @@ export default function KitAssemblyPanel({ sceneObjects, onAddComponent, onLoadK
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: idx < currentStepIndex ? '#10b981' : idx === currentStepIndex ? '#3b82f6' : '#334155', color: '#fff', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
-                  {idx < currentStepIndex ? '✓' : st.step}
+                  {idx < currentStepIndex ? <CheckCircle2 size={13} /> : st.step}
                 </span>
                 <span>{st.name}</span>
               </div>
@@ -238,4 +238,3 @@ export default function KitAssemblyPanel({ sceneObjects, onAddComponent, onLoadK
     </aside>
   );
 }
-

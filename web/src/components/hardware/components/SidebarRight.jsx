@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { Plus, Cpu, Cog, Box, Search, Layers } from 'lucide-react';
+import { IconPlus as Plus, IconCpu as Cpu, IconSettings as Cog, IconBox as Box, IconSearch as Search, IconLayersIntersect as Layers } from '@tabler/icons-react';
 import { CATALOG, CATEGORIES, getPartName, getPartSpecs } from '../data/catalog';
 import PartThumbnail from './PartThumbnail';
 import { useI18n } from '../i18n/index.jsx';
@@ -120,8 +120,32 @@ export default function SidebarRight({ onAdd, onAddLego, onAddLDrawPart }) {
     [ldrawCatalog],
   );
 
+  const addItem = (item) => {
+    if (item.rawItem?.isCatalogType) onAdd(item.partNum);
+    else if (item.isLDraw && onAddLDrawPart) onAddLDrawPart(item.partNum, item.name);
+    else if (item.isLegoPart && onAddLego) onAddLego(item.part);
+    else onAdd(item.type || item.partNum);
+  };
+
+  const dragPayloadFor = (item) => {
+    if (item.rawItem?.isCatalogType) return { kind: 'component', type: item.partNum, name: item.name };
+    if (item.isLDraw) return { kind: 'ldraw', partNum: item.partNum, name: item.name };
+    if (item.isLegoPart) return { kind: 'lego', part: item.part };
+    return { kind: 'component', type: item.type || item.partNum, name: item.name };
+  };
+
+  const beginDrag = (event, item) => {
+    event.dataTransfer.effectAllowed = 'copy';
+    event.dataTransfer.setData('application/x-innohub-part', JSON.stringify(dragPayloadFor(item)));
+    event.dataTransfer.setData('text/plain', item.name || item.partNum || 'part');
+    const transparent = document.createElement('canvas');
+    transparent.width = 1;
+    transparent.height = 1;
+    event.dataTransfer.setDragImage(transparent, 0, 0);
+  };
+
   return (
-    <div className="glass-panel" style={{ width: '330px', display: 'flex', flexDirection: 'column', height: '100%', zIndex: 10 }}>
+    <aside className="glass-panel hardware-catalog" style={{ width: '340px', display: 'flex', flexDirection: 'column', height: '100%', zIndex: 10 }}>
       {/* Sarlavha */}
       <div style={{ padding: '16px 20px 12px 20px', borderBottom: '1px solid var(--panel-border)' }}>
         <h2 style={{ margin: 0, fontSize: '1.15rem', color: 'var(--text-primary)' }}>{t('catalog.title')}</h2>
@@ -236,24 +260,17 @@ export default function SidebarRight({ onAdd, onAddLego, onAddLDrawPart }) {
             <div
               key={item.id || item.partNum || idx}
               className="item-card"
-              onClick={() => {
-                if (item.rawItem?.isCatalogType) {
-                  onAdd(item.partNum);
-                } else if (item.isLDraw && onAddLDrawPart) {
-                  onAddLDrawPart(item.partNum, item.name);
-                } else if (item.isLegoPart && onAddLego) {
-                  onAddLego(item.part);
-                } else {
-                  onAdd(item.type || item.partNum);
-                }
-              }}
+              draggable
+              onDragStart={(event) => beginDrag(event, item)}
+              onClick={() => addItem(item)}
+              title="Bosib qo‘shing yoki 3D sahnaga sudrang"
               style={{ cursor: 'pointer', padding: '10px 12px' }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <PartThumbnail item={item} name={item.name} group={item.group} colorHex={item.colorHex || item.material?.color} />
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <h3 style={{ margin: 0, fontSize: '0.88rem', color: 'var(--text-primary)' }}>
-                    {item.starred && <span title={t('catalog.recommended')} style={{ marginRight: '4px' }}>⭐</span>}
+                    {item.starred && <span className="catalog-recommended-dot" title={t('catalog.recommended')} />}
                     {item.name}
                   </h3>
                   <p style={{ margin: '2px 0 0 0', fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
@@ -275,8 +292,6 @@ export default function SidebarRight({ onAdd, onAddLego, onAddLDrawPart }) {
           </div>
         )}
       </div>
-    </div>
+    </aside>
   );
 }
-
-

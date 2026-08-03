@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Play, Square, Cpu, Terminal, Zap, Gauge, Compass } from 'lucide-react';
+import { IconPlayerPlay as Play, IconSquare as Square, IconCpu as Cpu, IconTerminal2 as Terminal, IconBolt as Zap, IconGauge as Gauge, IconCompass as Compass } from '@tabler/icons-react';
 import { useI18n } from '../i18n/index.jsx';
 
 const DEFAULT_ARDUINO_CODE = `// Arduino Bot Control Code
@@ -222,4 +222,3 @@ export default function SimulationPanel({
     </aside>
   );
 }
-

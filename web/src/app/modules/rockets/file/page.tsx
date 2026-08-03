@@ -5,6 +5,7 @@ import { useRocketStore } from "../../../../store/rocketStore";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine,
 } from "recharts";
+import { IconChartLine } from "@tabler/icons-react";
 
 export default function FilePage() {
   const store = useRocketStore();
@@ -172,7 +173,7 @@ export default function FilePage() {
                 </ResponsiveContainer>
               ) : (
                 <div className="w-full h-full flex flex-col items-center justify-center text-gray-400 text-sm gap-2">
-                  <span className="text-3xl">📈</span>
+                  <IconChartLine size={28} stroke={1.7} />
                   Hali musobaqaga kiritilgan dizayn yo&apos;q.
                   <span className="text-xs">Chapdagi «Saqlash va musobaqaga kiritish» tugmasini bosing.</span>
                 </div>

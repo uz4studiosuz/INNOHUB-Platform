@@ -14,7 +14,7 @@ export function ModuleWorkspace({
   children: React.ReactNode;
 }) {
   return (
-    <div className="fixed inset-0 z-[60] flex flex-col" style={{ background: "#d0d0d0" }}>
+    <div className="fixed inset-0 z-[60] flex flex-col bg-[var(--canvas)] text-[var(--ink)]">
       <ModuleNavbar basePath={basePath} tabs={tabs} accent={accent} />
       <div className="flex-1 flex flex-col min-w-0 min-h-0 overflow-y-auto">
         {children}

@@ -9,7 +9,7 @@ export const GENERATED_PARTS: ComponentDef[] = [
   // capacitor_ceramic_100mil.fzp -> ceramic_capacitor_blue_leg.svg
   {
     type: "capacitor", name: "Capacitor", category: "general",
-    icon: "🔵", art: "capacitor.svg", width: 27.12, height: 58.79,
+    icon: "", art: "capacitor.svg", width: 27.12, height: 58.79,
     terminals: [
       { id: "p0", label: "Pin 0", x: 6.35, y: 55.91 },
       { id: "p1", label: "Pin 1", x: 20.78, y: 55.91 },
@@ -45,7 +45,7 @@ export const GENERATED_PARTS: ComponentDef[] = [
   // inductor.fzp -> inductor_leg.svg
   {
     type: "inductor", name: "Inductor", category: "general",
-    icon: "🌀", art: "inductor.svg", width: 61.68, height: 25.38,
+    icon: "", art: "inductor.svg", width: 61.68, height: 25.38,
     terminals: [
       { id: "pin-0", label: "pin 0", x: 4.1, y: 16.26 },
       { id: "pin-1", label: "pin 1", x: 53.07, y: 16.29 },
@@ -54,7 +54,7 @@ export const GENERATED_PARTS: ComponentDef[] = [
   // basic-toggle-switch.fzp -> basic_toggle_switch.svg
   {
     type: "toggle-switch", name: "Toggle Switch", category: "input",
-    icon: "🔀", art: "toggle-switch.svg", width: 53.28, height: 54.62,
+    icon: "", art: "toggle-switch.svg", width: 53.28, height: 54.62,
     terminals: [
       { id: "l1", label: "L1", x: 10.5, y: 51.74 },
       { id: "com", label: "COM", x: 24.9, y: 51.74 },
@@ -64,7 +64,7 @@ export const GENERATED_PARTS: ComponentDef[] = [
   // Tilt switch.fzp -> tilt_switch.svg
   {
     type: "tilt-sensor", name: "Tilt Sensor", category: "input",
-    icon: "📐", art: "tilt-sensor.svg", width: 46.47, height: 58.76,
+    icon: "", art: "tilt-sensor.svg", width: 46.47, height: 58.76,
     terminals: [
       { id: "pin-1", label: "Pin 1", x: 28.31, y: 54.82 },
       { id: "pin-2", label: "Pin 2", x: 42.53, y: 54.82 },
@@ -73,7 +73,7 @@ export const GENERATED_PARTS: ComponentDef[] = [
   // reedSwitch_500mil.fzp -> reed_switch_leg.svg
   {
     type: "reed-switch", name: "Reed Switch", category: "input",
-    icon: "🧲", art: "reed-switch.svg", width: 90.72, height: 16.14,
+    icon: "", art: "reed-switch.svg", width: 90.72, height: 16.14,
     terminals: [
       { id: "pin-1", label: "pin 1", x: 6.05, y: 8.19 },
       { id: "pin-2", label: "pin 2", x: 84.67, y: 8.19 },
@@ -82,7 +82,7 @@ export const GENERATED_PARTS: ComponentDef[] = [
   // LDR_photocell_300mil.fzp -> ldr.svg
   {
     type: "photoresistor", name: "Photoresistor", category: "input",
-    icon: "🔆", art: "photoresistor.svg", width: 50.56, height: 23.76,
+    icon: "", art: "photoresistor.svg", width: 50.56, height: 23.76,
     terminals: [
       { id: "pin-0", label: "pin 0", x: 2.1, y: 19.76 },
       { id: "pin-1", label: "pin 1", x: 46.56, y: 19.76 },
@@ -91,7 +91,7 @@ export const GENERATED_PARTS: ComponentDef[] = [
   // basic_fsr.fzp -> basic_fsr.svg
   {
     type: "force-sensor", name: "Force Sensor", category: "input",
-    icon: "👆", art: "force-sensor.svg", width: 100.8, height: 315.25,
+    icon: "", art: "force-sensor.svg", width: 100.8, height: 315.25,
     terminals: [
       { id: "pin-0", label: "pin 0", x: 42.99, y: 312.37 },
       { id: "pin-1", label: "pin 1", x: 57.39, y: 312.37 },
@@ -100,7 +100,7 @@ export const GENERATED_PARTS: ComponentDef[] = [
   // tmp36.fzp -> tmp36.svg
   {
     type: "temperature-sensor", name: "Temperature Sensor", category: "input",
-    icon: "🌡️", art: "temperature-sensor.svg", width: 34.89, height: 66.52,
+    icon: "", art: "temperature-sensor.svg", width: 34.89, height: 66.52,
     terminals: [
       { id: "vs", label: "+Vs", x: 2.16, y: 62.52 },
       { id: "vout", label: "Vout", x: 16.52, y: 62.52 },
@@ -110,7 +110,7 @@ export const GENERATED_PARTS: ComponentDef[] = [
   // HC-SR04 Ultrasonic Distance Sensor.fzp -> hc-sr04_ultrafix_13.svg
   {
     type: "ultrasonic", name: "Ultrasonic Distance", category: "input",
-    icon: "📡", art: "ultrasonic.svg", width: 255.67, height: 133.82,
+    icon: "", art: "ultrasonic.svg", width: 255.67, height: 133.82,
     terminals: [
       { id: "vcc", label: "VCC", x: 104.3, y: 130.76 },
       { id: "trig", label: "TRIG", x: 118.7, y: 130.76 },
@@ -121,7 +121,7 @@ export const GENERATED_PARTS: ComponentDef[] = [
   // dc_motor.fzp -> dc_motor_leg.svg
   {
     type: "dc-motor", name: "DC Motor", category: "output",
-    icon: "🔃", art: "dc-motor.svg", width: 240.26, height: 111.44,
+    icon: "", art: "dc-motor.svg", width: 240.26, height: 111.44,
     terminals: [
       { id: "pin-1", label: "pin 1", x: 4.0, y: 49.15 },
       { id: "pin-2", label: "pin 2", x: 4.0, y: 66.11 },
@@ -130,7 +130,7 @@ export const GENERATED_PARTS: ComponentDef[] = [
   // stepper_motor_bipolar.fzp -> Stepper_Motor_Bipolar_breadboard_leg.svg
   {
     type: "stepper-motor", name: "Stepper Motor", category: "output",
-    icon: "⚙", art: "stepper-motor.svg", width: 239.81, height: 393.21,
+    icon: "", art: "stepper-motor.svg", width: 239.81, height: 393.21,
     terminals: [
       { id: "d", label: "D", x: 142.17, y: 389.06 },
       { id: "a", label: "A", x: 99.99, y: 389.06 },
@@ -141,7 +141,7 @@ export const GENERATED_PARTS: ComponentDef[] = [
   // 7segment_13_cat.fzp -> 7segment_13.svg
   {
     type: "seven-segment", name: "7-Segment Display", category: "output",
-    icon: "🔢", art: "seven-segment.svg", width: 71.54, height: 100.46,
+    icon: "", art: "seven-segment.svg", width: 71.54, height: 100.46,
     terminals: [
       { id: "segment-e", label: "Segment E", x: 6.63, y: 93.03 },
       { id: "segment-d", label: "Segment D", x: 21.04, y: 93.03 },
@@ -161,7 +161,7 @@ export const GENERATED_PARTS: ComponentDef[] = [
   // lcd-GDM1602K.fzp -> lcd-GDM1602K.svg
   {
     type: "lcd16x2", name: "LCD 16x2", category: "output",
-    icon: "📺", art: "lcd16x2.svg", width: 453.54, height: 204.09,
+    icon: "", art: "lcd16x2.svg", width: 453.54, height: 204.09,
     terminals: [
       { id: "vss", label: "VSS", x: 38.86, y: 6.94 },
       { id: "vdd", label: "VDD", x: 53.26, y: 6.94 },
@@ -195,7 +195,7 @@ export const GENERATED_PARTS: ComponentDef[] = [
   // Battery block 9V.fzp -> Battery_block_9V85_leg.svg
   {
     type: "battery-9v", name: "9V Battery", category: "power",
-    icon: "🔋", art: "battery-9v.svg", width: 204.54, height: 303.74,
+    icon: "", art: "battery-9v.svg", width: 204.54, height: 303.74,
     terminals: [
       { id: "neg", label: "-", x: 200.54, y: 35.3 },
       { id: "pos", label: "+", x: 200.54, y: 20.94 },
@@ -204,7 +204,7 @@ export const GENERATED_PARTS: ComponentDef[] = [
   // battery-AA.fzp -> batterypack_2xAA_leg.svg
   {
     type: "battery-aa", name: "1.5V Battery", category: "power",
-    icon: "🔋", art: "battery-aa.svg", width: 349.65, height: 174.97,
+    icon: "", art: "battery-aa.svg", width: 349.65, height: 174.97,
     terminals: [
       { id: "neg", label: "-", x: 345.65, y: 95.38 },
       { id: "pos", label: "+", x: 345.65, y: 68.0 },
@@ -213,7 +213,7 @@ export const GENERATED_PARTS: ComponentDef[] = [
   // sparkfun-electromechanical-battery-20pth.fzp -> sparkfun-electromechanical_battcom_20mm_pth_breadboard.svg
   {
     type: "coin-cell", name: "Coin Cell 3V", category: "power",
-    icon: "🪙", art: "coin-cell.svg", width: 135.34, height: 127.39,
+    icon: "", art: "coin-cell.svg", width: 135.34, height: 127.39,
     terminals: [
       { id: "pos", label: "+", x: 124.0, y: 61.64 },
       { id: "neg", label: "-", x: 10.61, y: 61.64 },
@@ -222,7 +222,7 @@ export const GENERATED_PARTS: ComponentDef[] = [
   // transistor_signal_NPN_TO92_CBE.fzp -> transistor_npn.svg
   {
     type: "transistor-npn", name: "NPN Transistor", category: "ics",
-    icon: "🔺", art: "transistor-npn.svg", width: 34.89, height: 66.52,
+    icon: "", art: "transistor-npn.svg", width: 34.89, height: 66.52,
     terminals: [
       { id: "e", label: "E", x: 30.89, y: 62.52 },
       { id: "b", label: "B", x: 16.52, y: 62.52 },
@@ -232,7 +232,7 @@ export const GENERATED_PARTS: ComponentDef[] = [
   // basic_power_transistor_pnp.fzp -> powertransistor_pnp.svg
   {
     type: "transistor-pnp", name: "PNP Transistor", category: "ics",
-    icon: "🔻", art: "transistor-pnp.svg", width: 53.28, height: 107.02,
+    icon: "", art: "transistor-pnp.svg", width: 53.28, height: 107.02,
     terminals: [
       { id: "base", label: "base", x: 12.96, y: 104.14 },
       { id: "collector", label: "collector", x: 27.36, y: 104.14 },
@@ -242,7 +242,7 @@ export const GENERATED_PARTS: ComponentDef[] = [
   // TE_RELAY.fzp -> TE_RELAY_05435a7cf6a72ed64571d5e62307969c_1_breadboard.svg
   {
     type: "relay", name: "Relay SPDT", category: "ics",
-    icon: "🧰", art: "relay.svg", width: 116.35, height: 129.98,
+    icon: "", art: "relay.svg", width: 116.35, height: 129.98,
     terminals: [
       { id: "coil1", label: "COIL1", x: 108.58, y: 125.98 },
       { id: "coil2", label: "COIL2", x: 108.58, y: 82.78 },
@@ -268,7 +268,7 @@ export const GENERATED_PARTS: ComponentDef[] = [
   // 74HC595.fzp -> 74HC595.svg
   {
     type: "shift-register", name: "8-Bit Shift Register", category: "ics",
-    icon: "🧮", art: "shift-register.svg", width: 115.2, height: 49.36,
+    icon: "", art: "shift-register.svg", width: 115.2, height: 49.36,
     terminals: [
       { id: "vcc", label: "VCC", x: 7.2, y: 2.16 },
       { id: "q4", label: "Q4", x: 50.4, y: 45.36 },
@@ -291,7 +291,7 @@ export const GENERATED_PARTS: ComponentDef[] = [
   // lm358.fzp -> lm358_bread.svg
   {
     type: "opamp", name: "Dual Op-Amp", category: "ics",
-    icon: "📈", art: "opamp.svg", width: 57.6, height: 48.24,
+    icon: "", art: "opamp.svg", width: 57.6, height: 48.24,
     terminals: [
       { id: "pin-4", label: "Pin 4", x: 50.4, y: 45.36 },
       { id: "pin-5", label: "Pin 5", x: 50.4, y: 2.16 },

@@ -1,8 +1,9 @@
 "use client";
 
-import { GliderNavbar } from "../../../components/glider-lab/GliderNavbar";
 import { EngineeringSidebar } from "../../../components/glider-lab/EngineeringSidebar";
 import { DockingStation } from "../../../components/glider-lab/DockingStation";
+import { ModuleWorkspace } from "../../../components/module-shell/ModuleWorkspace";
+import { MODULES } from "../../../components/module-shell/moduleConfig";
 
 export default function GliderLayout({
   children,
@@ -10,11 +11,7 @@ export default function GliderLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="fixed inset-0 z-[60] flex flex-col" style={{ background: "#d0d0d0" }}>
-      {/* Top Navbar */}
-      <GliderNavbar />
-
-      {/* Body: Sidebar + Main Content */}
+    <ModuleWorkspace basePath={MODULES.glider.basePath} accent={MODULES.glider.accent}>
       <div className="flex flex-1 min-h-0">
         {/* Engineering Sidebar */}
         <EngineeringSidebar />
@@ -27,6 +24,6 @@ export default function GliderLayout({
           {children}
         </div>
       </div>
-    </div>
+    </ModuleWorkspace>
   );
 }

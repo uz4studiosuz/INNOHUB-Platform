@@ -2,7 +2,6 @@
 
 import { useState, useCallback, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import SidebarLeft from './components/SidebarLeft';
 import SidebarRight from './components/SidebarRight';
 import KitAssemblyPanel from './components/KitAssemblyPanel';
 import SimulationPanel from './components/SimulationPanel';
@@ -59,7 +58,7 @@ function App() {
   }, []);
 
   // Sahnaga LDraw modelini qo'shish
-  const handleAddLDrawPart = useCallback((partNum, name = '') => {
+  const handleAddLDrawPart = useCallback((partNum, name = '', dropPosition = null) => {
     const newId = uuidv4();
     setSceneObjects(prev => {
       const idx = prev.length;
@@ -73,7 +72,7 @@ function App() {
         name: name || `Part ${partNum}`,
         colorCode: 71, // Standart Light Gray
         visible: true,
-        position: [posX, 0, posZ],
+        position: dropPosition || [posX, 0, posZ],
         rotation: [0, 0, 0],
         params: { scalePercent: 100 },
       };
@@ -82,15 +81,8 @@ function App() {
     setSelectedObjectId(newId);
   }, []);
 
-  // LDraw detalining rangini o'zgartirish
-  const handleChangeColorCode = useCallback((id, colorCode) => {
-    setSceneObjects(prev => prev.map(obj =>
-      obj.id === id ? { ...obj, colorCode } : obj
-    ));
-  }, []);
-
   // Sahnaga yangi qism qo'shish — CATALOG dan o'qiydi (Faza 0)
-  const handleAddComponent = useCallback((typeInput) => {
+  const handleAddComponent = useCallback((typeInput, dropPosition = null) => {
     const type = typeof typeInput === 'string' ? typeInput : typeInput.type;
     const customName = typeof typeInput === 'object' ? typeInput.name : null;
     const entry = getCatalogEntry(type);
@@ -111,7 +103,7 @@ function App() {
         partNum: entry ? entry.partNum : null,
         colorCode: entry ? (entry.colorCode || 71) : 71,
         visible: true,
-        position: [posX, 25, posZ],
+        position: dropPosition || [posX, 25, posZ],
         rotation: [0, 0, 0],
         params: entry?.defaultParams ? { ...entry.defaultParams } : null,
       };
@@ -150,7 +142,7 @@ function App() {
   }, []);
 
   // LEGO Technic katalogidan (1000+ detal) qism qo'shish
-  const handleAddLego = useCallback((part) => {
+  const handleAddLego = useCallback((part, dropPosition = null) => {
     const newId = uuidv4();
     setSceneObjects(prev => {
       const idx = prev.length;
@@ -167,7 +159,7 @@ function App() {
         subcat: part.subcat,
         colorHex: part.colorHex,
         visible: true,
-        position: [posX, 25, posZ],
+        position: dropPosition || [posX, 25, posZ],
         rotation: [0, 0, 0],
         params: { ...(part.params || {}), scalePercent: 100 },
       };
@@ -176,17 +168,21 @@ function App() {
     setSelectedObjectId(newId);
   }, []);
 
+  const handleDropPart = useCallback((payload, position) => {
+    if (!payload || !position) return;
+    if (payload.kind === 'ldraw') {
+      handleAddLDrawPart(payload.partNum, payload.name, position);
+    } else if (payload.kind === 'lego') {
+      handleAddLego(payload.part, position);
+    } else {
+      handleAddComponent(payload.type || payload.partNum, position);
+    }
+  }, [handleAddComponent, handleAddLDrawPart, handleAddLego]);
+
   // Obyektni o'chirish
   const handleRemoveObject = useCallback((id) => {
     setSceneObjects(prev => prev.filter(obj => obj.id !== id));
     setSelectedObjectId(prev => prev === id ? null : prev);
-  }, []);
-
-  // Obyekt ko'rinishini o'zgartirish
-  const handleToggleVisibility = useCallback((id) => {
-    setSceneObjects(prev => prev.map(obj => 
-      obj.id === id ? { ...obj, visible: !obj.visible } : obj
-    ));
   }, []);
 
   // TransformControls → State sinxronizatsiyasi
@@ -243,17 +239,6 @@ function App() {
 
       {/* Asosiy kontent qatori (Row container) */}
       <div style={{ display: 'flex', flex: 1, width: '100%', minHeight: 0, overflow: 'hidden', position: 'relative' }}>
-        {/* Chap panel: Sahnadagi obyektlar ierarxiyasi va sozlamalar */}
-        <SidebarLeft 
-          objects={sceneObjects}
-          selectedId={selectedObjectId}
-          onSelect={setSelectedObjectId}
-          onRemove={handleRemoveObject}
-          onToggleVisibility={handleToggleVisibility}
-          onUpdateParams={handleUpdateParams}
-          onChangeColorCode={handleChangeColorCode}
-        />
-
         {/* Markaziy 3D Oyna */}
         <div style={{ flex: 1, position: 'relative', height: '100%' }}>
           <ThreeScene 
@@ -265,8 +250,12 @@ function App() {
             onRemove={handleRemoveObject}
             onUpdate={handleUpdateTransform}
             onUpdateParams={handleUpdateParams}
+            onDropPart={handleDropPart}
             onExportLdrReady={(exportFn) => { exportLdrFnRef.current = exportFn; }}
           />
+          <div className="scene-count-badge" aria-live="polite">
+            {sceneObjects.length} detal · katalogdan sudrab sahnaga qo‘ying
+          </div>
         </div>
 
         {/* O'ng panel: Rejimga qarab dinamik panel (Erkin qurish, Tayyor Yig'ish, Simulyatsiya) */}
@@ -339,5 +328,3 @@ export default function HardwareModule() {
     </I18nProvider>
   );
 }
-
-

@@ -1,22 +1,42 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
 @import "tailwindcss";
 
 :root {
-  --background: #080b11;
-  --foreground: #f8fafc;
-  --card-bg: rgba(15, 21, 36, 0.7);
-  --card-border: rgba(255, 255, 255, 0.08);
-  --accent-blue: #3b82f6;
-  --accent-emerald: #10b981;
-  --accent-violet: #8b5cf6;
-  --accent-rose: #f43f5e;
+  --canvas: #f4f6f8;
+  --surface: #ffffff;
+  --surface-muted: #eef2f5;
+  --surface-strong: #e4e9ee;
+  --ink: #18212b;
+  --ink-muted: #66727f;
+  --line: #dce2e8;
+  --line-strong: #cbd4dc;
+  --accent: #126b55;
+  --accent-hover: #0d5946;
+  --accent-soft: #e5f2ed;
+  --danger: #b42318;
+  --focus: #126b55;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
 }
 
 body {
-  background-color: var(--background);
-  color: var(--foreground);
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  background-color: var(--canvas);
+  color: var(--ink);
+  font-family: var(--font-geist-sans), Arial, sans-serif;
   overflow-x: hidden;
+}
+
+button,
+input,
+select,
+textarea { font: inherit; }
+
+button,
+a { -webkit-tap-highlight-color: transparent; }
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
 }
 
 /* Custom Scrollbar */
@@ -25,50 +45,46 @@ body {
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #080b11;
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
+  background: #c7d0d8;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+  background: #aeb9c3;
 }
 
-/* Custom styles for premium look */
+/* Shared surfaces keep learning widgets in one material system. */
 .glass-panel {
-  background: var(--card-bg);
-  backdrop-filter: blur(12px);
-  border: 1px solid var(--card-border);
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: 0 1px 2px rgba(24, 33, 43, 0.05);
 }
 
 .glass-panel-hover:hover {
-  border-color: rgba(255, 255, 255, 0.15);
-  box-shadow: 0 8px 30px rgba(59, 130, 246, 0.15);
-  transform: translateY(-2px);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-color: var(--line-strong);
+  box-shadow: 0 8px 24px rgba(24, 33, 43, 0.08);
+  transform: translateY(-1px);
+  transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
 }
 
 .neon-glow-blue {
-  box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+  box-shadow: none;
 }
 
 .neon-glow-emerald {
-  box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
+  box-shadow: none;
 }
 
 .grid-bg {
-  background-image: 
-    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-  background-size: 20px 20px;
+  background-image: none;
 }
 
 /* Range input overrides */
 input[type="range"] {
-  accent-color: var(--accent-blue);
-  background: #1e293b;
+  accent-color: var(--accent);
+  background: var(--surface-strong);
   height: 6px;
   border-radius: 3px;
 }
@@ -319,7 +335,7 @@ input[type="range"] {
   width: 70px;
   padding: 3px 6px;
   font-size: 12px;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-geist-mono), monospace;
   border: 1px solid #b0b0b0;
   border-radius: 3px;
   background: #ffffff;

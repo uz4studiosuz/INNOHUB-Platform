@@ -8,6 +8,7 @@ import {
 import { useRocketStore } from "../../../../store/rocketStore";
 import { FlightSample, finGeometry } from "../../../../lib/physics/rocketPhysics";
 import { PrintTemplates } from "../../../../components/rocket-lab/PrintTemplates";
+import { IconBulb } from "@tabler/icons-react";
 
 /**
  * The flight model already integrates a full trajectory on every edit; until
@@ -210,7 +211,7 @@ export default function BuildTestPage() {
                   <div key={`e${i}`} className="text-[11px] text-red-700 font-semibold">✖ {e}</div>
                 ))}
                 {analysis.hints.map((h, i) => (
-                  <div key={`h${i}`} className="text-[11px] text-amber-700">💡 {h}</div>
+                  <div key={`h${i}`} className="flex items-start gap-1.5 text-[11px] text-amber-700"><IconBulb size={14} stroke={1.8} className="shrink-0" /> {h}</div>
                 ))}
               </div>
             )}

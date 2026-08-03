@@ -3,6 +3,7 @@
 import React from "react";
 import { useRocketStore } from "../../store/rocketStore";
 import { FinPoint, TUBE_STOCK, finGeometry, finOutline } from "../../lib/physics/rocketPhysics";
+import { IconPrinter } from "@tabler/icons-react";
 
 /**
  * Life-size cutting templates for the parts a student actually makes by hand.
@@ -76,7 +77,7 @@ export function PrintTemplates() {
             Chop etgach 10 mm kvadratni chizg&apos;ich bilan tekshiring.
           </div>
         </div>
-        <button onClick={() => window.print()} className="pt-print-btn">🖨 Chop etish</button>
+        <button onClick={() => window.print()} className="pt-print-btn inline-flex items-center gap-2"><IconPrinter size={16} stroke={1.8} /> Chop etish</button>
       </div>
 
       <div className="pt-sheet">

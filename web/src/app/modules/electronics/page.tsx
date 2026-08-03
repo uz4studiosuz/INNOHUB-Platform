@@ -4,13 +4,30 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useElectronicsStore } from "../../../store/electronicsStore";
 import { Simulator } from "../../../components/electronics/engine";
 import CircuitCanvas from "../../../components/electronics/CircuitCanvas";
-import { CompVisual } from "../../../components/electronics/ComponentView";
+import { CompVisual, ComponentDragPreview } from "../../../components/electronics/ComponentView";
 import { COMPONENT_LIBRARY, PALETTE_ORDER, LED_COLORS, SIMULATED, PROP_UNITS, unitFor } from "../../../components/electronics/componentLibrary";
-import { SimState } from "../../../components/electronics/types";
+import { ComponentType, SimState } from "../../../components/electronics/types";
 import { compile, CompileResult, Diagnostic } from "../../../components/electronics/arduino";
 import { LIBRARIES } from "../../../components/electronics/libraries";
 import { EXAMPLES, DEFAULT_CODE } from "../../../components/electronics/examples";
 import { logIteration } from "../../../store/iterationStore";
+import {
+  IconAlertTriangle,
+  IconArrowBackUp,
+  IconArrowForwardUp,
+  IconBooks,
+  IconCheck,
+  IconCircuitGround,
+  IconCode,
+  IconCopy,
+  IconList,
+  IconPlayerPlay,
+  IconPlayerStop,
+  IconRotateClockwise2,
+  IconSearch,
+  IconTrash,
+  IconX,
+} from "@tabler/icons-react";
 
 const WIRE_COLORS = ["#111827", "#dc2626", "#16a34a", "#2563eb", "#ca8a04", "#9333ea", "#0891b2", "#f97316"];
 // Ordered to match Tinkercad's own category rhythm (General/Input/Output/
@@ -63,6 +80,7 @@ export default function ElectronicsPage() {
   const [speed, setSpeed] = useState(1);
   const [search, setSearch] = useState("");
   const [cat, setCat] = useState("all");
+  const [dragPreview, setDragPreview] = useState<{ type: ComponentType; x: number; y: number } | null>(null);
   /**
    * Which multiplier each part's value is being typed in, per component and
    * prop. This is a view preference, not part of the circuit - the stored value
@@ -237,19 +255,19 @@ export default function ElectronicsPage() {
   }, [cat, search]);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "calc(100vh - 42px)", background: "#e8ebef", minHeight: 0 }}>
+    <div style={{ display: "flex", flexDirection: "column", height: "calc(100vh - 56px)", background: "var(--canvas)", minHeight: 0 }}>
       {/* ================= TOP TOOLBAR ================= */}
-      <div style={{ height: 50, background: "#fff", borderBottom: "1px solid #d1d5db", display: "flex", alignItems: "center", gap: 6, padding: "0 12px", flexShrink: 0 }}>
+      <div style={{ minHeight: 52, background: "var(--surface)", borderBottom: "1px solid var(--line)", display: "flex", alignItems: "center", gap: 6, padding: "8px 12px", flexShrink: 0, overflowX: "auto" }}>
         <input value={title} onChange={(e) => setTitle(e.target.value)}
           style={{ fontWeight: 700, fontSize: 14, border: "1px solid transparent", borderRadius: 6, padding: "5px 8px", width: 180, color: "#111827" }} />
         <Sep />
-        <TBtn onClick={() => selected && duplicateComponent(selected.id)} disabled={!selected} title="Nusxa (Ctrl+D)">⧉</TBtn>
-        <TBtn onClick={() => selected && removeComponent(selected.id)} disabled={!selected} title="O'chirish (Del)">🗑</TBtn>
+        <TBtn onClick={() => selected && duplicateComponent(selected.id)} disabled={!selected} title="Nusxa (Ctrl+D)"><IconCopy size={17} stroke={1.8} /></TBtn>
+        <TBtn onClick={() => selected && removeComponent(selected.id)} disabled={!selected} title="O'chirish (Del)"><IconTrash size={17} stroke={1.8} /></TBtn>
         <Sep />
-        <TBtn onClick={undo} title="Orqaga (Ctrl+Z)">↶</TBtn>
-        <TBtn onClick={redo} title="Oldinga (Ctrl+Y)">↷</TBtn>
+        <TBtn onClick={undo} title="Orqaga (Ctrl+Z)"><IconArrowBackUp size={17} stroke={1.8} /></TBtn>
+        <TBtn onClick={redo} title="Oldinga (Ctrl+Y)"><IconArrowForwardUp size={17} stroke={1.8} /></TBtn>
         <Sep />
-        <TBtn onClick={() => selected && rotateComponent(selected.id)} disabled={!selected} title="Burish">⟳</TBtn>
+        <TBtn onClick={() => selected && rotateComponent(selected.id)} disabled={!selected} title="Burish"><IconRotateClockwise2 size={17} stroke={1.8} /></TBtn>
         <div title={selectedWire ? "Tanlangan simning rangi" : "Yangi sim rangi"}
           style={{ display: "flex", gap: 3, padding: "0 4px" }}>
           {WIRE_COLORS.map((c) => (
@@ -269,11 +287,11 @@ export default function ElectronicsPage() {
           <option value="" disabled>Misollar</option>
           {EXAMPLES.map((ex) => <option key={ex.key} value={ex.key}>{ex.name}</option>)}
         </select>
-        <button onClick={() => setCodeOpen((v) => !v)} style={{ ...btnLight, background: codeOpen ? "#e0e7ff" : "#f3f4f6" }}>{"</>"} Kod</button>
-        <button onClick={handleCompile} title="Kodni tekshirish (kompilyatsiya)" style={btnLight}>✓ Tekshirish</button>
+        <button onClick={() => setCodeOpen((v) => !v)} style={{ ...btnLight, background: codeOpen ? "var(--accent-soft)" : "var(--surface-muted)" }}><IconCode size={16} stroke={1.8} /> Kod</button>
+        <button onClick={handleCompile} title="Kodni tekshirish (kompilyatsiya)" style={btnLight}><IconCheck size={16} stroke={1.8} /> Tekshirish</button>
         {!running
-          ? <button onClick={handleStart} style={btnStart}>▶ Simulyatsiya</button>
-          : <button onClick={handleStop} style={{ ...btnStart, background: "#dc2626" }}>■ To&apos;xtatish</button>}
+          ? <button onClick={handleStart} style={btnStart}><IconPlayerPlay size={16} stroke={1.8} /> Simulyatsiya</button>
+          : <button onClick={handleStop} style={{ ...btnStart, background: "var(--danger)" }}><IconPlayerStop size={16} stroke={1.8} /> To&apos;xtatish</button>}
       </div>
 
       {/* ================= BODY ================= */}
@@ -284,7 +302,7 @@ export default function ElectronicsPage() {
 
           {/* status pill */}
           <div style={{ position: "absolute", top: 10, left: 10, background: "#ffffffcc", backdropFilter: "blur(4px)", borderRadius: 8, padding: "5px 10px", fontSize: 12, fontWeight: 600, color: running ? "#16a34a" : "#6b7280", boxShadow: "0 1px 4px rgba(0,0,0,0.1)" }}>
-            {running ? `● Ishlayapti — ${(timeMs / 1000).toFixed(1)}s` : "○ To'xtatilgan"}
+            {running ? `Ishlayapti - ${(timeMs / 1000).toFixed(1)}s` : "To'xtatilgan"}
           </div>
 
           {/* floating inspector */}
@@ -357,13 +375,13 @@ export default function ElectronicsPage() {
               })}
               {!SIMULATED.has(selected.type) && (
                 <div style={{ marginTop: 6, fontSize: 11, color: "#b45309", lineHeight: 1.35 }}>
-                  Bu komponent hozircha simulyatsiya qilinmaydi — chizmaga qo&apos;yish va ulash mumkin.
+                  Bu komponent hozircha simulyatsiya qilinmaydi. Chizmaga qo&apos;yish va ulash mumkin.
                 </div>
               )}
               <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
-                <button onClick={() => rotateComponent(selected.id)} style={btnLight}>⟳</button>
-                <button onClick={() => duplicateComponent(selected.id)} style={btnLight}>⧉</button>
-                <button onClick={() => removeComponent(selected.id)} style={{ ...btnLight, color: "#dc2626" }}>🗑</button>
+                <button onClick={() => rotateComponent(selected.id)} style={btnLight} title="Burish"><IconRotateClockwise2 size={16} stroke={1.8} /></button>
+                <button onClick={() => duplicateComponent(selected.id)} style={btnLight} title="Nusxa"><IconCopy size={16} stroke={1.8} /></button>
+                <button onClick={() => removeComponent(selected.id)} style={{ ...btnLight, color: "var(--danger)" }} title="O'chirish"><IconTrash size={16} stroke={1.8} /></button>
               </div>
             </div>
           )}
@@ -389,7 +407,7 @@ export default function ElectronicsPage() {
               </div>
               <div style={{ display: "flex", gap: 6, marginTop: 10 }}>
                 <button onClick={() => selectWire(null)} style={{ ...btnLight, flex: 1 }}>Bekor</button>
-                <button onClick={() => removeWire(selectedWire.id)} style={{ ...btnLight, color: "#dc2626" }}>🗑</button>
+                <button onClick={() => removeWire(selectedWire.id)} style={{ ...btnLight, color: "var(--danger)" }} title="O'chirish"><IconTrash size={16} stroke={1.8} /></button>
               </div>
             </div>
           )}
@@ -407,10 +425,13 @@ export default function ElectronicsPage() {
                     {CATEGORIES.map((c) => <option key={c.key} value={c.key}>{c.label}</option>)}
                   </select>
                 </div>
-                <span title="Ro'yxat ko'rinishi (tez orada)" style={{ color: "#c1c7d0", fontSize: 16, cursor: "not-allowed" }}>☰</span>
+                <span title="Ro'yxat ko'rinishi (tez orada)" style={{ color: "#9aa6b2", cursor: "not-allowed" }}><IconList size={18} stroke={1.8} /></span>
               </div>
-              <input placeholder="Qidirish…" value={search} onChange={(e) => setSearch(e.target.value)}
-                style={{ width: "100%", boxSizing: "border-box", border: "1px solid #d1d5db", borderRadius: 8, padding: "7px 10px", fontSize: 12, marginTop: 8 }} />
+              <label style={{ position: "relative", display: "block", marginTop: 8 }}>
+                <IconSearch size={15} stroke={1.8} style={{ position: "absolute", left: 9, top: 8, color: "var(--ink-muted)" }} />
+                <input aria-label="Komponentlarni qidirish" placeholder="Qidirish..." value={search} onChange={(e) => setSearch(e.target.value)}
+                  style={{ width: "100%", boxSizing: "border-box", border: "1px solid var(--line-strong)", borderRadius: 8, padding: "7px 10px 7px 30px", fontSize: 12 }} />
+              </label>
             </div>
             <div style={{ flex: 1, overflowY: "auto", padding: "10px 12px" }}>
               {groupedTiles.map((g) => (
@@ -420,8 +441,18 @@ export default function ElectronicsPage() {
                     {g.items.map((type) => {
                       const def = COMPONENT_LIBRARY[type];
                       return (
-                        <div key={type} draggable onDragStart={(e) => e.dataTransfer.setData("component", type)}
-                          title={`${def.name} — kanvasga sudrab tashlang${SIMULATED.has(type) ? "" : " (simulyatsiya qilinmaydi)"}`}
+                        <div key={type} draggable
+                          onDragStart={(e) => {
+                            e.dataTransfer.effectAllowed = "copy";
+                            e.dataTransfer.setData("component", type);
+                            const ghost = document.createElement("canvas");
+                            ghost.width = 1; ghost.height = 1;
+                            e.dataTransfer.setDragImage(ghost, 0, 0);
+                            setDragPreview({ type, x: e.clientX, y: e.clientY });
+                          }}
+                          onDrag={(e) => { if (e.clientX || e.clientY) setDragPreview({ type, x: e.clientX, y: e.clientY }); }}
+                          onDragEnd={() => setDragPreview(null)}
+                          title={`${def.name} - kanvasga sudrab tashlang${SIMULATED.has(type) ? "" : " (simulyatsiya qilinmaydi)"}`}
                           style={{ background: "#f9fafb", border: "1px solid #e5e7eb", borderRadius: 10, padding: "8px 4px 6px", textAlign: "center", cursor: "grab", transition: "box-shadow .15s", display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
                           {/* The part's own artwork, letter-boxed - a tile that
                               looks like the thing you are about to drop. */}
@@ -430,7 +461,7 @@ export default function ElectronicsPage() {
                               // eslint-disable-next-line @next/next/no-img-element -- a 34px local SVG thumbnail; next/image skips SVG optimisation anyway
                               ? <img src={`/electronics/${def.art}`} alt="" draggable={false}
                                   style={{ maxHeight: 34, maxWidth: 56, objectFit: "contain", opacity: SIMULATED.has(type) ? 1 : 0.55 }} />
-                              : <span style={{ fontSize: 24, lineHeight: 1 }}>{def.icon}</span>}
+                              : <IconCircuitGround size={26} stroke={1.7} color="var(--accent)" />}
                           </div>
                           <div style={{ fontSize: 10, color: "#374151", lineHeight: 1.15 }}>{def.name}</div>
                         </div>
@@ -448,23 +479,23 @@ export default function ElectronicsPage() {
         ) : (
           <aside style={{ width: 440, background: "#0d1117", display: "flex", flexDirection: "column", flexShrink: 0, borderLeft: "1px solid #1e293b" }}>
             <div style={{ padding: "10px 14px", borderBottom: "1px solid #1e293b", display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ color: "#e2e8f0", fontWeight: 700, fontSize: 13 }}>Kod — Arduino C (matn)</span>
+              <span style={{ color: "#e2e8f0", fontWeight: 700, fontSize: 13 }}>Kod | Arduino C</span>
               <div style={{ flex: 1 }} />
               <button onClick={() => setLibsOpen((v) => !v)} title="Kutubxonalar"
                 style={{ background: libsOpen ? "#1e3a5f" : "transparent", border: "1px solid #1e293b", borderRadius: 6, color: "#93c5fd", cursor: "pointer", fontSize: 11, padding: "4px 8px" }}>
-                📚 Kutubxonalar
+                <IconBooks size={15} stroke={1.8} /> Kutubxonalar
               </button>
               <button onClick={handleCompile} title="Kompilyatsiya qilish"
                 style={{ background: "#166534", border: "none", borderRadius: 6, color: "#dcfce7", cursor: "pointer", fontSize: 11, fontWeight: 700, padding: "5px 9px" }}>
-                ✓ Tekshirish
+                <IconCheck size={15} stroke={1.8} /> Tekshirish
               </button>
-              <button onClick={() => setCodeOpen(false)} style={{ background: "none", border: "none", color: "#94a3b8", cursor: "pointer", fontSize: 16 }}>✕</button>
+              <button onClick={() => setCodeOpen(false)} aria-label="Kodni yopish" style={{ background: "none", border: "none", color: "#94a3b8", cursor: "pointer", display: "flex" }}><IconX size={17} stroke={1.8} /></button>
             </div>
 
             {libsOpen && (
               <div style={{ maxHeight: 210, overflowY: "auto", borderBottom: "1px solid #1e293b", background: "#0b1220", padding: "8px 12px" }}>
                 <div style={{ color: "#64748b", fontSize: 10, textTransform: "uppercase", fontWeight: 700, marginBottom: 6 }}>
-                  Mavjud kutubxonalar — bosing, kod qo&apos;shiladi
+                  Mavjud kutubxonalar. Bosing, kod qo&apos;shiladi
                 </div>
                 {LIBRARIES.map((lib) => {
                   const used = code.includes(`<${lib.header}>`);
@@ -499,7 +530,7 @@ export default function ElectronicsPage() {
                 {build.diagnostics.length === 0 ? (
                   <div style={{ padding: "8px 14px", color: "#86efac", fontSize: 12, fontFamily: "monospace" }}>
                     {[
-                      "✓ Kompilyatsiya muvaffaqiyatli —",
+                      "Kompilyatsiya muvaffaqiyatli:",
                       `${build.stats.lines} satr,`,
                       `${build.stats.functions} ta funksiya,`,
                       `${build.stats.globals} ta global o'zgaruvchi,`,
@@ -511,7 +542,7 @@ export default function ElectronicsPage() {
                 )}
               </div>
             )}
-            {error && !build && <div style={{ background: "#7f1d1d", color: "#fecaca", padding: "8px 14px", fontSize: 12, fontFamily: "monospace" }}>⚠️ {error}</div>}
+            {error && !build && <div style={{ background: "#7f1d1d", color: "#fecaca", padding: "8px 14px", fontSize: 12, fontFamily: "monospace", display: "flex", alignItems: "center", gap: 7 }}><IconAlertTriangle size={15} stroke={1.8} /> {error}</div>}
             <div style={{ height: 190, borderTop: "1px solid #1e293b", display: "flex", flexDirection: "column" }}>
               <div style={{ padding: "6px 14px", color: "#22d3ee", fontSize: 11, fontWeight: 700, textTransform: "uppercase", borderBottom: "1px solid #1e293b", display: "flex", justifyContent: "space-between" }}>
                 <span>Serial Monitor</span>
@@ -524,6 +555,7 @@ export default function ElectronicsPage() {
           </aside>
         )}
       </div>
+      {dragPreview && <ComponentDragPreview type={dragPreview.type} clientX={dragPreview.x} clientY={dragPreview.y} />}
     </div>
   );
 }
@@ -549,7 +581,7 @@ function DiagRow({ d, onGo }: { d: Diagnostic; onGo: () => void }) {
 function TBtn({ children, onClick, disabled, title }: { children: React.ReactNode; onClick?: () => void; disabled?: boolean; title?: string }) {
   return (
     <button onClick={onClick} disabled={disabled} title={title}
-      style={{ width: 32, height: 32, borderRadius: 6, border: "1px solid #e5e7eb", background: "#fff", cursor: disabled ? "default" : "pointer", opacity: disabled ? 0.4 : 1, fontSize: 15, color: "#374151" }}>
+      style={{ width: 32, height: 32, borderRadius: 8, border: "1px solid var(--line)", background: "var(--surface)", cursor: disabled ? "default" : "pointer", opacity: disabled ? 0.4 : 1, color: "var(--ink)", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
       {children}
     </button>
   );
@@ -558,7 +590,7 @@ function Sep() { return <div style={{ width: 1, height: 24, background: "#e5e7eb
 
 const selectStyle: React.CSSProperties = { background: "#fff", color: "#111827", border: "1px solid #d1d5db", borderRadius: 6, padding: "6px 8px", fontSize: 12, cursor: "pointer" };
 const inputStyle: React.CSSProperties = { background: "#fff", color: "#111827", border: "1px solid #d1d5db", borderRadius: 6, padding: "6px 8px", fontSize: 12 };
-const btnLight: React.CSSProperties = { background: "#f3f4f6", color: "#374151", border: "1px solid #e5e7eb", borderRadius: 6, padding: "7px 12px", fontSize: 12, fontWeight: 600, cursor: "pointer" };
-const btnStart: React.CSSProperties = { background: "#16a34a", color: "#fff", border: "none", borderRadius: 6, padding: "8px 16px", fontWeight: 700, fontSize: 13, cursor: "pointer" };
+const btnLight: React.CSSProperties = { background: "var(--surface-muted)", color: "var(--ink)", border: "1px solid var(--line)", borderRadius: 8, padding: "7px 12px", fontSize: 12, fontWeight: 600, cursor: "pointer", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6, whiteSpace: "nowrap" };
+const btnStart: React.CSSProperties = { background: "var(--accent)", color: "#fff", border: "none", borderRadius: 8, padding: "8px 16px", fontWeight: 700, fontSize: 13, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6, whiteSpace: "nowrap" };
 const labelCol: React.CSSProperties = { display: "flex", flexDirection: "column", gap: 4 };
 const muted: React.CSSProperties = { color: "#6b7280" };

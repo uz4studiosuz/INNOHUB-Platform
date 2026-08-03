@@ -13,7 +13,7 @@ import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
 import { OutlinePass } from 'three/examples/jsm/postprocessing/OutlinePass';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment';
 
-import { Move, RotateCw, Maximize2, RotateCcw, Sliders, Trash2, Globe, Magnet } from 'lucide-react';
+import { IconArrowsMove as Move, IconRotateClockwise2 as RotateCw, IconMaximize as Maximize2, IconRotate as RotateCcw, IconAdjustments as Sliders, IconTrash as Trash2, IconWorld as Globe, IconMagnet as Magnet } from '@tabler/icons-react';
 import { getCatalogEntry, getMaterialConfig } from '../data/catalog';
 import { findSnapTarget } from '../utils/snappingSystem';
 import { loadLDrawPart, applyColorToLDrawGroup } from '../library/ldrawPartsCache';
@@ -64,6 +64,7 @@ export default function ThreeScene({
   onRemove,
   onUpdate,
   onUpdateParams,
+  onDropPart,
   onExportLdrReady
 }) {
   const { t } = useI18n();
@@ -81,6 +82,8 @@ export default function ThreeScene({
   const requestRenderRef = useRef(null); // sahnani qayta chizishni so'rash (render on demand)
   const raycasterRef = useRef(new THREE.Raycaster());
   const mouseRef = useRef(new THREE.Vector2());
+  const dropPreviewRef = useRef(null);
+  const [dropActive, setDropActive] = useState(false);
 
   // Visual mode state (Aylantirish - rotate, Surish - translate, Masshtab - scale)
   const [transformMode, setTransformMode] = useState('rotate');
@@ -109,6 +112,75 @@ export default function ThreeScene({
   useEffect(() => { onRemoveRef.current = onRemove; }, [onRemove]);
   useEffect(() => { onUpdateRef.current = onUpdate; }, [onUpdate]);
   useEffect(() => { selectedIdRef.current = selectedId; }, [selectedId]);
+
+  const clearDropPreview = () => {
+    const preview = dropPreviewRef.current;
+    if (preview && sceneRef.current) {
+      sceneRef.current.remove(preview);
+      preview.geometry.dispose();
+      preview.material.dispose();
+    }
+    dropPreviewRef.current = null;
+    setDropActive(false);
+    requestRenderRef.current?.();
+  };
+
+  const updateDropPreview = (clientX, clientY) => {
+    const camera = cameraRef.current;
+    const renderer = rendererRef.current;
+    const scene = sceneRef.current;
+    if (!camera || !renderer || !scene) return null;
+
+    const rect = renderer.domElement.getBoundingClientRect();
+    const pointer = new THREE.Vector2(
+      ((clientX - rect.left) / rect.width) * 2 - 1,
+      -((clientY - rect.top) / rect.height) * 2 + 1,
+    );
+    raycasterRef.current.setFromCamera(pointer, camera);
+    const hit = new THREE.Vector3();
+    if (!raycasterRef.current.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), hit)) return null;
+
+    hit.x = Math.round(hit.x / 10) * 10;
+    hit.z = Math.round(hit.z / 10) * 10;
+    if (!dropPreviewRef.current) {
+      const geometry = new THREE.BoxGeometry(30, 25, 30);
+      const material = new THREE.MeshStandardMaterial({
+        color: 0x2f80ed,
+        transparent: true,
+        opacity: 0.42,
+        roughness: 0.55,
+        metalness: 0.08,
+        depthWrite: false,
+      });
+      dropPreviewRef.current = new THREE.Mesh(geometry, material);
+      dropPreviewRef.current.renderOrder = 20;
+      scene.add(dropPreviewRef.current);
+    }
+    dropPreviewRef.current.position.set(hit.x, 12.5, hit.z);
+    setDropActive(true);
+    requestRenderRef.current?.();
+    return [hit.x, 25, hit.z];
+  };
+
+  const handleCatalogDragOver = (event) => {
+    if (!event.dataTransfer.types.includes('application/x-innohub-part')) return;
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'copy';
+    updateDropPreview(event.clientX, event.clientY);
+  };
+
+  const handleCatalogDrop = (event) => {
+    const encoded = event.dataTransfer.getData('application/x-innohub-part');
+    if (!encoded) return;
+    event.preventDefault();
+    const position = updateDropPreview(event.clientX, event.clientY);
+    try {
+      const payload = JSON.parse(encoded);
+      if (position) onDropPart?.(payload, position);
+    } finally {
+      clearDropPreview();
+    }
+  };
 
   useEffect(() => {
     if (onExportLdrReady) {
@@ -908,7 +980,7 @@ export default function ThreeScene({
           ctx.fillStyle = '#f59e0b';
           ctx.font = 'bold 36px sans-serif';
           ctx.textAlign = 'center';
-          ctx.fillText('⚠️ MODEL TOPILMADI', 256, 70);
+          ctx.fillText('MODEL TOPILMADI', 256, 70);
 
           ctx.fillStyle = '#ffffff';
           ctx.font = 'bold 30px sans-serif';
@@ -1214,7 +1286,15 @@ export default function ThreeScene({
   const currentScale = selectedObj?.params?.scalePercent || 100;
 
   return (
-    <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+    <div
+      className={`hardware-scene-shell${dropActive ? ' is-drop-active' : ''}`}
+      style={{ width: '100%', height: '100%', position: 'relative' }}
+      onDragOver={handleCatalogDragOver}
+      onDrop={handleCatalogDrop}
+      onDragLeave={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) clearDropPreview();
+      }}
+    >
       {/* 1. 3D Rejim Mode Bar (Aylantirish R / Surish G / Masshtab S + Local/World) */}
       <div
         className="glass-panel"
@@ -1323,7 +1403,7 @@ export default function ThreeScene({
           }}
         >
           <Magnet size={16} />
-          {snapEnabled ? `🧲 ${t('scene.snapOn')}` : t('scene.snapOff')}
+          {snapEnabled ? t('scene.snapOn') : t('scene.snapOff')}
         </button>
 
       </div>
@@ -1455,6 +1535,7 @@ export default function ThreeScene({
       )}
 
       <div ref={mountRef} style={{ width: '100%', height: '100%' }} />
+      {dropActive && <div className="drop-placement-hint">Qo‘yish uchun qo‘yib yuboring · 10 birlik grid</div>}
     </div>
   );
 }

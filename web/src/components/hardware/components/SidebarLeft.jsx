@@ -1,4 +1,4 @@
-import { Eye, EyeOff, Trash2, Box, Cpu, CircleDot, Sliders } from 'lucide-react';
+import { IconEye as Eye, IconEyeOff as EyeOff, IconTrash as Trash2, IconBox as Box, IconCpu as Cpu, IconCircleDot as CircleDot, IconAdjustments as Sliders } from '@tabler/icons-react';
 import { getCatalogEntry, getPartName } from '../data/catalog';
 import LDrawColorPicker from './LDrawColorPicker';
 import { useI18n } from '../i18n/index.jsx';
@@ -158,4 +158,3 @@ export default function SidebarLeft({
     </div>
   );
 }
-

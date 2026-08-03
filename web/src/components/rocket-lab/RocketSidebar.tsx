@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useRocketStore, RocketPanelType } from "../../store/rocketStore";
-import { Eye, EyeOff, Wrench, RotateCcw } from "lucide-react";
+import { IconEye, IconEyeOff, IconRotateClockwise2, IconTool } from "@tabler/icons-react";
 
 const DESIGN_COMPONENTS: { id: RocketPanelType; label: string }[] = [
   { id: "propulsion", label: "Dvigatel" },
@@ -47,7 +47,7 @@ export function RocketSidebar() {
             onClick={() => setActivePanel(item.id)}
             title="Sozlash panelini ochish"
           >
-            <Wrench size={14} />
+            <IconTool size={14} stroke={1.8} />
           </button>
           {hideable && (
             <button
@@ -55,7 +55,7 @@ export function RocketSidebar() {
               onClick={() => toggleVisibility(item.id)}
               title={isVisible ? "3D'da yashirish" : "3D'da ko'rsatish"}
             >
-              {isVisible ? <Eye size={14} /> : <EyeOff size={14} />}
+              {isVisible ? <IconEye size={14} stroke={1.8} /> : <IconEyeOff size={14} stroke={1.8} />}
             </button>
           )}
         </div>
@@ -96,7 +96,7 @@ export function RocketSidebar() {
           onClick={() => { if (window.confirm("Butun dizayn standart qiymatlarga qaytariladi. Davom etamizmi?")) resetAll(); }}
           className="w-full flex items-center justify-center gap-1.5 py-1.5 text-[11px] font-bold text-gray-600 bg-[#e0e0e0] border border-gray-400 rounded hover:bg-gray-300"
         >
-          <RotateCcw size={12} /> HAMMASINI QAYTARISH
+          <IconRotateClockwise2 size={13} stroke={1.8} /> HAMMASINI QAYTARISH
         </button>
       </div>
     </div>

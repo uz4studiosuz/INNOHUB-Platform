@@ -350,15 +350,15 @@ export default function CircuitCanvas({ visuals }: Props) {
   return (
     <div
       ref={canvasRef}
-      onDragOver={(e) => e.preventDefault()}
+      onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = "copy"; }}
       onDrop={onDrop}
       onPointerDown={(e) => { if (e.target === e.currentTarget) { select(null); selectWire(null); } }}
       style={{
         position: "relative",
         width: CANVAS_W,
         height: CANVAS_H,
-        backgroundColor: "#eef1f4",
-        backgroundImage: "radial-gradient(circle, #d3d9e0 1px, transparent 1px)",
+        backgroundColor: "#f7f8f9",
+        backgroundImage: "radial-gradient(circle, #cfd7de 1px, transparent 1px)",
         backgroundSize: "24px 24px",
         cursor: routing ? "crosshair" : undefined,
       }}

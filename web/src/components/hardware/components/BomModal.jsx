@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { X, Download, FileSpreadsheet, PackageCheck, Scale } from 'lucide-react';
+import { IconX as X, IconDownload as Download, IconFileSpreadsheet as FileSpreadsheet, IconPackage as PackageCheck, IconScale as Scale } from '@tabler/icons-react';
 import { getCatalogEntry, getPartName } from '../data/catalog';
 import { useI18n } from '../i18n/index.jsx';
 
@@ -198,4 +198,3 @@ export default function BomModal({ isOpen, onClose, objects }) {
     </div>
   );
 }
-

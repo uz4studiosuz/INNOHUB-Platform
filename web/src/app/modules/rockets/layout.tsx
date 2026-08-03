@@ -2,10 +2,11 @@
 
 import React from "react";
 import { usePathname } from "next/navigation";
-import { RocketNavbar } from "../../../components/rocket-lab/RocketNavbar";
 import { RocketSidebar } from "../../../components/rocket-lab/RocketSidebar";
 import { RocketDockingStation } from "../../../components/rocket-lab/RocketDockingStation";
 import { useRocketStore } from "../../../store/rocketStore";
+import { ModuleWorkspace } from "../../../components/module-shell/ModuleWorkspace";
+import { MODULES } from "../../../components/module-shell/moduleConfig";
 
 /**
  * The navbar belongs to the whole section and is rendered exactly once here -
@@ -18,9 +19,7 @@ export default function RocketLayout({ children }: { children: React.ReactNode }
   const isDesign = pathname === "/modules/rockets";
 
   return (
-    <div className="fixed inset-0 z-[60] flex flex-col" style={{ background: "#113854" }}>
-      <RocketNavbar />
-
+    <ModuleWorkspace basePath={MODULES.rockets.basePath} accent={MODULES.rockets.accent}>
       <div className="flex flex-1 min-h-0">
         {isDesign && <RocketSidebar />}
         <main className="flex-1 relative overflow-hidden min-w-0">{children}</main>
@@ -28,7 +27,7 @@ export default function RocketLayout({ children }: { children: React.ReactNode }
       </div>
 
       <Toast />
-    </div>
+    </ModuleWorkspace>
   );
 }
 

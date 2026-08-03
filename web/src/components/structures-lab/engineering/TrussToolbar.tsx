@@ -1,13 +1,27 @@
 "use client";
 
 import { BuilderMode, MATERIALS } from "./types";
+import {
+  Icon,
+  IconBox,
+  IconCircle,
+  IconCopy,
+  IconEraser,
+  IconEye,
+  IconLine,
+  IconPlayerPlay,
+  IconRulerMeasure,
+  IconTrash,
+  IconTriangle,
+  IconVectorBezier,
+} from "@tabler/icons-react";
 
-const MODES: { id: BuilderMode; label: string; icon: string }[] = [
-  { id: "node", label: "Tugun", icon: "●" },
-  { id: "member", label: "A'zo", icon: "╱" },
-  { id: "support", label: "Tayanch", icon: "▲" },
-  { id: "load", label: "Yuk", icon: "↓" },
-  { id: "delete", label: "O'chirish", icon: "✕" },
+const MODES: { id: BuilderMode; label: string; shortcut: string; icon: Icon }[] = [
+  { id: "node", label: "Tugun", shortcut: "N", icon: IconCircle },
+  { id: "member", label: "A'zo", shortcut: "M", icon: IconLine },
+  { id: "support", label: "Tayanch", shortcut: "S", icon: IconTriangle },
+  { id: "load", label: "Yuk", shortcut: "L", icon: IconVectorBezier },
+  { id: "delete", label: "O'chirish", shortcut: "D", icon: IconEraser },
 ];
 
 export type ViewMode = "2d" | "3d";
@@ -41,100 +55,69 @@ export function TrussToolbar({
   view: ViewMode;
   onViewChange: (v: ViewMode) => void;
 }) {
+  const editing = view === "2d";
+  const secondaryButton = "inline-flex h-9 items-center gap-1.5 rounded-lg border border-[var(--line)] bg-white px-3 text-xs font-semibold text-[var(--ink-muted)] transition-colors hover:bg-[var(--surface-muted)] hover:text-[var(--ink)]";
+
   return (
-    <div className="flex flex-wrap items-center gap-2 px-4 py-2 bg-[#e4e4e4] border-b border-gray-300">
-      <div className="flex gap-1">
-        <button
-          onClick={() => onViewChange("2d")}
-          className={`px-3 py-1.5 rounded text-xs font-bold cursor-pointer transition-colors ${
-            view === "2d" ? "bg-violet-600 text-white" : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-100"
-          }`}
-        >
-          2D
-        </button>
-        <button
-          onClick={() => onViewChange("3d")}
-          className={`px-3 py-1.5 rounded text-xs font-bold cursor-pointer transition-colors ${
-            view === "3d" ? "bg-violet-600 text-white" : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-100"
-          }`}
-        >
-          🔄 3D
-        </button>
-      </div>
-
-      <span className="h-6 w-px bg-gray-400 mx-1" />
-
-      <div className="flex gap-1">
-        {MODES.map((m) => (
-          <button
-            key={m.id}
-            onClick={() => onModeChange(m.id)}
-            className={`px-3 py-1.5 rounded text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-colors ${
-              mode === m.id ? "bg-violet-600 text-white" : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-100"
-            }`}
-          >
-            <span>{m.icon}</span>
-            {m.label}
+    <div className="shrink-0 border-b border-[var(--line)] bg-white">
+      <div className="flex min-h-14 flex-wrap items-center gap-2 px-4 py-2">
+        <div className="flex rounded-lg bg-[var(--surface-muted)] p-1">
+          <button onClick={() => onViewChange("2d")} className={`inline-flex h-8 items-center gap-1.5 rounded-md px-3 text-xs font-semibold ${editing ? "bg-white text-[var(--ink)] shadow-[0_1px_2px_rgba(24,33,43,0.08)]" : "text-[var(--ink-muted)]"}`}>
+            <IconRulerMeasure size={15} stroke={1.8} /> 2D qurish
           </button>
-        ))}
+          <button onClick={() => onViewChange("3d")} className={`inline-flex h-8 items-center gap-1.5 rounded-md px-3 text-xs font-semibold ${!editing ? "bg-white text-[var(--ink)] shadow-[0_1px_2px_rgba(24,33,43,0.08)]" : "text-[var(--ink-muted)]"}`}>
+            <IconBox size={15} stroke={1.8} /> 3D tekshirish
+          </button>
+        </div>
+
+        <span className="mx-1 h-7 w-px bg-[var(--line)]" />
+
+        {editing ? (
+          <div className="flex flex-wrap gap-1" aria-label="Qurish asboblari">
+            {MODES.map((item) => {
+              const ModeIcon = item.icon;
+              return (
+                <button key={item.id} onClick={() => onModeChange(item.id)} title={`${item.label} (${item.shortcut})`} className={`inline-flex h-9 items-center gap-1.5 rounded-lg px-3 text-xs font-semibold transition-colors ${mode === item.id ? "bg-[var(--accent)] text-white" : "text-[var(--ink-muted)] hover:bg-[var(--surface-muted)] hover:text-[var(--ink)]"}`}>
+                  <ModeIcon size={15} stroke={1.8} /> {item.label}
+                </button>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="inline-flex h-9 items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 text-xs font-medium text-emerald-800">
+            <IconEye size={15} stroke={1.8} /> 3D sahna faqat ko‘rish uchun — obyekt qo‘shilmaydi
+          </div>
+        )}
+
+        <span className="flex-1" />
+
+        {editing && (
+          <>
+            <label className="flex h-9 items-center gap-2 rounded-lg border border-[var(--line)] bg-white px-3 text-xs font-medium text-[var(--ink-muted)]">
+              Material
+              <select value={materialId} onChange={(e) => onMaterialChange(e.target.value)} className="bg-transparent font-semibold text-[var(--ink)] outline-none">
+                {MATERIALS.map((material) => <option key={material.id} value={material.id}>{material.label}</option>)}
+              </select>
+            </label>
+            {mode === "load" && (
+              <label className="flex h-9 items-center gap-2 rounded-lg border border-[var(--line)] bg-white px-3 text-xs font-medium text-[var(--ink-muted)]">
+                Yuk
+                <input type="number" value={loadMagnitude} onChange={(e) => onLoadMagnitudeChange(Number(e.target.value))} className="w-16 bg-transparent font-mono font-semibold text-[var(--ink)] outline-none" /> N
+              </label>
+            )}
+          </>
+        )}
       </div>
 
-      <span className="h-6 w-px bg-gray-400 mx-1" />
-
-      <label className="flex items-center gap-1.5 text-xs font-semibold text-gray-600">
-        Material:
-        <select
-          value={materialId}
-          onChange={(e) => onMaterialChange(e.target.value)}
-          className="border border-gray-300 rounded px-1.5 py-1 text-xs"
-        >
-          {MATERIALS.map((mt) => (
-            <option key={mt.id} value={mt.id}>{mt.label}</option>
-          ))}
-        </select>
-      </label>
-
-      {mode === "load" && (
-        <label className="flex items-center gap-1.5 text-xs font-semibold text-gray-600">
-          Yuk (N):
-          <input
-            type="number"
-            value={loadMagnitude}
-            onChange={(e) => onLoadMagnitudeChange(Number(e.target.value))}
-            className="border border-gray-300 rounded px-1.5 py-1 text-xs w-20"
-          />
-        </label>
-      )}
-
-      <span className="flex-1" />
-
-      <button
-        onClick={onLoadExample}
-        title="Tayyor namuna fermani yuklaydi (4m Warren fermasi, alyuminiy)"
-        className="px-3 py-1.5 rounded text-xs font-bold bg-white text-gray-600 border border-gray-300 hover:bg-gray-100 cursor-pointer"
-      >
-        📐 Namuna
-      </button>
-      <button
-        onClick={onMirror}
-        title="Joriy dizaynni o'ng chetidan oynadek nusxalab, ko'prikning ikkinchi yarmini yaratadi"
-        className="px-3 py-1.5 rounded text-xs font-bold bg-white text-gray-600 border border-gray-300 hover:bg-gray-100 cursor-pointer"
-      >
-        🪞 Nusxalash
-      </button>
-      <button
-        onClick={onClear}
-        className="px-3 py-1.5 rounded text-xs font-bold bg-white text-gray-600 border border-gray-300 hover:bg-gray-100 cursor-pointer"
-      >
-        Tozalash
-      </button>
-      <button
-        onClick={onSolve}
-        disabled={solving}
-        className="px-4 py-1.5 rounded text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 cursor-pointer"
-      >
-        {solving ? "Tahlil qilinmoqda..." : "▶ Tahlil qilish"}
-      </button>
+      <div className="flex min-h-12 flex-wrap items-center gap-2 border-t border-[var(--line)] px-4 py-1.5">
+        <button onClick={onLoadExample} className={secondaryButton}><IconRulerMeasure size={15} stroke={1.8} /> Namuna</button>
+        <button onClick={onMirror} disabled={!editing} className={`${secondaryButton} disabled:cursor-not-allowed disabled:opacity-40`}><IconCopy size={15} stroke={1.8} /> Ko‘zgulash</button>
+        <button onClick={onClear} disabled={!editing} className={`${secondaryButton} disabled:cursor-not-allowed disabled:opacity-40`}><IconTrash size={15} stroke={1.8} /> Tozalash</button>
+        <span className="flex-1" />
+        <button onClick={onSolve} disabled={solving} className="inline-flex h-9 items-center gap-2 rounded-lg bg-[var(--accent)] px-4 text-xs font-semibold text-white transition-colors hover:bg-[#0e5846] disabled:opacity-50">
+          <IconPlayerPlay size={15} stroke={1.8} /> {solving ? "Tahlil qilinmoqda..." : "Tahlil qilish"}
+        </button>
+      </div>
     </div>
   );
 }

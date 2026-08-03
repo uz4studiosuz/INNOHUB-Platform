@@ -1,5 +1,5 @@
 import { LDRAW_COLORS } from '../library/ldrawColors';
-import { Palette } from 'lucide-react';
+import { IconPalette as Palette } from '@tabler/icons-react';
 
 export default function LDrawColorPicker({ currentColorCode, onChangeColor }) {
   return (

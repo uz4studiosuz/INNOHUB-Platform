@@ -1,9 +1,10 @@
 "use client";
 
 import React from "react";
-import { PlacedComponent, Terminal } from "./types";
+import { ComponentType, PlacedComponent, Terminal } from "./types";
 import { ART, COMPONENT_LIBRARY, LED_COLORS, formatValue } from "./componentLibrary";
 import { BB } from "./breadboard";
+import { IconAlertTriangle } from "@tabler/icons-react";
 
 export interface CompVisual {
   led?: number;
@@ -118,6 +119,49 @@ export default function ComponentView({
   );
 }
 
+/**
+ * Uses the exact same renderer as a placed component. The palette drag layer
+ * therefore stays live and full-fidelity instead of showing the browser's
+ * semi-transparent screenshot ghost.
+ */
+export function ComponentDragPreview({ type, clientX, clientY }: {
+  type: ComponentType;
+  clientX: number;
+  clientY: number;
+}) {
+  const def = COMPONENT_LIBRARY[type];
+  if (!def) return null;
+  const comp: PlacedComponent = {
+    id: "__drag_preview__",
+    type,
+    x: 0,
+    y: 0,
+    rotation: 0,
+    props: { ...(def.defaults ?? {}) },
+  };
+
+  return (
+    <div
+      aria-hidden="true"
+      style={{
+        position: "fixed",
+        left: clientX,
+        top: clientY,
+        width: def.width,
+        height: def.height,
+        transform: "translate(-50%, -50%)",
+        pointerEvents: "none",
+        zIndex: 999,
+        filter: "drop-shadow(0 12px 18px rgba(24, 33, 43, 0.18))",
+      }}
+    >
+      <svg width={def.width} height={def.height} style={{ overflow: "visible" }}>
+        <Graphic comp={comp} visual={{}} selected={false} />
+      </svg>
+    </div>
+  );
+}
+
 /** Colour code of a 4-band resistor, so the bands match the value on screen. */
 const BAND_DIGIT = [
   "#0d0d0d", "#8a3d06", "#c40808", "#e85b0c", "#e8c800",
@@ -191,7 +235,7 @@ function Graphic({ comp, visual, selected, setProp }: {
           {b > 0 && <circle cx={a.cx} cy={a.cy} r={a.r * (1.2 + 0.7 * b)} fill={color} opacity={0.1 + 0.26 * b} />}
           {art(`led-${key}.svg`)}
           {b > 0 && <circle cx={a.cx} cy={a.cy} r={a.r} fill={color} opacity={0.15 + 0.4 * b} />}
-          {visual.warning && <text x={a.cx} y={-4} textAnchor="middle" fontSize={14}>⚠️</text>}
+          {visual.warning && <IconAlertTriangle x={a.cx - 8} y={-18} size={16} stroke={1.8} color="#b45309" />}
         </g>
       );
     }
@@ -381,9 +425,10 @@ function Graphic({ comp, visual, selected, setProp }: {
             </g>
           ))}
           {visual.warning && (
-            <text x={def.width / 2} y={-6} textAnchor="middle" fontSize={12} fill="#b45309">
-              ⚠️ {visual.warning}
-            </text>
+            <>
+              <IconAlertTriangle x={def.width / 2 - 9} y={-22} size={17} stroke={1.8} color="#b45309" />
+              <text x={def.width / 2} y={-7} textAnchor="middle" fontSize={11} fill="#b45309">{visual.warning}</text>
+            </>
           )}
         </g>
       );
