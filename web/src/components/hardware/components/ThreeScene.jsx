@@ -13,9 +13,9 @@ import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
 import { OutlinePass } from 'three/examples/jsm/postprocessing/OutlinePass';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment';
 
-import { IconArrowsMove as Move, IconRotateClockwise2 as RotateCw, IconMaximize as Maximize2, IconRotate as RotateCcw, IconAdjustments as Sliders, IconTrash as Trash2, IconWorld as Globe, IconMagnet as Magnet, IconVideo, IconAlertTriangle, IconFlag, IconRadar2, IconClock, IconRefresh } from '@tabler/icons-react';
+import { IconArrowsMove as Move, IconRotateClockwise2 as RotateCw, IconMaximize as Maximize2, IconRotate as RotateCcw, IconAdjustments as Sliders, IconTrash as Trash2, IconWorld as Globe, IconMagnet as Magnet, IconVideo, IconAlertTriangle, IconFlag, IconRadar2, IconClock, IconRefresh, IconPackage } from '@tabler/icons-react';
 import { buildArena, LDU_TO_CM } from '../simulation/arenaBuilder';
-import { createRobotState, stepRobot, keyRole } from '../simulation/robotDriver';
+import { createRobotState, stepRobot, keyRole, tryGrab, releaseHeld } from '../simulation/robotDriver';
 import { getCatalogEntry, getMaterialConfig } from '../data/catalog';
 import { findSnapTarget } from '../utils/snappingSystem';
 import { loadLDrawPart, applyColorToLDrawGroup } from '../library/ldrawPartsCache';
@@ -41,6 +41,8 @@ import {
   createLegoLBeamGeometry,
   createRobotChassisGeometry,
   createCasterMesh,
+  createArmSegmentGeometry,
+  createBucketGeometry,
 } from '../utils/proceduralGeometries';
 
 const TARGET_SIZE = 50;
@@ -64,7 +66,6 @@ export default function ThreeScene({
   isSimulating = false,
   simState = {},
   /** Sinov poligoni: 'slalom' | 'maze' | 'warehouse' */
-  simCourse = 'slalom',
   /** 'auto' — kod bo'yicha o'zi yuradi, 'manual' — WASD bilan boshqariladi */
   simDriveMode = 'auto',
   /** Kodda to'siq "yaqin" deb hisoblanadigan masofa (sm) */
@@ -121,6 +122,7 @@ export default function ThreeScene({
   const groundRef = useRef(null);
   const gridRef = useRef(null);
   const arenaRef = useRef(null);
+  const arenaClockRef = useRef(0);
   const robotStateRef = useRef(null);
   const robotRadiusRef = useRef(120);
   const sensorYRef = useRef(60);
@@ -884,6 +886,24 @@ export default function ThreeScene({
           body.rotation.y = robotState.heading;
         }
 
+        // Olov tebranishi va suv oqimi — fizikadan mustaqil, faqat vaqtga
+        // bog'liq, shuning uchun robot to'xtab qolsa ham davom etadi.
+        arenaClockRef.current += deltaSeconds;
+        arena.update?.(arenaClockRef.current);
+
+        // Ko'chirilgan yuklarning meshlarini yangi joyiga ko'chiramiz.
+        // Fizika p.x/p.z da yuritiladi, mesh esa faqat ko'rinish — ikkalasini
+        // ajratib turish to'qnashuv hisobini Three.js transformlaridan xoli
+        // qiladi va sinovni test qilishni ham osonlashtiradi.
+        arena.payloads?.forEach((p) => {
+          const liftY = p.held ? p.restY + 190 : p.restY;
+          p.mesh.position.set(p.x, liftY, p.z);
+          if (p.delivered) {
+            p.mesh.material.emissive?.set('#a855f7');
+            p.mesh.material.emissiveIntensity = 0.5;
+          }
+        });
+
         objectsMapRef.current.forEach((obj3d) => {
           if (!obj3d || obj3d === 'loading') return;
           const type = (obj3d.userData?.type || '').toLowerCase();
@@ -923,6 +943,10 @@ export default function ThreeScene({
               (Math.hypot(robotState.x - arena.goal.x, robotState.z - arena.goal.z) * LDU_TO_CM).toFixed(0),
             ),
             justReachedGoal: result.justReachedGoal,
+            hazard: robotState.hazard,
+            holding: !!robotState.heldPayloadId,
+            delivered: arena.payloads.filter((p) => p.delivered).length,
+            payloadTotal: arena.payloads.length,
           };
           setHud(snapshot);
           onTelemetryRef.current?.(snapshot);
@@ -1070,8 +1094,9 @@ export default function ThreeScene({
     robotRadiusRef.current = Math.max(60, Math.max(size.x, size.z) * 0.5);
     sensorYRef.current = Math.max(25, size.y * 0.45);
 
-    const arena = buildArena(simCourse);
+    const arena = buildArena();
     arenaRef.current = arena;
+    arenaClockRef.current = 0;
     scene.add(arena.group);
 
     // Poligon o'z poliga ega — yig'ish gridi va zamin bu yerda ortiqcha.
@@ -1121,7 +1146,7 @@ export default function ThreeScene({
       setHud(null);
       requestRenderRef.current?.();
     };
-  }, [isSimulating, simCourse]);
+  }, [isSimulating]);
 
   // Qo'lda boshqarish klavishlari (WASD / strelkalar). Faqat qo'lda rejimda
   // tinglaymiz, aks holda 'S' tugmasi sahna "Masshtab" rejimiga ham tushadi.
@@ -1139,13 +1164,35 @@ export default function ThreeScene({
       event.preventDefault();
     };
 
+    // Space — manipulyator: bo'sh bo'lsa oldidagi yukni ushlaydi, ushlab
+    // turgan bo'lsa qo'yib yuboradi. Bitta tugma, chunki ikkita alohida
+    // tugma (ol / qo'y) o'quvchini "qaysi biri hozir kerak?" degan ortiqcha
+    // qarorga majbur qilardi.
+    const onGrabKey = (event) => {
+      if (event.code !== 'Space') return;
+      if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') return;
+      event.preventDefault();
+      const arena = arenaRef.current;
+      const robotState = robotStateRef.current;
+      if (!arena || !robotState) return;
+
+      if (robotState.heldPayloadId) {
+        const released = releaseHeld(robotState, arena);
+        if (released?.delivered) requestShadowUpdateRef.current?.();
+      } else {
+        tryGrab(robotState, arena, robotRadiusRef.current);
+      }
+    };
+
     const onDown = (event) => setKey(event, true);
     const onUp = (event) => setKey(event, false);
     window.addEventListener('keydown', onDown);
     window.addEventListener('keyup', onUp);
+    window.addEventListener('keydown', onGrabKey);
     return () => {
       window.removeEventListener('keydown', onDown);
       window.removeEventListener('keyup', onUp);
+      window.removeEventListener('keydown', onGrabKey);
       driveKeysRef.current = { forward: false, back: false, left: false, right: false };
     };
   }, [isSimulating, simDriveMode]);
@@ -1214,6 +1261,15 @@ export default function ThreeScene({
     } else if (genType === 'caster') {
       object3d = createCasterMesh({
         wheelDiaMm: obj.params?.wheelDiaMm || entry?.defaultParams?.wheelDiaMm || 25,
+      });
+    } else if (genType === 'arm_segment') {
+      object3d = createArmSegmentGeometry({
+        lengthMm: obj.params?.lengthMm || entry?.defaultParams?.lengthMm || 90,
+        widthMm: obj.params?.widthMm || entry?.defaultParams?.widthMm || 22,
+      });
+    } else if (genType === 'bucket') {
+      object3d = createBucketGeometry({
+        widthMm: obj.params?.widthMm || entry?.defaultParams?.widthMm || 46,
       });
     } else if (genType === 'robot_chassis') {
       const geo = createRobotChassisGeometry({
@@ -2093,7 +2149,28 @@ export default function ThreeScene({
                 <strong>{hud.goalReached ? 'YETDI' : `${hud.goalDistanceCm} sm`}</strong>
               </div>
             </div>
+            {hud.payloadTotal > 0 && (
+              <div className={`sim-hud-stat${hud.delivered > 0 ? ' is-done' : ''}`}>
+                <IconPackage size={15} />
+                <div>
+                  <span className="sim-hud-label">Yetkazilgan</span>
+                  <strong>{hud.delivered}/{hud.payloadTotal}</strong>
+                </div>
+              </div>
+            )}
           </div>
+
+          {/* Xavf zonasi ogohlantirishi — olov yoki suv ustida turibdi */}
+          {hud.hazard && (
+            <div className={`sim-hud-hazard is-${hud.hazard}`}>
+              <IconAlertTriangle size={15} />
+              <span>
+                {hud.hazard === 'fire'
+                  ? 'OLOV! Robot issiqlik zonasida — orqaga qayting'
+                  : 'SUV! Elektronika suvga tushdi — orqaga qayting'}
+              </span>
+            </div>
+          )}
 
           {/* Sensor masofasi chizig'i — 0..100 sm oralig'ida */}
           <div className="sim-hud-gauge">
@@ -2108,7 +2185,11 @@ export default function ThreeScene({
 
           <div className="sim-hud-foot">
             <span>{Math.round(hud.speedMmS)} mm/s</span>
-            <span>{simDriveMode === 'manual' ? 'W/A/S/D — haydash' : 'Avtonom: kod boshqarmoqda'}</span>
+            <span>
+              {simDriveMode === 'manual'
+                ? `W/A/S/D — haydash · Space — ${hud.holding ? 'qo‘yish' : 'yukni olish'}`
+                : 'Avtonom: kod boshqarmoqda'}
+            </span>
           </div>
         </div>
       )}

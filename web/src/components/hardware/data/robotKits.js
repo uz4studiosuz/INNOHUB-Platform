@@ -257,6 +257,82 @@ const KITS = [
       { type: 'hc-sr04', name: 'HC-SR04 sensor', pos: [95, 6, 0] },
     ],
   },
+
+  {
+    id: 'excavator',
+    title: 'Ekskavator Robot',
+    description: 'Bo\'g\'inli manipulyator va cho\'mich — sinov xonasidagi yuklarni ko\'taradi',
+    difficulty: 'Murakkab',
+    // Real ekskavator: pastda yuruvchi qism (xodovoy), ustida buriladigan
+    // kabina, kabinadan strela -> tirsak -> cho'mich chiqadi. Har bo'g'inda
+    // alohida servo — shuning uchun bu yig'mada 3 ta servo bor.
+    parts: [
+      { type: 'robot-chassis', name: 'Yuruvchi qism (shassi)', pos: [0, 0, 0],
+        params: { lengthMm: 200, widthMm: 130, thickMm: 3, scalePercent: 100 } },
+
+      { type: 'dc-tt-yellow', name: 'Motor (old chap)',   pos: [ 56, -22, -50], rot: [0, 0, 90] },
+      { type: 'dc-tt-yellow', name: 'Motor (old o\'ng)',  pos: [ 56, -22,  50], rot: [0, 0, 90] },
+      { type: 'dc-tt-yellow', name: 'Motor (orqa chap)',  pos: [-56, -22, -50], rot: [0, 0, 90] },
+      { type: 'dc-tt-yellow', name: 'Motor (orqa o\'ng)', pos: [-56, -22,  50], rot: [0, 0, 90] },
+
+      { type: 'tt-wheel-80mm', name: 'G\'ildirak (old chap)',   pos: [ 56, -22, -78] },
+      { type: 'tt-wheel-80mm', name: 'G\'ildirak (old o\'ng)',  pos: [ 56, -22,  78] },
+      { type: 'tt-wheel-80mm', name: 'G\'ildirak (orqa chap)',  pos: [-56, -22, -78] },
+      { type: 'tt-wheel-80mm', name: 'G\'ildirak (orqa o\'ng)', pos: [-56, -22,  78] },
+
+      // Kabina va boshqaruv
+      { type: 'arduino-uno', name: 'Arduino Uno', pos: [-52, 8, 0], rot: [0, 90, 0] },
+      { type: 'l298n', name: 'L298N (yurish)', pos: [-52, 26, 0] },
+      { type: 'battery-18650-4', name: 'Batareya boksi', pos: [-14, 14, 0] },
+
+      // Manipulyator: bel servosi -> strela -> tirsak servosi -> tirsak ->
+      // cho'mich servosi -> cho'mich. Har biri oldingisining uchida turadi.
+      { type: 'sg90', name: 'Servo (bel)', pos: [26, 12, 0] },
+      { type: 'arm-segment', name: 'Strela', pos: [34, 22, 0], rot: [0, 0, 35],
+        params: { lengthMm: 110, widthMm: 22, scalePercent: 100 } },
+      { type: 'sg90', name: 'Servo (tirsak)', pos: [124, 85, 0] },
+      { type: 'arm-segment', name: 'Tirsak', pos: [128, 92, 0], rot: [0, 0, -42],
+        params: { lengthMm: 90, widthMm: 18, scalePercent: 100 } },
+      { type: 'sg90', name: 'Servo (cho\'mich)', pos: [193, 32, 0] },
+      { type: 'gripper-bucket', name: 'Cho\'mich', pos: [204, 16, 0],
+        params: { widthMm: 46, scalePercent: 100 } },
+
+      { type: 'hc-sr04', name: 'HC-SR04 sensor', pos: [86, 12, 0] },
+    ],
+  },
+
+  {
+    id: 'loader_bot',
+    title: 'Yuk Ortuvchi Robot',
+    description: 'Oldingi ko\'taruvchi cho\'mich — yashiklarni olib, yetkazish zonasiga tashiydi',
+    difficulty: 'O\'rta+',
+    // Ekskavatordan farqi: qo'l bo'g'insiz, faqat tepaga-pastga ko'tariladi
+    // (real pogruzchikdagidek). Soddaroq, lekin yuk vazifasini bajaradi.
+    parts: [
+      { type: 'robot-chassis', name: 'Shassi', pos: [0, 0, 0],
+        params: { lengthMm: 180, widthMm: 120, thickMm: 3, scalePercent: 100 } },
+
+      { type: 'dc-tt-yellow', name: 'TT motor (chap)',  pos: [-40, -22, -50], rot: [0, 0, 90] },
+      { type: 'dc-tt-yellow', name: 'TT motor (o\'ng)', pos: [-40, -22,  50], rot: [0, 0, 90] },
+      { type: 'tt-wheel-65mm', name: 'G\'ildirak (chap)',  pos: [-40, -22, -74] },
+      { type: 'tt-wheel-65mm', name: 'G\'ildirak (o\'ng)', pos: [-40, -22,  74] },
+      { type: 'caster-wheel', name: 'Kaster g\'ildirak', pos: [66, -20, 0] },
+
+      { type: 'arduino-uno', name: 'Arduino Uno', pos: [-20, 8, 0], rot: [0, 90, 0] },
+      { type: 'l298n', name: 'L298N drayver', pos: [-56, 8, 0] },
+      { type: 'battery-18650-4', name: 'Batareya boksi', pos: [10, 14, 0] },
+
+      // Ko'tarish uzeli: kuchliroq MG90S (metall reduktorli), chunki yuk
+      // og'irligi to'g'ridan-to'g'ri shu servoga tushadi.
+      { type: 'mg90s', name: 'MG90S servo (ko\'tarish)', pos: [48, 12, 0] },
+      { type: 'arm-segment', name: 'Ko\'taruvchi richag', pos: [56, 20, 0], rot: [0, 0, 18],
+        params: { lengthMm: 75, widthMm: 20, scalePercent: 100 } },
+      { type: 'gripper-bucket', name: 'Cho\'mich', pos: [128, 32, 0],
+        params: { widthMm: 58, scalePercent: 100 } },
+
+      { type: 'hc-sr04', name: 'HC-SR04 sensor', pos: [82, 4, 0] },
+    ],
+  },
 ];
 
 /** Barcha yig'malar (UI ro'yxati uchun). */

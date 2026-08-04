@@ -57,6 +57,12 @@ export function createRobotState(spawn) {
     /** "Tiqilib qolish" detektori uchun: oxirgi tekshiruvdagi joylashuv. */
     stuckAnchor: { x: spawn.x, z: spawn.z },
     stuckTimer: 0,
+    /** Manipulyator ushlab turgan yuk id'si (yo'q bo'lsa null). */
+    heldPayloadId: null,
+    /** Robot xavf zonasiga tushgan bo'lsa — 'fire' | 'water'. */
+    hazard: null,
+    /** Yetkazib berilgan yuklar soni. */
+    delivered: 0,
   };
 }
 
@@ -133,6 +139,109 @@ export function resolveCollisions(state, radius, boxes, circles) {
   }
 
   return hit;
+}
+
+/**
+ * Robot va ko'chiriladigan yuklar orasidagi to'qnashuv.
+ *
+ * Qat'iy to'siqdan farqi: yuk ham suriladi. Taqsimot massaga bog'liq —
+ * robot (~1 kg) yengil shardan (0.25 kg) og'irroq, shuning uchun shar
+ * ko'proq siljiydi. Bu impuls emas, "pozitsion" itarish: o'quv robotining
+ * tezligida jismlar sirpanib ketmaydi, surilib to'xtaydi — real og'ir
+ * yashikni itargandagidek.
+ */
+export function resolvePayloads(state, radius, payloads, robotMassKg = 1) {
+  let pushed = null;
+
+  for (const p of payloads) {
+    if (p.held) continue;
+    const dx = state.x - p.x;
+    const dz = state.z - p.z;
+    const minDist = radius + p.r;
+    const distSq = dx * dx + dz * dz;
+    if (distSq >= minDist * minDist) continue;
+
+    const dist = Math.sqrt(distSq) || 1e-4;
+    const overlap = minDist - dist;
+    const nx = dx / dist;
+    const nz = dz / dist;
+
+    // Og'irroq jism kamroq siljiydi.
+    const payloadShare = robotMassKg / (robotMassKg + p.massKg);
+    p.x -= nx * overlap * payloadShare;
+    p.z -= nz * overlap * payloadShare;
+    state.x += nx * overlap * (1 - payloadShare);
+    state.z += nz * overlap * (1 - payloadShare);
+    pushed = p;
+  }
+
+  return pushed;
+}
+
+/** Yuk qaysi xavf to'rtburchagi ustida turibdi (yoki null). */
+export function hazardAt(x, z, hazards) {
+  for (const h of hazards) {
+    if (Math.abs(x - h.x) <= h.hw && Math.abs(z - h.z) <= h.hd) return h.kind;
+  }
+  return null;
+}
+
+/** Manipulyator yetadigan nuqta — robot markazidan oldinda. */
+function gripPoint(state, reach) {
+  return {
+    x: state.x + Math.cos(state.heading) * reach,
+    z: state.z - Math.sin(state.heading) * reach,
+  };
+}
+
+/**
+ * Oldidagi eng yaqin yukni ushlaydi.
+ *
+ * Faqat manipulyatori bor robot chaqiradi (SimulationPanel buni yig'ilgan
+ * detallardan aniqlaydi) — g'ildirakli robot yukni faqat itara oladi.
+ *
+ * @returns ushlangan yuk yoki null
+ */
+export function tryGrab(state, arena, radius, reachLdu = 210) {
+  if (state.heldPayloadId) return null;
+  const grip = gripPoint(state, radius + reachLdu * 0.5);
+
+  let best = null;
+  let bestDist = Infinity;
+  for (const p of arena.payloads) {
+    if (p.held || p.delivered) continue;
+    const d = Math.hypot(grip.x - p.x, grip.z - p.z);
+    if (d < p.r + reachLdu && d < bestDist) {
+      best = p;
+      bestDist = d;
+    }
+  }
+  if (!best) return null;
+
+  best.held = true;
+  state.heldPayloadId = best.id;
+  return best;
+}
+
+/**
+ * Ushlangan yukni qo'yib yuboradi.
+ *
+ * Agar u yetkazish zonasi ustida bo'lsa, `delivered` deb belgilanadi —
+ * vazifa shu tarzda bajarilgan hisoblanadi.
+ *
+ * @returns { payload, delivered } yoki null
+ */
+export function releaseHeld(state, arena) {
+  if (!state.heldPayloadId) return null;
+  const payload = arena.payloads.find((p) => p.id === state.heldPayloadId);
+  state.heldPayloadId = null;
+  if (!payload) return null;
+
+  payload.held = false;
+  const inDropZone =
+    Math.hypot(payload.x - arena.dropZone.x, payload.z - arena.dropZone.z) < arena.dropZone.r;
+  if (inDropZone) payload.delivered = true;
+  return { payload, delivered: inDropZone };
 }
 
 /** Orqaga qaytib, ochiqroq tomonga burilish manevri.
@@ -269,7 +378,35 @@ export function stepRobot({
   state.x += Math.cos(state.heading) * state.speed * delta;
   state.z += -Math.sin(state.heading) * state.speed * delta;
 
-  const collided = resolveCollisions(state, radius, arena.boxes, arena.circles);
+  let collided = resolveCollisions(state, radius, arena.boxes, arena.circles);
+
+  // Yuklarni itarish — qat'iy to'siqlardan keyin, chunki itarilgan yuk
+  // robotni devorga qarab surib yuborishi mumkin va oxirgi so'z devorniki
+  // bo'lishi kerak (jism ichiga kirib qolmaslik uchun).
+  if (arena.payloads?.length) {
+    const pushed = resolvePayloads(state, radius, arena.payloads, 1);
+    if (pushed) {
+      // Itarilgan yuk devor yoki boshqa to'siq ichiga kirib qolmasin.
+      resolveCollisions(pushed, pushed.r, arena.boxes, arena.circles);
+      resolveCollisions(state, radius, arena.boxes, arena.circles);
+      state.speed *= 0.72;
+    }
+    // Ushlangan yuk manipulyator uchida "osilib" yuradi.
+    if (state.heldPayloadId) {
+      const held = arena.payloads.find((p) => p.id === state.heldPayloadId);
+      if (held) {
+        const grip = gripPoint(state, radius + 150);
+        held.x = grip.x;
+        held.z = grip.z;
+      }
+    }
+  }
+
+  // Xavf zonalari — robot ustidan yursa sinov muvaffaqiyatsiz.
+  if (arena.hazards?.length) {
+    state.hazard = hazardAt(state.x, state.z, arena.hazards);
+  }
+
   if (collided) {
     // Devorga urilganda tezlik so'nadi va hisob faqat yangi urilishda oshadi.
     state.speed *= 0.25;

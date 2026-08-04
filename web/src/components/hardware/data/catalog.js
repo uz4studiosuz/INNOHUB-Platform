@@ -1274,6 +1274,57 @@ export const CATALOG = [
       })),
   },
 
+  // ─── 🦾 Manipulyator (ekskavator / robot qo'li) ──────────────────
+  // Yuk maydonidagi yashik va bochkalarni ko'tarish uchun. Bularsiz
+  // sinov xonasidagi yuk vazifasini faqat itarib bajarish mumkin edi.
+  {
+    type: 'arm-segment',
+    partNum: 'arm-segment',
+    name: 'Manipulyator strelasi',
+    nameRu: 'Стрела манипулятора',
+    nameEn: 'Arm Segment / Boom',
+    specsRu: 'Секция руки с гидроцилиндром',
+    specsEn: 'Arm section with hydraulic cylinder',
+    massG: 85,
+    description: 'Ekskavator strelasi yoki robot qo‘lining bo‘g‘ini, uzunligi sozlanadi',
+    isProcedural: true,
+    generator: 'arm_segment',
+    category: 'mechanic',
+    subcat: 'arm',
+    specs: 'Bo‘g‘inli qo‘l uchun sektsiya',
+    defaultParams: { lengthMm: 90, widthMm: 22, scalePercent: 100 },
+    paramSchema: {
+      type: 'select',
+      label: 'Uzunligi (mm)',
+      key: 'lengthMm',
+      options: [60, 75, 90, 110, 130],
+    },
+    material: { color: '#e0a020', metalness: 0.55, roughness: 0.42 },
+  },
+  {
+    type: 'gripper-bucket',
+    partNum: 'gripper-bucket',
+    name: 'Cho‘mich (kovsh)',
+    nameRu: 'Ковш экскаватора',
+    nameEn: 'Excavator Bucket',
+    specsRu: 'Ковш для захвата груза',
+    specsEn: 'Bucket for picking up payloads',
+    massG: 60,
+    description: 'Yukni olish uchun cho‘mich — sinov xonasidagi yashiklarni ko‘taradi',
+    isProcedural: true,
+    generator: 'bucket',
+    category: 'mechanic',
+    subcat: 'arm',
+    specs: 'Tishli kovsh, kengligi sozlanadi',
+    defaultParams: { widthMm: 46, scalePercent: 100 },
+    paramSchema: {
+      type: 'select',
+      label: 'Kengligi (mm)',
+      key: 'widthMm',
+      options: [34, 46, 58, 70],
+    },
+    material: { color: '#d8dee5', metalness: 0.72, roughness: 0.34 },
+  },
 
 ];
 

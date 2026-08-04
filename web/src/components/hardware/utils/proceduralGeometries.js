@@ -607,3 +607,121 @@ export function createCasterMesh({ wheelDiaMm = 25 } = {}) {
   });
   return group;
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Manipulyator (robot qo'li) — strela, tirsak va cho'mich
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Manipulyator bo'g'ini: ekskavator strelasi yoki robot qo'lining yelkasi.
+ *
+ * Nega yangi detal kerak bo'ldi: qo'lni mavjud `lego_beam_*` dan yig'ib
+ * bo'lmaydi — LEGO protsedural detallari millimetrda yasalgan, elektronika va
+ * shassi esa LDU da (yuqoridagi MM izohiga qarang), ya'ni balka shassidan 2.5
+ * barobar kichik chiqadi. Bu detal LDU da, shuning uchun robot yonida
+ * to'g'ri o'lchamda turadi.
+ *
+ * Koordinata boshi PASTKI o'qda (bo'g'in markazida emas): qo'l shu nuqtadan
+ * buriladi, shuning uchun yig'mada joylashtirish ham shu nuqtaga nisbatan
+ * bo'lgani qulay.
+ *
+ * @param {number} lengthMm - bo'g'in uzunligi (mm)
+ * @param {number} widthMm  - kengligi (mm)
+ */
+export function createArmSegmentGeometry({ lengthMm = 90, widthMm = 22 } = {}) {
+  const group = new THREE.Group();
+  const L = lengthMm * MM;
+  const W = widthMm * MM;
+  const T = W * 0.55;
+
+  const steel = new THREE.MeshStandardMaterial({ color: '#e0a020', metalness: 0.55, roughness: 0.42 });
+  const dark = new THREE.MeshStandardMaterial({ color: '#3a4048', metalness: 0.7, roughness: 0.35 });
+
+  // Asosiy profil — uchlari toraygan (real strela shunday: kuchlanish
+  // pastki o'qda eng katta, uchida eng kichik).
+  const boom = new THREE.Mesh(new THREE.BoxGeometry(L, W, T), steel);
+  boom.position.x = L / 2;
+  group.add(boom);
+
+  const taper = new THREE.Mesh(new THREE.BoxGeometry(L * 0.42, W * 0.62, T * 1.02), steel);
+  taper.position.set(L * 0.79, W * 0.16, 0);
+  group.add(taper);
+
+  // Ikkala uchdagi o'q (bo'g'in) — qo'l shu yerdan buriladi.
+  [0, L].forEach((x) => {
+    const pivot = new THREE.Mesh(new THREE.CylinderGeometry(W * 0.34, W * 0.34, T * 1.5, 16), dark);
+    pivot.rotation.x = Math.PI / 2;
+    pivot.position.x = x;
+    group.add(pivot);
+  });
+
+  // Gidravlik silindr — ekskavatorni tanitadigan asosiy detal.
+  const cylinder = new THREE.Mesh(new THREE.CylinderGeometry(W * 0.19, W * 0.19, L * 0.5, 12), dark);
+  cylinder.rotation.z = Math.PI / 2;
+  cylinder.position.set(L * 0.34, W * 0.62, 0);
+  group.add(cylinder);
+
+  const rod = new THREE.Mesh(new THREE.CylinderGeometry(W * 0.1, W * 0.1, L * 0.34, 10),
+    new THREE.MeshStandardMaterial({ color: '#c9d2da', metalness: 0.9, roughness: 0.14 }));
+  rod.rotation.z = Math.PI / 2;
+  rod.position.set(L * 0.72, W * 0.62, 0);
+  group.add(rod);
+
+  group.traverse((ch) => {
+    if (ch.isMesh) { ch.castShadow = true; ch.receiveShadow = true; }
+  });
+  return group;
+}
+
+/**
+ * Cho'mich (ekskavator kovshi) yoki tutqich.
+ *
+ * Ochiq quti shaklida: beshta yupqa devor. To'liq quti bo'lsa ichidagi yuk
+ * ko'rinmay qolardi, o'quvchi esa aynan "yuk kovshda turibdi" degan holatni
+ * ko'rishi kerak.
+ *
+ * @param {number} widthMm - kovsh kengligi (mm)
+ */
+export function createBucketGeometry({ widthMm = 46 } = {}) {
+  const group = new THREE.Group();
+  const W = widthMm * MM;
+  const D = W * 0.78;   // chuqurligi
+  const H = W * 0.62;   // balandligi
+  const T = W * 0.07;   // devor qalinligi
+
+  const shell = new THREE.MeshStandardMaterial({ color: '#d8dee5', metalness: 0.72, roughness: 0.34 });
+  const edge = new THREE.MeshStandardMaterial({ color: '#8b939c', metalness: 0.85, roughness: 0.25 });
+
+  const floor = new THREE.Mesh(new THREE.BoxGeometry(D, T, W), shell);
+  floor.position.y = T / 2;
+  group.add(floor);
+
+  const back = new THREE.Mesh(new THREE.BoxGeometry(T, H, W), shell);
+  back.position.set(-D / 2 + T / 2, H / 2, 0);
+  group.add(back);
+
+  [-1, 1].forEach((s) => {
+    const side = new THREE.Mesh(new THREE.BoxGeometry(D, H * 0.82, T), shell);
+    side.position.set(0, (H * 0.82) / 2, s * (W / 2 - T / 2));
+    group.add(side);
+  });
+
+  // Tishlar — kovshning old qirrasi.
+  for (let i = 0; i < 4; i++) {
+    const tooth = new THREE.Mesh(new THREE.ConeGeometry(T * 1.1, W * 0.16, 4), edge);
+    tooth.rotation.z = -Math.PI / 2;
+    tooth.position.set(D / 2 + W * 0.07, T, -W * 0.32 + i * (W * 0.21));
+    group.add(tooth);
+  }
+
+  // Osma o'qi — qo'lning uchiga shu yerdan ulanadi.
+  const pivot = new THREE.Mesh(new THREE.CylinderGeometry(T * 1.6, T * 1.6, W * 1.02, 14), edge);
+  pivot.rotation.x = Math.PI / 2;
+  pivot.position.set(-D / 2 + T, H * 0.86, 0);
+  group.add(pivot);
+
+  group.traverse((ch) => {
+    if (ch.isMesh) { ch.castShadow = true; ch.receiveShadow = true; }
+  });
+  return group;
+}

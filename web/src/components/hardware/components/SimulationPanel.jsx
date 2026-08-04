@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { IconPlayerPlay as Play, IconSquare as Square, IconCpu as Cpu, IconTerminal2 as Terminal, IconBolt as Zap, IconGauge as Gauge, IconCompass as Compass, IconCircleCheck, IconAlertTriangle, IconCode, IconMap2, IconDeviceGamepad2, IconRobot, IconRefresh, IconTrophy } from '@tabler/icons-react';
 import { useI18n } from '../i18n/index.jsx';
-import { COURSE_PRESETS } from '../simulation/arenaBuilder';
+import { ARENA_ZONES } from '../simulation/arenaBuilder';
 
 const DEFAULT_ARDUINO_CODE = `// Arduino Bot Control Code
 #include <Servo.h>
@@ -66,10 +66,8 @@ export default function SimulationPanel({
   sceneObjects = [],
   isSimulating,
   telemetry,
-  course,
   driveMode,
   logs = [],
-  onCourseChange,
   onDriveModeChange,
   onStopCmChange,
   onLog,
@@ -116,14 +114,13 @@ export default function SimulationPanel({
       onResetLogs?.([`[XATO] Sinovni boshlashdan oldin apparat zanjiri va setup()/loop() kodini tekshiring.`]);
       return;
     }
-    const preset = COURSE_PRESETS.find((item) => item.id === course);
     onResetLogs?.([
-      `[SYSTEM] "${preset?.label || course}" poligonida sinov boshlandi.`,
+      `[SYSTEM] INNOHUB sinov poligonida sinov boshlandi.`,
       `[ARDUINO] Setup bajarildi. PWM = ${motorSpeed}, Servo = ${servoAngle}°`,
       `[ARDUINO] To'siq chegarasi kodda: distance < ${stopCm} sm`,
       `[SENSOR] HC-SR04 ultratovush sensori faol.`,
       driveMode === 'manual'
-        ? `[REJIM] Qo'lda boshqarish: sahnani bosing va W / A / S / D bilan haydang.`
+        ? `[REJIM] Qo'lda: W/A/S/D — haydash, Space — yukni olish/qo'yish.`
         : `[REJIM] Avtonom: robot kod mantig'i bo'yicha o'zi yuradi.`,
     ]);
     onStartSimulation?.({ motorSpeed, servoAngle });
@@ -175,35 +172,53 @@ export default function SimulationPanel({
           </div>
         </div>
 
-        {/* Sinov poligoni tanlash */}
+        {/* Sinov poligoni: bitta maydon, ketma-ket zonalar */}
         <div style={{ padding: 12, borderRadius: 10, border: '1px solid #334155', background: '#111827' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#38bdf8', fontSize: 12, fontWeight: 700, textTransform: 'uppercase', marginBottom: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#38bdf8', fontSize: 12, fontWeight: 700, textTransform: 'uppercase', marginBottom: 4 }}>
             <IconMap2 size={14} />
-            <span>Sinov xonasi</span>
+            <span>INNOHUB sinov poligoni</span>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            {COURSE_PRESETS.map((preset) => (
-              <button
-                key={preset.id}
-                type="button"
-                disabled={isSimulating}
-                onClick={() => onCourseChange?.(preset.id)}
+          <p style={{ fontSize: 10.5, color: '#94a3b8', margin: '0 0 10px 0', lineHeight: 1.5 }}>
+            2.9 × 2.1 m maydon. Robot chapdagi startdan o‘ngdagi finishga qadar
+            barcha zonadan o‘tishi kerak.
+          </p>
+          <ol style={{ display: 'flex', flexDirection: 'column', gap: 5, margin: 0, padding: 0, listStyle: 'none', counterReset: 'zone' }}>
+            {ARENA_ZONES.map((zone, i) => (
+              <li
+                key={zone.id}
                 style={{
-                  textAlign: 'left',
-                  padding: '9px 11px',
-                  borderRadius: 8,
-                  cursor: isSimulating ? 'not-allowed' : 'pointer',
-                  opacity: isSimulating && course !== preset.id ? 0.45 : 1,
-                  border: `1px solid ${course === preset.id ? '#2563eb' : '#334155'}`,
-                  background: course === preset.id ? 'rgba(37, 99, 235, 0.18)' : '#0f172a',
-                  color: '#e2e8f0',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  padding: '7px 9px',
+                  borderRadius: 7,
+                  border: '1px solid #24314a',
+                  background: '#0f172a',
                 }}
               >
-                <div style={{ fontSize: 12.5, fontWeight: 700 }}>{preset.label}</div>
-                <div style={{ fontSize: 10.5, color: '#94a3b8', marginTop: 2 }}>{preset.hint}</div>
-              </button>
+                <span
+                  style={{
+                    display: 'grid',
+                    placeItems: 'center',
+                    width: 18,
+                    height: 18,
+                    borderRadius: 5,
+                    background: '#1e3a5f',
+                    color: '#7dd3fc',
+                    fontSize: 10,
+                    fontWeight: 800,
+                    flexShrink: 0,
+                  }}
+                >
+                  {i + 1}
+                </span>
+                <span style={{ minWidth: 0 }}>
+                  <span style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#e2e8f0' }}>{zone.label}</span>
+                  <span style={{ display: 'block', fontSize: 10, color: '#94a3b8' }}>{zone.hint}</span>
+                </span>
+              </li>
             ))}
-          </div>
+          </ol>
 
           <div style={{ display: 'flex', gap: 6, marginTop: 10 }}>
             {[

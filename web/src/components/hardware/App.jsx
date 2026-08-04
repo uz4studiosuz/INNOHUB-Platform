@@ -26,7 +26,6 @@ function App() {
   const [isSimulating, setIsSimulating] = useState(false);
   const [simState, setSimState] = useState({ motorSpeed: 180, servoAngle: 90 });
   // Sinov xonasi sozlamalari va sahnadan qaytadigan jonli ko'rsatkichlar
-  const [simCourse, setSimCourse] = useState('slalom');
   const [simDriveMode, setSimDriveMode] = useState('auto');
   const [telemetry, setTelemetry] = useState(null);
   const [simStopCm, setSimStopCm] = useState(15);
@@ -346,7 +345,6 @@ function App() {
             selectedId={selectedObjectId}
             isSimulating={isSimulating}
             simState={simState}
-            simCourse={simCourse}
             simDriveMode={simDriveMode}
             simStopCm={simStopCm}
             onTelemetry={handleTelemetry}
@@ -389,10 +387,8 @@ function App() {
             sceneObjects={sceneObjects}
             isSimulating={isSimulating}
             telemetry={telemetry}
-            course={simCourse}
             driveMode={simDriveMode}
             logs={simLogs}
-            onCourseChange={setSimCourse}
             onDriveModeChange={setSimDriveMode}
             onStopCmChange={setSimStopCm}
             onLog={appendSimLog}
