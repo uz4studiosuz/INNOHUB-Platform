@@ -109,6 +109,17 @@ interface TrussCanvasProps {
    * (the rally, results) turn it on so a small design isn't a speck in one
    * corner of a large canvas. */
   fitZoom?: boolean;
+  /** Qulash animatsiyasi uchun: tugunlarni shu joylashuvda chizadi.
+   * Dizaynning o'zi o'zgarmaydi — bu faqat ko'rinish qatlami. */
+  nodeOverrides?: Map<string, { x: number; y: number }> | null;
+  /** Singan a'zolar — qizil va uzuq chiziq bilan chiziladi. */
+  brokenMemberIds?: Set<string> | null;
+  /** Har a'zoning yonida tartib raqamini chizadi. Tahlil ro'yxatidagi "#4"
+   * qaysi a'zo ekanini bilish uchun — raqamsiz ro'yxat o'qib bo'lmas edi. */
+  showMemberIndices?: boolean;
+  /** Ro'yxatda sichqoncha ostidagi a'zo — chizmada ajratib ko'rsatiladi. */
+  highlightMemberId?: string | null;
+  onMemberHover?: (id: string | null) => void;
 }
 
 export default function TrussCanvas({
@@ -127,6 +138,11 @@ export default function TrussCanvas({
   intensityMode = false,
   fitRequest = 0,
   fitZoom = false,
+  nodeOverrides = null,
+  brokenMemberIds = null,
+  showMemberIndices = false,
+  highlightMemberId = null,
+  onMemberHover,
 }: TrussCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 800, height: 500 });
@@ -208,7 +224,13 @@ export default function TrussCanvas({
     [mode, onAddNode, readOnly, viewportOffset, viewportScale]
   );
 
-  const nodeMap = new Map(nodes.map((n) => [n.id, n]));
+  // Qulash paytida tugunlar dizayndagi joyida emas, fizika hisoblagan
+  // joyida turadi. Dizayn o'zgarmaydi — bu faqat chizish qatlami.
+  const posOf = (n: TrussNode) => {
+    const moved = nodeOverrides?.get(n.id);
+    return moved ? { ...n, x: moved.x, y: moved.y } : n;
+  };
+  const nodeMap = new Map(nodes.map((n) => [n.id, posOf(n)]));
   const gridLines = [];
   for (let x = 0; x <= dimensions.width; x += GRID_SIZE) {
     gridLines.push(<Line key={`gx${x}`} points={[x, 0, x, dimensions.height]} stroke="#263845" strokeWidth={0.5} />);
@@ -251,11 +273,13 @@ export default function TrussCanvas({
 
         <Layer>
           <Group x={viewportOffset.x} y={viewportOffset.y} scaleX={viewportScale} scaleY={viewportScale}>
-          {members.map((m) => {
+          {members.map((m, memberIndex) => {
             const a = nodeMap.get(m.nodeA);
             const b = nodeMap.get(m.nodeB);
             if (!a || !b) return null;
             const res = solved?.get(m.id);
+            const isBroken = !!brokenMemberIds?.has(m.id);
+            const isHighlighted = highlightMemberId === m.id;
             // Tahlildan oldin a'zo o'z materialining rangi bilan chiziladi.
             // Avval hammasi bir xil kulrang edi va aralash materialli
             // ko'prikda qaysi a'zo nimadan qilinganini bilib bo'lmasdi —
@@ -271,10 +295,19 @@ export default function TrussCanvas({
             }
             const midX = (a.x + b.x) / 2;
             const midY = (a.y + b.y) / 2;
+            // A'zoga perpendikulyar birlik vektor — raqam chiziq ustiga
+            // tushib qolmasligi uchun shu yo'nalishda chetga suriladi.
+            const dx = b.x - a.x;
+            const dy = b.y - a.y;
+            const len = Math.hypot(dx, dy) || 1;
+            const normX = -dy / len;
+            const normY = dx / len;
             return (
               <Group
                 key={m.id}
                 onClick={() => !readOnly && mode === "delete" && onMemberClick(m.id)}
+                onMouseEnter={() => onMemberHover?.(m.id)}
+                onMouseLeave={() => onMemberHover?.(null)}
                 onContextMenu={(event) => {
                   if (readOnly || !onDeleteMember) return;
                   event.evt.preventDefault();
@@ -282,8 +315,41 @@ export default function TrussCanvas({
                   onDeleteMember(m.id);
                 }}
               >
-                <Line points={[a.x, a.y, b.x, b.y]} stroke={color} strokeWidth={res && res.safetyFactor < 1 ? 5 : 3} hitStrokeWidth={14} />
-                {res && (
+                {/* Ajratilgan a'zo ostidagi qalin nur — ro'yxat va chizma
+                    o'rtasidagi bog'lanish shu bilan ko'rinadi. */}
+                {isHighlighted && (
+                  <Line
+                    points={[a.x, a.y, b.x, b.y]}
+                    stroke="#facc15"
+                    strokeWidth={11}
+                    opacity={0.5}
+                    lineCap="round"
+                    listening={false}
+                  />
+                )}
+                {/* Singan a'zo uzuq va xira chiziladi — u endi hech narsani
+                    ushlab turmaydi, shuning uchun butun a'zodan ko'zga
+                    darhol farq qilishi kerak. */}
+                <Line
+                  points={[a.x, a.y, b.x, b.y]}
+                  stroke={isBroken ? "#7f1d1d" : color}
+                  strokeWidth={isBroken ? 2 : res && res.safetyFactor < 1 ? 5 : 3}
+                  dash={isBroken ? [6, 5] : undefined}
+                  opacity={isBroken ? 0.55 : 1}
+                  hitStrokeWidth={14}
+                />
+                {showMemberIndices && (
+                  <Text
+                    x={midX + normX * 13 - 7}
+                    y={midY + normY * 13 - 6}
+                    text={`${memberIndex}`}
+                    fontSize={12}
+                    fill={isHighlighted ? "#facc15" : "#93a4b5"}
+                    fontStyle="bold"
+                    listening={false}
+                  />
+                )}
+                {res && !isBroken && !showMemberIndices && (
                   <Text
                     x={midX - 16}
                     y={midY - 8}
@@ -304,7 +370,9 @@ export default function TrussCanvas({
           {memberFirstNode && nodeMap.get(memberFirstNode) && (
             <Circle x={nodeMap.get(memberFirstNode)!.x} y={nodeMap.get(memberFirstNode)!.y} radius={12} stroke="#facc15" strokeWidth={2} />
           )}
-          {nodes.map((n) => (
+          {nodes.map((raw) => {
+            const n = posOf(raw);
+            return (
             <Group key={n.id}>
               <LoadArrow x={n.x} y={n.y} fx={n.loadFx} fy={n.loadFy} />
               {supportGlyph(n.support, n.x, n.y)}
@@ -326,7 +394,8 @@ export default function TrussCanvas({
                 onDragEnd={(e) => onNodeDrag(n.id, snap(e.target.x()), snap(e.target.y()))}
               />
             </Group>
-          ))}
+            );
+          })}
           </Group>
         </Layer>
       </Stage>

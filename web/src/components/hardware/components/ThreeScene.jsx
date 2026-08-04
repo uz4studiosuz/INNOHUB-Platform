@@ -16,6 +16,7 @@ import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment
 import { IconArrowsMove as Move, IconRotateClockwise2 as RotateCw, IconMaximize as Maximize2, IconRotate as RotateCcw, IconAdjustments as Sliders, IconTrash as Trash2, IconWorld as Globe, IconMagnet as Magnet, IconVideo, IconAlertTriangle, IconFlag, IconRadar2, IconClock, IconRefresh, IconPackage } from '@tabler/icons-react';
 import { buildArena, LDU_TO_CM } from '../simulation/arenaBuilder';
 import { createRobotState, stepRobot, keyRole, tryGrab, releaseHeld } from '../simulation/robotDriver';
+import { analyzeBuild } from '../simulation/buildAnalysis';
 import { getCatalogEntry, getMaterialConfig } from '../data/catalog';
 import { findSnapTarget } from '../utils/snappingSystem';
 import { loadLDrawPart, applyColorToLDrawGroup } from '../library/ldrawPartsCache';
@@ -123,6 +124,7 @@ export default function ThreeScene({
   const gridRef = useRef(null);
   const arenaRef = useRef(null);
   const arenaClockRef = useRef(0);
+  const buildProfileRef = useRef(null);
   const robotStateRef = useRef(null);
   const robotRadiusRef = useRef(120);
   const sensorYRef = useRef(60);
@@ -149,6 +151,12 @@ export default function ThreeScene({
   useEffect(() => { snapEnabledRef.current = snapEnabled; }, [snapEnabled]);
   useEffect(() => { objectsRef.current = objects; }, [objects]);
   useEffect(() => { isSimulatingRef.current = isSimulating; }, [isSimulating]);
+
+  // Yig'ma imkoniyatlari (yuradimi, ko'radimi, ko'taradimi) detallar
+  // ro'yxatidan kelib chiqadi. Alohida effektda hisoblanadi, chunki poligonni
+  // qurish effekti faqat sinov boshlanganda ishlashi kerak — u yerga
+  // `objects` ni qo'shsak, har detal o'zgarishida butun xona qayta qurilardi.
+  useEffect(() => { buildProfileRef.current = analyzeBuild(objects); }, [objects]);
   useEffect(() => { simStateRef.current = simState; }, [simState]);
   useEffect(() => { simDriveModeRef.current = simDriveMode; }, [simDriveMode]);
   useEffect(() => { simStopCmRef.current = simStopCm; }, [simStopCm]);
@@ -378,7 +386,10 @@ export default function ThreeScene({
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.autoUpdate = false;
     renderer.shadowMap.needsUpdate = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    // three r185 da PCFSoftShadowMap eskirgan: u har o'rnatilganda konsolga
+    // ogohlantirish yozadi va ichida baribir PCFShadowMap ga tushadi. Shuning
+    // uchun to'g'ridan-to'g'ri PCFShadowMap — natija bir xil, konsol toza.
+    renderer.shadowMap.type = THREE.PCFShadowMap;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     // Sahna scene.environment (studiya IBL) + 4 ta yorug'lik bilan yoritiladi,
     // shuning uchun ekspozitsiya 1 dan past bo'lishi kerak - aks holda och
@@ -878,6 +889,7 @@ export default function ThreeScene({
           stopCm: simStopCmRef.current,
           manual: simDriveModeRef.current === 'manual',
           keys: driveKeysRef.current,
+          build: buildProfileRef.current,
         });
 
         const body = robotBodyRef.current;
@@ -1097,6 +1109,7 @@ export default function ThreeScene({
     const arena = buildArena();
     arenaRef.current = arena;
     arenaClockRef.current = 0;
+
     scene.add(arena.group);
 
     // Poligon o'z poliga ega — yig'ish gridi va zamin bu yerda ortiqcha.
@@ -1144,6 +1157,12 @@ export default function ThreeScene({
       if (groundRef.current) groundRef.current.visible = true;
       if (gridRef.current) gridRef.current.visible = true;
       setHud(null);
+
+      // Sinov tugagach kamerani standart ko'rinishga qaytaramiz. Aks holda u
+      // poligonning qayeridadir — robotdan bir necha metr narida — osilib
+      // qolar, sahna esa yig'ish ko'rinishiga qaytgan bo'lardi: foydalanuvchi
+      // bo'sh gridga qarab "qayerga tushib qoldim?" degan holatga tushadi.
+      frameSceneRef.current?.(new THREE.Vector3(0.7, 0.45, 1), { duration: 700, padding: 1.5 });
       requestRenderRef.current?.();
     };
   }, [isSimulating]);

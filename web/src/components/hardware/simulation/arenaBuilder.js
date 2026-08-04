@@ -13,10 +13,14 @@ import * as THREE from 'three';
  * Barcha o'lchamlar LDraw birligida (1 LDU = 0.4 mm), chunki sahnadagi
  * detallar ham shu birlikda. 2500 LDU = 1 metr.
  */
-export const ROOM_WIDTH = 7200;   // X bo'ylab — 2.88 m
-export const ROOM_DEPTH = 5200;   // Z bo'ylab — 2.08 m
-export const WALL_HEIGHT = 420;
-export const WALL_THICK = 55;
+// Robot yig'masi 400-550 LDU uzunlikda. Xona undan ~20 barobar keng bo'lishi
+// kerak, aks holda robot "qutiga tiqilgan" ko'rinadi va manevr qilishga joy
+// qolmaydi. Devor balandligi ham robot bo'yidan (~150 LDU) sezilarli baland:
+// past devor sinov maydonini emas, chegara chizig'ini eslatardi.
+export const ROOM_WIDTH = 11000;  // X bo'ylab — 4.4 m
+export const ROOM_DEPTH = 7600;   // Z bo'ylab — 3.04 m
+export const WALL_HEIGHT = 900;
+export const WALL_THICK = 70;
 export const FLOOR_Y = 0;
 
 const HALF_W = ROOM_WIDTH / 2;
@@ -137,11 +141,11 @@ function buildCourse() {
   for (let i = 0; i < cones; i++) {
     const x = fx(-0.74 + (0.34 * i) / (cones - 1));
     const z = i % 2 === 0 ? fz(-0.3) : fz(0.3);
-    obstacles.push({ kind: 'cylinder', x, z, r: 60, h: 200, color: '#f97316', cone: true });
+    obstacles.push({ kind: 'cylinder', x, z, r: 46, h: 165, color: '#f97316', cone: true });
   }
 
   // ── 2. Labirint bo'limi ──
-  const wall = (x, z, w, d) => obstacles.push({ kind: 'box', x, z, w, d, h: 340, color: '#46536b' });
+  const wall = (x, z, w, d) => obstacles.push({ kind: 'box', x, z, w, d, h: 520, color: '#46536b' });
   wall(fx(-0.3), fz(-0.55), 70, fz(0.8));
   wall(fx(-0.16), fz(0.5), 70, fz(0.9));
   wall(fx(-0.02), fz(-0.5), 70, fz(0.86));
@@ -153,8 +157,8 @@ function buildCourse() {
   hazards.push({ kind: 'fire', x: fx(0.16), z: fz(-0.46), hw: 340, hd: 330 });
   hazards.push({ kind: 'water', x: fx(0.16), z: fz(0.46), hw: 420, hd: 380 });
   // Xavf zonalari orasidagi tor o'tish yo'li — robot shu yerdan o'tishi kerak.
-  obstacles.push({ kind: 'box', x: fx(0.16), z: fz(-0.86), w: 90, d: fz(0.26), h: 300, color: '#3f4b5c' });
-  obstacles.push({ kind: 'box', x: fx(0.16), z: fz(0.88), w: 90, d: fz(0.22), h: 300, color: '#3f4b5c' });
+  obstacles.push({ kind: 'box', x: fx(0.16), z: fz(-0.86), w: 110, d: fz(0.26), h: 460, color: '#3f4b5c' });
+  obstacles.push({ kind: 'box', x: fx(0.16), z: fz(0.88), w: 110, d: fz(0.22), h: 460, color: '#3f4b5c' });
 
   // ── 4. Yuk maydoni: ko'chiriladigan yashik, bochka va shar ──
   // Bularni robot itarib yura oladi, manipulyatorli robot esa ko'tara oladi.
@@ -167,17 +171,17 @@ function buildCourse() {
   ];
   payloadSpots.forEach((spot, i) => {
     if (spot.kind === 'crate') {
-      payloads.push({ id: `payload-${i}`, kind: 'crate', x: spot.x, z: spot.z, r: 105, h: 190, massKg: 0.4, color: '#a06a30' });
+      payloads.push({ id: `payload-${i}`, kind: 'crate', x: spot.x, z: spot.z, r: 84, h: 150, massKg: 0.4, color: '#a06a30' });
     } else if (spot.kind === 'barrel') {
-      payloads.push({ id: `payload-${i}`, kind: 'barrel', x: spot.x, z: spot.z, r: 88, h: 215, massKg: 0.55, color: '#2b6cb0' });
+      payloads.push({ id: `payload-${i}`, kind: 'barrel', x: spot.x, z: spot.z, r: 68, h: 175, massKg: 0.55, color: '#2b6cb0' });
     } else {
-      payloads.push({ id: `payload-${i}`, kind: 'ball', x: spot.x, z: spot.z, r: 82, h: 164, massKg: 0.25, color: '#e0b73c' });
+      payloads.push({ id: `payload-${i}`, kind: 'ball', x: spot.x, z: spot.z, r: 62, h: 124, massKg: 0.25, color: '#e0b73c' });
     }
   });
 
   // Yuk maydonini ramkalovchi qat'iy javonlar — yuklar tarqab ketmasligi uchun.
-  obstacles.push({ kind: 'box', x: fx(0.52), z: fz(-0.9), w: fx(0.36), d: 80, h: 260, color: '#4a5568' });
-  obstacles.push({ kind: 'box', x: fx(0.52), z: fz(0.9), w: fx(0.36), d: 80, h: 260, color: '#4a5568' });
+  obstacles.push({ kind: 'box', x: fx(0.52), z: fz(-0.9), w: fx(0.36), d: 100, h: 400, color: '#4a5568' });
+  obstacles.push({ kind: 'box', x: fx(0.52), z: fz(0.9), w: fx(0.36), d: 100, h: 400, color: '#4a5568' });
 
   return {
     obstacles,

@@ -419,7 +419,11 @@ def run_truss(params):
     stability = _stability_out(truss)
 
     try:
-        forces = truss.solve()
+        # Qattiqlik usuli — tugunlar usulidan farqli o'laroq statik
+        # aniqlanmagan konstruksiyani ham yechadi va tugun siljishlarini
+        # beradi (egilgan shakl chizish uchun).
+        result = truss.solve_stiffness()
+        forces = result["forces"]
         members_out = []
         for i, m in enumerate(truss.members):
             members_out.append({
@@ -428,35 +432,86 @@ def run_truss(params):
                 "node_j": m.node_j,
                 "force_N": m.force,
                 "stress_Pa": m.stress(),
-                "safety_factor": m.safety_factor(),
-                "in_tension": m.is_tension()
+                "safety_factor": _finite(m.safety_factor()),
+                "in_tension": m.is_tension(),
+                "lengthM": m.length(truss.nodes),
+                "bucklingCapacityN": _finite(m.buckling_critical_load(truss.nodes)) if m.is_compression() else None,
             })
-        return {"member_forces_N": list(forces), "members": members_out, "stability": stability}
+        return {
+            "member_forces_N": [_finite(f) for f in forces],
+            "members": members_out,
+            "displacements": [[_finite(dx), _finite(dy)] for dx, dy in result["displacements"]],
+            "reactions": {k: [_finite(v[0]), _finite(v[1])] for k, v in result["reactions"].items()},
+            "stability": stability,
+        }
     except ValueError as e:
         return {"error": str(e), "stability": stability}
+
+def _finite(value):
+    """Infinity/NaN -> None, so the payload stays valid JSON.
+
+    Python's json.dumps happily writes bare `Infinity`, which is NOT valid
+    JSON and which JavaScript's JSON.parse rejects outright - the whole
+    response would fail to parse in the browser. An unloaded member legitimately
+    has an infinite safety factor, so this case is reached by ordinary designs,
+    not just odd ones. null means "no finite limit" and the UI renders it as un-symbol.
+    """
+    if value is None:
+        return None
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, (int, float)):
+        if math.isinf(value) or math.isnan(value):
+            return None
+        return value
+    return value
+
 
 def run_truss_loadtest(params):
     truss = _build_truss_from_params(params)
     stability = _stability_out(truss)
 
+    # Tanlangan transportning og'irligi berilgan bo'lsa, u ko'prikka haqiqiy
+    # yuk sifatida qo'yiladi va butun deka bo'ylab yurgiziladi (harakatlanuvchi
+    # yuk tahlili). Avval bu qiymat yechuvchiga umuman yetib bormasdi: yuk
+    # faqat quruvchida chizilganidan olinar, natijada 1 tonnami, 12 tonnami —
+    # a'zolardagi kuch ham, bandlik ham bir xil chiqardi.
+    vehicle_load_N = float(params.get("vehicle_load_N") or 0)
+    load_steps = int(params.get("load_steps") or 21)
+
     try:
-        result = truss.load_test()
+        if vehicle_load_N > 0:
+            result = truss.moving_load_test(vehicle_load_N, steps=load_steps)
+        else:
+            result = truss.load_test()
         return {
-            "failureLoadN": result["failure_load_N"],
+            "failureLoadN": _finite(result["failure_load_N"]),
             "structureMassKg": result["structure_mass_kg"],
-            "efficiency": result["efficiency"],
+            "efficiency": _finite(result["efficiency"]),
             "failingMemberIndex": result["failing_member_index"],
+            "referenceLoadN": result["reference_load_N"],
             "members": [
                 {
                     "force_N": mr["force_N"],
                     "stress_Pa": mr["stress_Pa"],
                     "in_tension": mr["in_tension"],
                     "isBuckling": mr["is_buckling"],
-                    "memberFailureLoadN": mr["member_failure_load_N"],
+                    "memberFailureLoadN": _finite(mr["member_failure_load_N"]),
+                    "lengthM": mr["length_m"],
+                    "massKg": mr["mass_kg"],
+                    "axialCapacityN": _finite(mr["axial_capacity_N"]),
+                    "bucklingCapacityN": _finite(mr["buckling_capacity_N"]),
+                    "governingLimitN": _finite(mr["governing_limit_N"]),
+                    "utilisation": _finite(mr["utilisation"]),
+                    "safetyFactor": _finite(mr["safety_factor"]),
                 }
                 for mr in result["members"]
             ],
+            # Egilgan shakl (metrda) — chizmada ko'rsatish uchun.
+            "displacements": [[_finite(dx), _finite(dy)] for dx, dy in result["displacements"]],
+            "reactions": {k: [_finite(v[0]), _finite(v[1])] for k, v in result["reactions"].items()},
             "stability": stability,
+            "worstPositionRatio": result.get("worst_position_ratio"),
         }
     except ValueError as e:
         return {"error": str(e), "stability": stability}

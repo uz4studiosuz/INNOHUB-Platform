@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { IconPlayerPlay as Play, IconSquare as Square, IconCpu as Cpu, IconTerminal2 as Terminal, IconBolt as Zap, IconGauge as Gauge, IconCompass as Compass, IconCircleCheck, IconAlertTriangle, IconCode, IconMap2, IconDeviceGamepad2, IconRobot, IconRefresh, IconTrophy } from '@tabler/icons-react';
 import { useI18n } from '../i18n/index.jsx';
 import { ARENA_ZONES } from '../simulation/arenaBuilder';
+import { analyzeBuild } from '../simulation/buildAnalysis';
 
 const DEFAULT_ARDUINO_CODE = `// Arduino Bot Control Code
 #include <Servo.h>
@@ -84,14 +85,19 @@ export default function SimulationPanel({
 
   const stopCm = readStopDistance(code);
 
-  const types = sceneObjects.map((item) => String(item.type || '').toLowerCase());
+  // Yig'ma tahlili — sahnada nima turganidan robotning haqiqiy imkoniyatlari
+  // chiqariladi. Sinov aynan shu profil bo'yicha ishlaydi, ya'ni bu ro'yxat
+  // bezak emas: g'ildirak yo'q deb yozilgan bo'lsa, robot haqiqatan yurmaydi.
+  const build = useMemo(() => analyzeBuild(sceneObjects), [sceneObjects]);
   const benchChecks = [
-    { label: 'Kontroller', ok: types.some((type) => type.includes('arduino') || type.includes('esp32') || type.includes('raspberry')) },
-    { label: 'Motor drayver', ok: types.some((type) => type.includes('l298') || type.includes('driver')) },
-    { label: 'Harakat uzeli', ok: types.some((type) => type.includes('motor') || type.includes('wheel') || type.includes('gear')) },
-    { label: 'Quvvat manbai', ok: types.some((type) => type.includes('battery') || type.includes('power')) },
+    { label: 'Kontroller', ok: build.hasController },
+    { label: 'Motor drayver', ok: build.hasDriver },
+    { label: `Yetaklovchi g‘ildirak (${build.wheelCount})`, ok: build.wheelCount >= 2 },
+    { label: 'Quvvat manbai', ok: build.hasBattery },
   ];
-  const hardwareReady = benchChecks.every((check) => check.ok);
+  // Sinovni boshlash uchun robot harakatlana olishi shart — aks holda u
+  // start maydonchasida turib qoladi va sinovdan hech qanday ma'lumot chiqmaydi.
+  const hardwareReady = build.canDrive;
   const codeReady = /void\s+setup\s*\(/.test(code) && /void\s+loop\s*\(/.test(code);
 
   // Slayderlar sahnaga uzatiladi: motor tezligi va servo burchagi robotning
@@ -169,6 +175,64 @@ export default function SimulationPanel({
                 {check.label}
               </div>
             ))}
+          </div>
+
+          {/* Yig'madan hisoblangan haqiqiy xarakteristikalar */}
+          <div style={{ marginTop: 11, paddingTop: 10, borderTop: '1px solid #24314a' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8 }}>
+              <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: 0.4, color: '#64748b', textTransform: 'uppercase' }}>
+                Yig‘ma tahlili
+              </span>
+              <span style={{ fontSize: 11, fontWeight: 700, color: '#7dd3fc' }}>{build.profile}</span>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px 10px' }}>
+              {[
+                { k: 'Massa', v: `${build.massKg.toFixed(2)} kg` },
+                { k: 'Maks. tezlik', v: build.canDrive ? `${build.maxSpeedMmS} mm/s` : '—' },
+                { k: 'G‘ildirak', v: build.wheelCount ? `${build.wheelCount} × ⌀${build.wheelDiameterMm} mm` : 'yo‘q' },
+                { k: 'Moment', v: build.torqueNcm ? `${build.torqueNcm} N·sm` : '—' },
+              ].map((row) => (
+                <div key={row.k} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10.5 }}>
+                  <span style={{ color: '#94a3b8' }}>{row.k}</span>
+                  <span style={{ color: '#e2e8f0', fontWeight: 700, fontFamily: 'ui-monospace, monospace' }}>{row.v}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Imkoniyatlar — sinov aynan shularga bo'ysunadi */}
+            <div style={{ display: 'flex', gap: 6, marginTop: 9, flexWrap: 'wrap' }}>
+              {[
+                { label: 'Yuradi', ok: build.canDrive },
+                { label: 'Ko‘radi', ok: build.canSense },
+                { label: 'Ko‘taradi', ok: build.canLift },
+              ].map((cap) => (
+                <span
+                  key={cap.label}
+                  style={{
+                    padding: '3px 8px',
+                    borderRadius: 999,
+                    fontSize: 10,
+                    fontWeight: 700,
+                    border: `1px solid ${cap.ok ? '#15803d' : '#3f4658'}`,
+                    background: cap.ok ? 'rgba(34,197,94,0.14)' : 'rgba(148,163,184,0.08)',
+                    color: cap.ok ? '#86efac' : '#64748b',
+                  }}
+                >
+                  {cap.ok ? '✓' : '✕'} {cap.label}
+                </span>
+              ))}
+            </div>
+
+            {build.issues.length > 0 && (
+              <ul style={{ margin: '9px 0 0 0', padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 5 }}>
+                {build.issues.map((issue) => (
+                  <li key={issue} style={{ display: 'flex', gap: 6, fontSize: 10.5, color: '#fcd34d', lineHeight: 1.45 }}>
+                    <IconAlertTriangle size={12} style={{ flexShrink: 0, marginTop: 1 }} />
+                    <span>{issue}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         </div>
 

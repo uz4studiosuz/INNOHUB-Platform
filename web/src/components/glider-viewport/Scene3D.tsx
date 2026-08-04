@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Canvas, useThree } from "@react-three/fiber";
 import { ContactShadows, OrbitControls } from "@react-three/drei";
-import { IconBox, IconCamera, IconLayoutSidebarRight, IconView360 } from "@tabler/icons-react";
+import { IconBox, IconCamera, IconLayoutSidebarRight, IconRefresh, IconView360 } from "@tabler/icons-react";
 import { GliderModel } from "./GliderModel";
 import { WindTunnel } from "./WindTunnel";
 import { useGliderStore } from "../../store/gliderStore";
@@ -67,9 +67,23 @@ export function Scene3D() {
             <PresetIcon size={15} stroke={1.8} /> {label}
           </button>
         ))}
+
+        {/* Aniq "boshlang'ich holat" tugmasi. Ko'rinishlar tugmasini qayta
+            bosish ham kamerani tiklaydi, lekin u allaqachon tanlangan ko'rinib
+            turgani uchun hech kim uni bosmaydi — ko'rinishni buzib qo'ygan
+            foydalanuvchi qaytish yo'lini topa olmasdi. */}
+        <span className="mx-0.5 h-5 w-px bg-white/15" />
+        <button
+          type="button"
+          onClick={() => chooseCamera("iso")}
+          title="Kamerani boshlang'ich holatga qaytarish"
+          className="flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-[11px] font-semibold text-slate-300 transition-colors hover:bg-white/10 hover:text-white"
+        >
+          <IconRefresh size={15} stroke={1.8} /> Reset
+        </button>
       </div>
       <div className="pointer-events-none absolute bottom-3 left-3 z-10 flex items-center gap-2 rounded-lg border border-white/10 bg-[#101923]/85 px-3 py-2 text-[10px] text-slate-300">
-        <IconCamera size={14} stroke={1.8} /> Chap tugma: aylantirish, o'ng tugma: surish, g'ildirak: zoom
+        <IconCamera size={14} stroke={1.8} /> Chap tugma: aylantirish, o&apos;ng tugma: surish, g&apos;ildirak: zoom
       </div>
 
       <Canvas

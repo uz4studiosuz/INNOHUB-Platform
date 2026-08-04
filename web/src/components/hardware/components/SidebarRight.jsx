@@ -168,12 +168,13 @@ export default function SidebarRight({ onAdd, onAddLego, onAddLDrawPart }) {
             style={{
               width: '100%',
               padding: '7px 10px 7px 30px',
-              borderRadius: '6px',
-              background: '#1e293b',
-              border: '1px solid var(--panel-border)',
-              color: '#fff',
+              borderRadius: '8px',
+              background: 'rgba(255, 255, 255, 0.05)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              color: '#e2e8f0',
               fontSize: '0.8rem',
               outline: 'none',
+              transition: 'border-color 0.2s, box-shadow 0.2s',
             }}
           />
         </div>
@@ -181,7 +182,7 @@ export default function SidebarRight({ onAdd, onAddLego, onAddLDrawPart }) {
 
       {/* Categories Tabs */}
       <div style={{ display: 'flex', gap: '4px', padding: '10px 16px 0 16px', flexWrap: 'wrap', maxHeight: '120px', overflowY: 'auto' }}>
-        <div style={{ width: '100%', fontSize: '10px', color: '#60a5fa', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '2px' }}>
+        <div style={{ width: '100%', fontSize: '10px', color: '#10b981', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '2px', letterSpacing: '0.04em' }}>
           {t('catalog.elecAndRealLego')}{ldrawTotal ? ` (${ldrawTotal})` : ''}
         </div>
         <button
@@ -224,7 +225,7 @@ export default function SidebarRight({ onAdd, onAddLego, onAddLDrawPart }) {
           );
         })}
 
-        <div style={{ width: '100%', fontSize: '10px', color: '#34d399', fontWeight: 'bold', textTransform: 'uppercase', margin: '6px 0 2px 0' }}>
+        <div style={{ width: '100%', fontSize: '10px', color: '#34d399', fontWeight: 'bold', textTransform: 'uppercase', margin: '6px 0 2px 0', letterSpacing: '0.04em' }}>
           {t('catalog.proceduralTitle')}
         </div>
         {CATEGORIES.map(cat => (

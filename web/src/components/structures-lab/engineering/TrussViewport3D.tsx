@@ -2,7 +2,7 @@
 
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
-import { ACESFilmicToneMapping, PCFSoftShadowMap } from "three";
+import { ACESFilmicToneMapping, PCFShadowMap } from "three";
 import { TrussNode, TrussMemberDraft, SolvedMember } from "./types";
 import { useTrussBounds, TrussSceneContents } from "./trussScene3D";
 import { StudioStage } from "./trussStudioScene";
@@ -19,7 +19,7 @@ export default function TrussViewport3D({ nodes, members, solved }: TrussViewpor
   return (
     <div className="relative flex-1 bg-[#17212b]">
       <Canvas
-        shadows={{ type: PCFSoftShadowMap }}
+        shadows={{ type: PCFShadowMap }}
         dpr={[1, 2]}
         gl={{ antialias: true, toneMapping: ACESFilmicToneMapping, toneMappingExposure: 1.05 }}
         camera={{ position: [radius * 1.7, radius * 0.9, radius * 2.65], fov: 40, near: 0.1, far: radius * 30 }}

@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import { TrussToolbar, ViewMode } from "./TrussToolbar";
 import { TrussNode, TrussMemberDraft, BuilderMode, MATERIALS, SolvedMember, SupportType } from "./types";
 import { buildTrussApiParams } from "./trussApiParams";
-import { computeStability, stabilityErrorMessage } from "./trussStability";
+import { computeStability, stabilityErrorMessage, stabilityWarningMessage } from "./trussStability";
 import { nextId, mirrorTrussHorizontally } from "./trussMirror";
 import { buildExampleWarrenTruss } from "./trussExample";
 import { loadTrussDesign, saveTrussDesign } from "../../../store/trussDesignStore";
@@ -48,6 +48,7 @@ export default function TrussBuilder() {
   const [solved, setSolved] = useState<Map<string, SolvedMember> | null>(null);
   const [solving, setSolving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [warning, setWarning] = useState<string | null>(null);
   const [history, setHistory] = useState<{ past: TrussSnapshot[]; future: TrussSnapshot[] }>({ past: [], future: [] });
   const [fitRequest, setFitRequest] = useState(0);
   const currentSnapshotRef = useRef<TrussSnapshot>({ nodes: [], members: [] });
@@ -266,11 +267,15 @@ export default function TrussBuilder() {
       setError("Kamida bitta tayanch (support) belgilang.");
       return;
     }
+    // Faqat mexanizm to'sadi. Statik aniqlanmagan konstruksiya endi
+    // yechiladi (qattiqlik usuli), shuning uchun u ogohlantirish sifatida
+    // ko'rsatiladi va tahlil davom etadi.
     const stabilityError = stabilityErrorMessage(stability);
     if (stabilityError) {
       setError(stabilityError);
       return;
     }
+    setWarning(stabilityWarningMessage(stability));
 
     setSolving(true);
     try {
@@ -418,6 +423,12 @@ export default function TrussBuilder() {
 
           <h3 className="mb-2 text-sm font-semibold">Natijalar</h3>
           {error && <div className="mb-3 rounded-lg border border-red-200 bg-red-50 p-3 text-red-700">{error}</div>}
+          {warning && !error && (
+            <div className="mb-3 flex gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-[12.5px] leading-snug text-amber-800">
+              <IconAlertTriangle size={16} stroke={1.9} className="mt-0.5 shrink-0" />
+              <span>{warning}</span>
+            </div>
+          )}
           {!solved && !error && (
             <p className="rounded-xl border border-[var(--line)] bg-[var(--surface-muted)] p-3 leading-5 text-[var(--ink-muted)]">
               Tugun (●) qo&apos;yib, a&apos;zo (╱) bilan ulang, tayanch va yuk belgilang, so&apos;ng &quot;Tahlil qilish&quot;ni bosing.

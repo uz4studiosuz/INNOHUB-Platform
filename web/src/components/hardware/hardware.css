@@ -11,23 +11,23 @@
   line-height: 1.5;
   font-weight: 400;
 
-  color-scheme: light;
-  color: #18212b;
-  background-color: #f4f6f7;
+  color-scheme: dark;
+  color: #e2e8f0;
+  background-color: #0a0e18;
 
   font-synthesize: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  --primary-color: #126b55;
-  --primary-hover: #0e5846;
-  --bg-color: #eef1f2;
-  --panel-bg: #ffffff;
-  --panel-border: #dce2e5;
-  --text-primary: #18212b;
-  --text-secondary: #65717c;
-  --glass-blur: 0px;
+  --primary-color: #10b981;
+  --primary-hover: #059669;
+  --bg-color: #080b11;
+  --panel-bg: #0e1422;
+  --panel-border: rgba(255, 255, 255, 0.08);
+  --text-primary: #e2e8f0;
+  --text-secondary: #7c8aa0;
+  --glass-blur: 12px;
 
   /* Fills the module route rather than the viewport. */
   position: absolute;
@@ -55,12 +55,12 @@
 
 /* Glassmorphism Panel */
 .glass-panel {
-  background: var(--panel-bg);
+  background: rgba(14, 20, 34, 0.85);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
   border-right: 1px solid var(--panel-border);
   border-left: 1px solid var(--panel-border);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
 }
 
 .btn-primary {
@@ -140,17 +140,17 @@
   position: relative;
   width: 100%;
   height: 52px;
-  background: #ffffff;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  border-bottom: 1px solid var(--panel-border);
+  background: rgba(14, 20, 34, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 16px;
   z-index: 100;
-  box-shadow: none;
+  box-shadow: 0 1px 12px rgba(0, 0, 0, 0.3);
   box-sizing: border-box;
 }
 
@@ -174,13 +174,13 @@
   margin: 0;
   font-size: 15px;
   font-weight: 700;
-  color: var(--text-primary);
+  color: #e2e8f0;
   letter-spacing: -0.01em;
   white-space: nowrap;
 }
 .logo-tagline {
   font-size: 10px;
-  color: var(--text-secondary);
+  color: #7c8aa0;
   display: block;
   white-space: nowrap;
 }
@@ -190,10 +190,10 @@
   align-items: center;
   gap: 4px;
   margin-left: 16px;
-  background: #f3f6f5;
+  background: rgba(255, 255, 255, 0.04);
   padding: 3px;
   border-radius: 8px;
-  border: 1px solid var(--panel-border);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .mode-tab-btn {
@@ -212,12 +212,13 @@
   white-space: nowrap;
 }
 .mode-tab-btn:hover {
-  color: var(--text-primary);
-  background: rgba(255, 255, 255, 0.05);
+  color: #e2e8f0;
+  background: rgba(255, 255, 255, 0.06);
 }
 .mode-tab-btn.active {
   background: var(--primary-color);
   color: #fff;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
 }
 
 .header-actions {
@@ -227,9 +228,9 @@
 }
 
 .header-btn {
-  background: #ffffff;
-  border: 1px solid var(--panel-border);
-  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #cbd5e1;
   padding: 6px 10px;
   border-radius: 8px;
   font-size: 13px;
@@ -242,16 +243,22 @@
   white-space: nowrap;
 }
 .header-btn:hover {
-  background: #f3f6f5;
-  border-color: #cbd4d8;
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.18);
+  color: #e2e8f0;
+}
+.header-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
 }
 .header-btn.primary {
-  background: #e5f2ed;
-  border-color: #b8d9cc;
-  color: #126b55;
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.3);
+  color: #6ee7b7;
 }
 .header-btn.primary:hover {
-  background: #d9ece5;
+  background: rgba(16, 185, 129, 0.22);
+  border-color: rgba(16, 185, 129, 0.5);
 }
 .header-btn.success {
   background: rgba(16, 185, 129, 0.15);
@@ -306,38 +313,44 @@
 .divider-vertical {
   width: 1px;
   height: 24px;
-  background: #dce2e5;
+  background: rgba(255, 255, 255, 0.1);
   margin: 0 2px;
 }
 
 .hardware-catalog {
-  background: #ffffff;
-  border-left: 1px solid #dce2e5;
+  background: rgba(14, 20, 34, 0.92);
+  border-left: 1px solid rgba(255, 255, 255, 0.06);
   border-right: 0;
-  box-shadow: none;
-  color: #18212b;
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.25);
+  color: #e2e8f0;
 }
 
 .hardware-catalog input[type="text"] {
-  background: #f6f8f8 !important;
-  border-color: #dce2e5 !important;
-  color: #18212b !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: #e2e8f0 !important;
+}
+.hardware-catalog input[type="text"]:focus {
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2) !important;
 }
 
 .hardware-catalog .item-card {
-  background: #ffffff;
-  border-color: #e1e6e8;
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.08);
   box-shadow: none;
+  transition: all 0.2s ease;
 }
 
 .hardware-catalog .item-card:hover {
-  background: #f6f9f8;
-  border-color: #b9c8c3;
-  transform: none;
+  background: rgba(16, 185, 129, 0.08);
+  border-color: rgba(16, 185, 129, 0.3);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .hardware-catalog .btn-icon:not(:hover) {
-  color: #65717c;
+  color: #7c8aa0;
 }
 
 .catalog-recommended-dot {
@@ -346,8 +359,9 @@
   height: 7px;
   margin-right: 6px;
   border-radius: 999px;
-  background: #126b55;
+  background: #10b981;
   vertical-align: 1px;
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.4);
 }
 
 .hardware-scene-shell::after {
@@ -478,8 +492,8 @@
 }
 
 .header-menu .header-btn.is-open {
-  background: rgba(56, 189, 248, 0.16);
-  border-color: rgba(56, 189, 248, 0.45);
+  background: rgba(16, 185, 129, 0.16);
+  border-color: rgba(16, 185, 129, 0.45);
 }
 
 .header-menu-panel {
@@ -1231,4 +1245,19 @@
   background: var(--primary-color);
   color: #ffffff;
   box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+}
+
+/* ─── Bekor qilish / qaytarish guruhi ─── */
+.header-undo-group {
+  display: flex;
+  gap: 4px;
+}
+
+.header-undo-group .header-btn {
+  padding: 7px 9px;
+}
+
+.header-undo-group .header-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
 }

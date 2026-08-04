@@ -280,6 +280,9 @@ export function MemberBeam({
   materialLabel,
   sceneRadius,
   onClick,
+  highlight,
+  onPointerOver,
+  onPointerOut,
 }: {
   a: THREE.Vector3;
   b: THREE.Vector3;
@@ -297,6 +300,11 @@ export function MemberBeam({
    */
   sceneRadius: number;
   onClick?: (e: ThreeEvent<MouseEvent>) => void;
+  /** When true, the beam glows with an emissive highlight so it stands out
+   * visually from all other members - used for hover and selection feedback. */
+  highlight?: boolean;
+  onPointerOver?: (e: ThreeEvent<PointerEvent>) => void;
+  onPointerOut?: (e: ThreeEvent<PointerEvent>) => void;
 }) {
   const { position, quaternion, length } = useMemo(() => {
     const dir = new THREE.Vector3().subVectors(b, a);
@@ -306,21 +314,31 @@ export function MemberBeam({
     return { position: mid, quaternion: quat, length: len };
   }, [a, b]);
 
-  const side = Math.max(sceneRadius * (thick ? 0.06 : 0.042), 0.11);
+  const side = Math.max(sceneRadius * (thick || highlight ? 0.06 : 0.042), 0.11);
   const profile = materialProfileFor(materialLabel);
   const woodTexture = isWood && profile.wood ? getWoodTexture() : null;
 
   return (
-    <mesh position={position} quaternion={quaternion} castShadow receiveShadow onClick={onClick}>
+    <mesh
+      position={position}
+      quaternion={quaternion}
+      castShadow
+      receiveShadow
+      onClick={onClick}
+      onPointerOver={onPointerOver}
+      onPointerOut={onPointerOut}
+    >
       {profile.round
         ? <cylinderGeometry args={[side * 0.62, side * 0.62, length, 16, 1]} />
         : <boxGeometry args={[side, length, side]} />}
       <meshStandardMaterial
-        color={color}
-        map={woodTexture}
-        roughness={isWood ? profile.roughness : Math.min(profile.roughness + 0.18, 0.72)}
-        metalness={profile.metalness}
-        envMapIntensity={profile.wood ? 0.35 : 1.15}
+        color={highlight ? "#fbbf24" : color}
+        map={highlight ? null : woodTexture}
+        roughness={highlight ? 0.3 : isWood ? profile.roughness : Math.min(profile.roughness + 0.18, 0.72)}
+        metalness={highlight ? 0.6 : profile.metalness}
+        emissive={highlight ? "#f59e0b" : "#000000"}
+        emissiveIntensity={highlight ? 0.55 : 0}
+        envMapIntensity={highlight ? 2.0 : profile.wood ? 0.35 : 1.15}
       />
     </mesh>
   );
@@ -547,7 +565,7 @@ function BridgeInfrastructure({ nodes, centerX, centerY, radius, depthUnits }: {
     geo.translate(0, 0, -depth / 2);
     geo.computeVertexNormals();
     return { geo, height, topHalf };
-  }, [deck, radius]);
+  }, [deck, radius, depthUnits]);
 
   if (!deck || !abutmentGeometry) return null;
 
@@ -624,6 +642,11 @@ interface TrussSceneContentsProps {
    * instead of the multi-colored per-member force/safety scheme, which reads
    * as noisy and un-serious in the arena view. */
   keepWood?: boolean;
+  /** Member ID currently hovered (from sidebar or from the 3D scene itself).
+   * The matching beam renders with an emissive glow. */
+  highlightMemberId?: string | null;
+  /** Fires when the pointer enters/leaves a beam in the 3D scene. */
+  onMemberHover?: (id: string | null) => void;
 }
 
 export function TrussSceneContents({
@@ -637,6 +660,8 @@ export function TrussSceneContents({
   onMemberClick,
   colorByForce,
   keepWood,
+  highlightMemberId,
+  onMemberHover,
 }: TrussSceneContentsProps) {
   const { center, radius, depthUnits, halfDepth } = useTrussBounds(nodes);
   // The design (nodes/members) is drawn as one 2D truss; rendered as the two
@@ -672,6 +697,7 @@ export function TrussSceneContents({
         color = colorByForce && res ? forceBandColor(res.forceN) : memberColorFor(res, m.materialLabel);
         isWoodBeam = !res;
       }
+      const isHighlighted = highlightMemberId === m.id;
       return (
         <MemberBeam
           key={`${side}-${m.id}`}
@@ -682,12 +708,23 @@ export function TrussSceneContents({
           isWood={isWoodBeam}
           materialLabel={m.materialLabel}
           sceneRadius={radius}
+          highlight={isHighlighted}
           onClick={
-            side === "front" && onMemberClick
+            side === "front"
               ? (e) => {
                   e.stopPropagation();
-                  if (mode === "delete") onMemberClick(m.id);
+                  if (onMemberClick) onMemberClick(m.id);
                 }
+              : undefined
+          }
+          onPointerOver={
+            side === "front" && onMemberHover
+              ? (e) => { e.stopPropagation(); onMemberHover(m.id); }
+              : undefined
+          }
+          onPointerOut={
+            side === "front" && onMemberHover
+              ? () => onMemberHover(null)
               : undefined
           }
         />

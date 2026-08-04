@@ -786,6 +786,12 @@ input[type="range"] {
   transform-origin: left center;
 }
 
+/* Smooth expand animation for member detail cards */
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 /* ─── Electronics: wire tie-points ───
    The component artwork already prints its own pin holes and labels, so a
    terminal stays invisible until you reach for it and then rings itself. */

@@ -72,7 +72,7 @@ const KITS = [
   {
     id: '2wd_car',
     title: '2WD Robot-Mashina',
-    description: 'Eng oddiy robot: shassi, 2 ta TT motor, 2 g\'ildirak, kaster, Arduino, L298N, batareya',
+    description: 'Eng oddiy robot: shassi, 2 ta TT motor, 2 g\'ildirak, kaster, Arduino, L298N, batareya, HC-SR04',
     difficulty: 'Boshlang\'ich',
     // Real hayotda: 160x110 mm akril shassi, orqada 2 ta TT motor, oldida
     // erkin aylanuvchi kaster g'ildirak, ustida elektronika.
@@ -99,13 +99,16 @@ const KITS = [
       { type: 'arduino-uno', name: 'Arduino Uno', pos: [5, 8, 0], rot: [0, 90, 0] },
       { type: 'l298n', name: 'L298N drayver', pos: [-52, 8, 0] },
       { type: 'battery-18650-4', name: 'Batareya boksi', pos: [48, 14, 0] },
+
+      // Old tomonda masofa sensori: usiz avtonom rejim ko'r holda yuradi.
+      { type: 'hc-sr04', name: 'HC-SR04 sensor', pos: [78, 6, 0] },
     ],
   },
 
   {
     id: '4wd_car',
     title: '4WD Robot-Mashina',
-    description: 'To\'rt g\'ildirakli: 4 ta TT motor, 2 ta L298N, kattaroq shassi',
+    description: 'To\'rt g\'ildirakli: 4 ta TT motor, 2 ta L298N, kattaroq shassi, HC-SR04',
     difficulty: 'Boshlang\'ich+',
     parts: [
       { type: 'robot-chassis', name: 'Shassi', pos: [0, 0, 0],
@@ -125,6 +128,7 @@ const KITS = [
       { type: 'l298n', name: 'L298N (old)',  pos: [ 62, 8, 0] },
       { type: 'l298n', name: 'L298N (orqa)', pos: [-62, 8, 0] },
       { type: 'battery-18650-4', name: 'Batareya boksi', pos: [0, 14, 42] },
+      { type: 'hc-sr04', name: 'HC-SR04 sensor', pos: [98, 6, 0] },
     ],
   },
 
@@ -182,6 +186,7 @@ const KITS = [
       { type: 'l298n', name: 'L298N (old)',  pos: [ 64, 8, 0] },
       { type: 'l298n', name: 'L298N (orqa)', pos: [-64, 8, 0] },
       { type: 'battery-18650-4', name: 'Batareya boksi', pos: [0, 16, 44] },
+      { type: 'hc-sr04', name: 'HC-SR04 sensor', pos: [100, 8, 0] },
     ],
   },
 

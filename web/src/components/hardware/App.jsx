@@ -13,11 +13,22 @@ import LDrawSourceModal from './components/LDrawSourceModal';
 import { I18nProvider } from './i18n/index.jsx';
 import { getCatalogEntry } from './data/catalog';
 import { getKitParts } from './data/robotKits';
+import { useSceneHistory } from './hooks/useSceneHistory';
 import './hardware.css';
 
 function App() {
-  // Sahnadagi barcha obyektlar ro'yxati
-  const [sceneObjects, setSceneObjects] = useState([]);
+  // Sahnadagi barcha obyektlar ro'yxati. State tarix bilan o'ralgan, ya'ni
+  // har bir o'zgarish avtomatik ravishda bekor qilinadigan bo'ladi — har
+  // chaqiruv joyiga alohida snapshot kodi yozish shart emas.
+  const {
+    sceneObjects,
+    setSceneObjects,
+    resetSceneObjects,
+    undo: handleUndo,
+    redo: handleRedo,
+    canUndo,
+    canRedo,
+  } = useSceneHistory([]);
 
   // Mode state: 'free_build' | 'kit_assembly' | 'simulation'
   const [activeMode, setActiveMode] = useState('free_build');
@@ -113,25 +124,46 @@ function App() {
     }
   }, []);
 
+  // Bekor qilish / qaytarish klaviatura yorliqlari. Matn maydonlarida
+  // ishlamaydi — u yerda Ctrl+Z brauzerning o'z bekor qilishi bo'lishi kerak.
+  useEffect(() => {
+    const onKeyDown = (event) => {
+      const target = event.target;
+      if (target?.closest?.('input, textarea, select, [contenteditable="true"]')) return;
+      if (!(event.ctrlKey || event.metaKey)) return;
+      const key = event.key.toLowerCase();
+      if (key === 'z') {
+        event.preventDefault();
+        if (event.shiftKey) handleRedo();
+        else handleUndo();
+      } else if (key === 'y') {
+        event.preventDefault();
+        handleRedo();
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [handleUndo, handleRedo]);
+
   // Loyihani JSON fayldan yuklash
   const handleLoadProject = useCallback((data) => {
-    if (data.sceneObjects) setSceneObjects(data.sceneObjects);
+    if (data.sceneObjects) resetSceneObjects(data.sceneObjects);
     if (data.pinMappings) setPinMappings(data.pinMappings);
     setSelectedObjectId(null);
-  }, []);
+  }, [resetSceneObjects]);
 
   // .LDR faylidan obyektlarni sahnaga yuklash
   const handleImportLdrObjects = useCallback((importedObjects) => {
     setSceneObjects(importedObjects);
     setSelectedObjectId(null);
-  }, []);
+  }, [setSceneObjects]);
 
   // Sahnani tozalash
   const handleClearScene = useCallback(() => {
     setSceneObjects([]);
     setSelectedObjectId(null);
     setPinMappings({});
-  }, []);
+  }, [setSceneObjects]);
 
   // Sahnaga LDraw modelini qo'shish
   const handleAddLDrawPart = useCallback((partNum, name = '', dropPosition = null) => {
@@ -155,7 +187,7 @@ function App() {
       return [...prev, newObj];
     });
     setSelectedObjectId(newId);
-  }, []);
+  }, [setSceneObjects]);
 
   // Sahnaga yangi qism qo'shish — CATALOG dan o'qiydi (Faza 0)
   const handleAddComponent = useCallback((typeInput, dropPosition = null) => {
@@ -187,7 +219,7 @@ function App() {
     });
 
     setSelectedObjectId(newId);
-  }, []);
+  }, [setSceneObjects]);
 
   // Tayyor robot yig'masini sahnaga tushirish ("Tayyorini yukla" rejimi).
   // handleAddComponent dan farqi: joylashuv va burilish yig'mada aniq
@@ -238,7 +270,7 @@ function App() {
       }, 180 + index * 480);
       kitTimersRef.current.push(timer);
     });
-  }, []);
+  }, [setSceneObjects]);
 
   // LEGO Technic katalogidan (1000+ detal) qism qo'shish
   const handleAddLego = useCallback((part, dropPosition = null) => {
@@ -265,7 +297,7 @@ function App() {
       return [...prev, newObj];
     });
     setSelectedObjectId(newId);
-  }, []);
+  }, [setSceneObjects]);
 
   const handleDropPart = useCallback((payload, position) => {
     if (!payload || !position) return;
@@ -282,7 +314,7 @@ function App() {
   const handleRemoveObject = useCallback((id) => {
     setSceneObjects(prev => prev.filter(obj => obj.id !== id));
     setSelectedObjectId(prev => prev === id ? null : prev);
-  }, []);
+  }, [setSceneObjects]);
 
   // TransformControls → State sinxronizatsiyasi
   const handleUpdateTransform = useCallback((id, position, rotation, snapResult = null) => {
@@ -304,8 +336,8 @@ function App() {
         }
       }
       return updatedObj;
-    }));
-  }, []);
+    }), { tag: `transform:${id}` });
+  }, [setSceneObjects]);
 
   // Parametrik o'lchamlarni o'zgartirish
   const handleUpdateParams = useCallback((id, newParams) => {
@@ -313,8 +345,8 @@ function App() {
       obj.id === id
         ? { ...obj, params: { ...obj.params, ...newParams } }
         : obj
-    ));
-  }, []);
+    ), { tag: `params:${id}` });
+  }, [setSceneObjects]);
 
   return (
     // .hardware-root carries the module's variables and pins it to the route's
@@ -327,6 +359,10 @@ function App() {
         pinMappings={pinMappings}
         activeMode={activeMode}
         onSelectMode={handleSelectMode}
+        onUndo={handleUndo}
+        onRedo={handleRedo}
+        canUndo={canUndo}
+        canRedo={canRedo}
         onLoadProject={handleLoadProject}
         onClearScene={handleClearScene}
         onOpenBomModal={() => setIsBomOpen(true)}

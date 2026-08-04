@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { IconCpu as Cpu, IconDeviceFloppy as Save, IconFolderOpen as FolderOpen, IconTrash as Trash2, IconPackage as PackageCheck, IconRobot as Bot, IconDownload as Download, IconUpload as Upload, IconDatabase as HardDrive, IconBox as Box, IconPlayerPlay as Play, IconFolder, IconChevronDown } from '@tabler/icons-react';
+import { IconCpu as Cpu, IconDeviceFloppy as Save, IconFolderOpen as FolderOpen, IconTrash as Trash2, IconPackage as PackageCheck, IconRobot as Bot, IconDownload as Download, IconUpload as Upload, IconDatabase as HardDrive, IconBox as Box, IconPlayerPlay as Play, IconFolder, IconChevronDown, IconArrowBackUp, IconArrowForwardUp } from '@tabler/icons-react';
 import { exportProjectToJson, importProjectFromJson } from '../utils/projectStorage';
 import { importFromLdr } from '../utils/ldrConverter';
 import { useI18n } from '../i18n/index.jsx';
@@ -16,6 +16,10 @@ export default function Header({
   onExportLdr,
   onImportLdrObjects,
   onOpenLDrawSourceModal,
+  onUndo,
+  onRedo,
+  canUndo = false,
+  canRedo = false,
 }) {
   const { t } = useI18n();
   const jsonFileInputRef = useRef(null);
@@ -137,6 +141,31 @@ export default function Header({
       </div>
 
       <div className="header-actions">
+        {/* Bekor qilish / qaytarish — birinchi o'rinda, chunki bu eng tez-tez
+            kerak bo'ladigan amal: noto'g'ri joyga qo'yilgan detalni qaytarish. */}
+        <div className="header-undo-group">
+          <button
+            className="header-btn"
+            onClick={onUndo}
+            disabled={!canUndo}
+            title="Bekor qilish (Ctrl+Z)"
+            aria-label="Bekor qilish"
+          >
+            <IconArrowBackUp size={16} />
+          </button>
+          <button
+            className="header-btn"
+            onClick={onRedo}
+            disabled={!canRedo}
+            title="Qaytarish (Ctrl+Shift+Z)"
+            aria-label="Qaytarish"
+          >
+            <IconArrowForwardUp size={16} />
+          </button>
+        </div>
+
+        <div className="divider-vertical" />
+
         {/* The language switcher moved to the platform top bar. Two of them on
             one screen was one too many, and this one only ever changed the
             language of this module. */}

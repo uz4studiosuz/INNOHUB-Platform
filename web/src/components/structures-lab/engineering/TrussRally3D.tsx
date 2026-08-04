@@ -182,10 +182,16 @@ interface TrussRally3DProps {
   /** Fires when the vehicle had to be drawn smaller than life to fit the span,
    * so the page can say so rather than showing a silently wrong scale. */
   onDrawScale?: (scaledDown: boolean) => void;
+  /** Member ID being hovered in the sidebar — highlighted with emissive glow. */
+  highlightMemberId?: string | null;
+  /** Fires when pointer enters/leaves a member beam in the 3D scene. */
+  onMemberHover?: (id: string | null) => void;
+  /** Fires when a member beam is clicked in the 3D scene. */
+  onMemberClick?: (id: string) => void;
 }
 
-export default function TrussRally3D({ nodes, members, solved, truckProgress, vehicle, onDrawScale }: TrussRally3DProps) {
-  const { center, radius, spanMeters, depthUnits } = useTrussBounds(nodes);
+export default function TrussRally3D({ nodes, members, solved, truckProgress, vehicle, onDrawScale, highlightMemberId, onMemberHover, onMemberClick }: TrussRally3DProps) {
+  const { center, radius, depthUnits } = useTrussBounds(nodes);
 
   const { minX, maxX, deckY, spanUnits } = useMemo(() => {
     if (nodes.length === 0) return { minX: -5, maxX: 5, deckY: 0, spanUnits: 10 };
@@ -273,7 +279,7 @@ export default function TrussRally3D({ nodes, members, solved, truckProgress, ve
   return (
     <div className="flex-1 relative bg-[#17212b]">
       <Canvas
-        shadows={{ type: THREE.PCFSoftShadowMap }}
+        shadows={{ type: THREE.PCFShadowMap }}
         dpr={[1, 2]}
         camera={{ position: [radius * 1.7, radius * 0.9, radius * 2.65], fov: 40, near: 0.1, far: radius * 30 }}
         gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.05 }}
@@ -284,7 +290,15 @@ export default function TrussRally3D({ nodes, members, solved, truckProgress, ve
             same joints. keepWood used to force every rally bridge to timber,
             which meant a steel design looked like balsa the moment you tested
             it. */}
-        <TrussSceneContents nodes={nodes} members={members} solved={solved} colorByForce />
+        <TrussSceneContents
+          nodes={nodes}
+          members={members}
+          solved={solved}
+          colorByForce
+          highlightMemberId={highlightMemberId}
+          onMemberHover={onMemberHover}
+          onMemberClick={onMemberClick}
+        />
 
         <ApproachRamp x={minX - bankWidth / 2 - 0.4} y={deckY} width={bankWidth} depth={radius * 1.6} />
         <ApproachRamp x={maxX + bankWidth / 2 + 0.4} y={deckY} width={bankWidth} depth={radius * 1.6} />

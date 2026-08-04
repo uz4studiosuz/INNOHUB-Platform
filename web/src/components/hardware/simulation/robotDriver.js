@@ -318,7 +318,12 @@ export function stepRobot({
   stopCm,
   manual,
   keys,
+  build,
 }) {
+  // Yig'ma imkoniyatlari. Berilmasa — eski xatti-harakat (hamma narsa mumkin),
+  // shunda bu parametr qo'shilishi mavjud chaqiruvlarni buzmaydi.
+  const canDrive = build ? build.canDrive : true;
+  const canSense = build ? build.canSense : true;
   // Servo sensor kallagini buradi: 90° = to'g'ri oldinga. Bu — panelda va
   // Serial Monitor da ko'rsatiladigan o'lchov.
   const servoOffset = ((servoAngle - 90) * Math.PI) / 180;
@@ -329,9 +334,12 @@ export function stepRobot({
   // servo yon tomonga burilgan bo'lsa, robot ko'r holda yurib devorga
   // urilib turardi.
   const bodyFront = servoOffset === 0 ? sensorCm : measureDistanceCm(raycaster, arena.colliders, state, 0, sensorY);
-  const front = Math.min(sensorCm, bodyFront);
-  const left = measureDistanceCm(raycaster, arena.colliders, state, 0.55, sensorY);
-  const right = measureDistanceCm(raycaster, arena.colliders, state, -0.55, sensorY);
+  // Sensori yo'q robot hech nima "ko'rmaydi": 400 sm — HC-SR04 ning "to'siq
+  // yo'q" qiymati. Shunda avtonom kod to'siqqa qarab to'xtamaydi va bola
+  // sensorsiz robot nega devorga urilishini o'z ko'zi bilan ko'radi.
+  const front = canSense ? Math.min(sensorCm, bodyFront) : 400;
+  const left = canSense ? measureDistanceCm(raycaster, arena.colliders, state, 0.55, sensorY) : 400;
+  const right = canSense ? measureDistanceCm(raycaster, arena.colliders, state, -0.55, sensorY) : 400;
 
   let throttle = 0;
   let steer = 0;
@@ -358,8 +366,21 @@ export function stepRobot({
     steer = control.steer;
   }
 
+  // G'ildiragi (yoki drayveri, batareyasi, kontrolleri) yo'q robot joyidan
+  // qimirlamaydi — motor o'qi aylanadi, xolos. Avval sahnada nima turganidan
+  // qat'i nazar hamma narsa yurib ketaverardi.
+  if (!canDrive) {
+    throttle = 0;
+    steer = 0;
+    state.speed = 0;
+    state.turnRate = 0;
+  }
+
   const pwm = Math.max(0, Math.min(255, motorSpeed)) / 255;
-  const maxLinear = MAX_LINEAR * pwm;
+  // Maksimal tezlik yig'madan keladi: g'ildirak diametri x motor RPM.
+  // 80 mm li g'ildirakli robot 65 mm likdan aniq tezroq yuradi.
+  const buildLimit = build?.maxSpeedMmS ? build.maxSpeedMmS / 0.4 : MAX_LINEAR;
+  const maxLinear = Math.min(MAX_LINEAR, buildLimit) * pwm;
   const targetSpeed = throttle * maxLinear;
   const speedDelta = targetSpeed - state.speed;
   const maxChange = ACCEL * delta;
