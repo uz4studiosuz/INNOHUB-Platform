@@ -15,7 +15,7 @@ export default function GliderLayout({
   const engineeringOpen = pathname === MODULES.glider.basePath;
 
   return (
-    <ModuleWorkspace basePath={MODULES.glider.basePath} accent={MODULES.glider.accent}>
+    <ModuleWorkspace basePath={MODULES.glider.basePath}>
       <div className="flex flex-1 min-h-0">
         {engineeringOpen && <EngineeringSidebar />}
         {engineeringOpen && <DockingStation />}

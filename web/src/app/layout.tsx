@@ -20,7 +20,7 @@ export default function RootLayout({
   // an Uzbek page the way it used to.
   return (
     <html lang="uz" className={`${GeistSans.variable} ${GeistMono.variable} h-full antialiased`}>
-      <body className="min-h-full flex bg-[var(--canvas)] text-[var(--ink)]">
+      <body style={{ minHeight: "100%", display: "flex", margin: 0, backgroundColor: "var(--md-sys-color-background)", color: "var(--md-sys-color-on-background)" }}>
         <I18nProvider>
           <PlatformShell>{children}</PlatformShell>
         </I18nProvider>

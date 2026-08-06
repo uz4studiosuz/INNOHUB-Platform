@@ -1,836 +1,700 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Roboto+Mono:wght@400;500&display=swap');
 @import "tailwindcss";
 
+/* ============================================================
+   MD3 COLOR ROLES AS TAILWIND UTILITIES
+   Exposes `bg-surface`, `text-on-surface-variant`, `border-outline`,
+   `bg-secondary-container` … driven by the same --md-sys-color-* values
+   declared in :root below, so utilities and inline styles never diverge.
+   ============================================================ */
+@theme inline {
+  --color-primary: var(--md-sys-color-primary);
+  --color-on-primary: var(--md-sys-color-on-primary);
+  --color-primary-container: var(--md-sys-color-primary-container);
+  --color-on-primary-container: var(--md-sys-color-on-primary-container);
+
+  --color-secondary: var(--md-sys-color-secondary);
+  --color-on-secondary: var(--md-sys-color-on-secondary);
+  --color-secondary-container: var(--md-sys-color-secondary-container);
+  --color-on-secondary-container: var(--md-sys-color-on-secondary-container);
+
+  --color-tertiary: var(--md-sys-color-tertiary);
+  --color-on-tertiary: var(--md-sys-color-on-tertiary);
+  --color-tertiary-container: var(--md-sys-color-tertiary-container);
+  --color-on-tertiary-container: var(--md-sys-color-on-tertiary-container);
+
+  --color-error: var(--md-sys-color-error);
+  --color-on-error: var(--md-sys-color-on-error);
+  --color-error-container: var(--md-sys-color-error-container);
+  --color-on-error-container: var(--md-sys-color-on-error-container);
+
+  --color-background: var(--md-sys-color-background);
+  --color-on-background: var(--md-sys-color-on-background);
+  --color-surface: var(--md-sys-color-surface);
+  --color-on-surface: var(--md-sys-color-on-surface);
+  --color-surface-dim: var(--md-sys-color-surface-dim);
+  --color-surface-bright: var(--md-sys-color-surface-bright);
+  --color-surface-container-lowest: var(--md-sys-color-surface-container-lowest);
+  --color-surface-container-low: var(--md-sys-color-surface-container-low);
+  --color-surface-container: var(--md-sys-color-surface-container);
+  --color-surface-container-high: var(--md-sys-color-surface-container-high);
+  --color-surface-container-highest: var(--md-sys-color-surface-container-highest);
+  --color-surface-variant: var(--md-sys-color-surface-variant);
+  --color-on-surface-variant: var(--md-sys-color-on-surface-variant);
+
+  --color-outline: var(--md-sys-color-outline);
+  --color-outline-variant: var(--md-sys-color-outline-variant);
+  --color-inverse-surface: var(--md-sys-color-inverse-surface);
+  --color-inverse-on-surface: var(--md-sys-color-inverse-on-surface);
+  --color-scrim: var(--md-sys-color-scrim);
+
+  /* Data/status colours — outside the 60/30/10 budget on purpose. */
+  --color-safe: var(--md-sys-color-safe);
+  --color-caution: var(--md-sys-color-caution);
+  --color-warn: var(--md-sys-color-warn);
+  --color-danger: var(--md-sys-color-danger);
+  --color-tension: var(--md-sys-color-tension);
+  --color-compression: var(--md-sys-color-compression);
+}
+
+/* ============================================================
+   GOOGLE MATERIAL 3 — LIGHT SCHEME DESIGN TOKENS
+   Reference: m3.material.io/styles/color/roles
+   ============================================================ */
 :root {
-  --canvas: #f4f6f8;
-  --surface: #ffffff;
-  --surface-muted: #eef2f5;
-  --surface-strong: #e4e9ee;
-  --ink: #18212b;
-  --ink-muted: #66727f;
-  --line: #dce2e8;
-  --line-strong: #cbd4dc;
-  --accent: #126b55;
-  --accent-hover: #0d5946;
-  --accent-soft: #e5f2ed;
-  --danger: #b42318;
-  --focus: #126b55;
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
+  /* Primary — Blue */
+  --md-sys-color-primary: #0061a4;
+  --md-sys-color-on-primary: #ffffff;
+  --md-sys-color-primary-container: #d1e4ff;
+  --md-sys-color-on-primary-container: #001d36;
+
+  /* Secondary */
+  --md-sys-color-secondary: #535f70;
+  --md-sys-color-on-secondary: #ffffff;
+  --md-sys-color-secondary-container: #d7e3f7;
+  --md-sys-color-on-secondary-container: #101c2b;
+
+  /* Tertiary — Teal */
+  --md-sys-color-tertiary: #006a58;
+  --md-sys-color-on-tertiary: #ffffff;
+  --md-sys-color-tertiary-container: #7ef7d9;
+  --md-sys-color-on-tertiary-container: #002019;
+
+  /* Error */
+  --md-sys-color-error: #ba1a1a;
+  --md-sys-color-on-error: #ffffff;
+  --md-sys-color-error-container: #ffdad6;
+  --md-sys-color-on-error-container: #410002;
+
+  /* Background */
+  --md-sys-color-background: #fafcff;
+  --md-sys-color-on-background: #1a1c1e;
+
+  /* Surface */
+  --md-sys-color-surface: #fafcff;
+  --md-sys-color-on-surface: #1a1c1e;
+  --md-sys-color-surface-dim: #d9dbe0;
+  --md-sys-color-surface-bright: #fafcff;
+  --md-sys-color-surface-variant: #dfe2eb;
+  --md-sys-color-on-surface-variant: #43474e;
+
+  /* Surface containers (elevation layers) */
+  --md-sys-color-surface-container-lowest: #ffffff;
+  --md-sys-color-surface-container-low:    #f4f6fb;
+  --md-sys-color-surface-container:        #eef0f5;
+  --md-sys-color-surface-container-high:   #e8eaf0;
+  --md-sys-color-surface-container-highest:#e2e5ea;
+
+  /* Outline */
+  --md-sys-color-outline: #73777f;
+  --md-sys-color-outline-variant: #c3c7cf;
+
+  /* Inverse */
+  --md-sys-color-inverse-surface: #2e3133;
+  --md-sys-color-inverse-on-surface: #f0f0f4;
+  --md-sys-color-inverse-primary: #9ecaff;
+
+  /* Shadow & scrim */
+  --md-sys-color-shadow: #000000;
+  --md-sys-color-scrim: #000000;
+
+  /* Status / data colours — tuned for AA contrast on light surfaces */
+  --md-sys-color-safe: #146c2e;
+  --md-sys-color-caution: #8a6100;
+  --md-sys-color-warn: #b35309;
+  --md-sys-color-danger: #ba1a1a;
+  --md-sys-color-tension: #0b57d0;
+  --md-sys-color-compression: #c5221f;
+
+  /* ---- Legacy aliases kept for backward-compat with old components ---- */
+  --canvas: var(--md-sys-color-background);
+  --surface: var(--md-sys-color-surface-container-lowest);
+  --surface-muted: var(--md-sys-color-surface-container-low);
+  --surface-strong: var(--md-sys-color-surface-container-high);
+  --ink: var(--md-sys-color-on-surface);
+  --ink-muted: var(--md-sys-color-on-surface-variant);
+  --line: var(--md-sys-color-outline-variant);
+  --line-strong: var(--md-sys-color-outline);
+  --accent: var(--md-sys-color-primary);
+  --accent-hover: #00497b;
+  --accent-soft: var(--md-sys-color-primary-container);
+  --danger: var(--md-sys-color-error);
+  --focus: var(--md-sys-color-primary);
+
+  /* ---- MD3 Shape scale ---- */
+  --md-sys-shape-none:           0px;
+  --md-sys-shape-extra-small:    4px;
+  --md-sys-shape-small:          8px;
+  --md-sys-shape-medium:         12px;
+  --md-sys-shape-large:          16px;
+  --md-sys-shape-extra-large:    28px;
+  --md-sys-shape-full:           9999px;
+
+  /* ---- MD3 Elevation (tonal surface overlays) ---- */
+  --md-sys-elevation-level0: 0px 0px 0px 0px rgba(0,0,0,0);
+  --md-sys-elevation-level1: 0px 1px 2px 0px rgba(0,0,0,.12), 0px 1px 3px 1px rgba(0,0,0,.07);
+  --md-sys-elevation-level2: 0px 1px 2px 0px rgba(0,0,0,.12), 0px 2px 6px 2px rgba(0,0,0,.07);
+  --md-sys-elevation-level3: 0px 4px 8px 3px rgba(0,0,0,.09), 0px 1px 3px 0px rgba(0,0,0,.12);
+  --md-sys-elevation-level4: 0px 6px 10px 4px rgba(0,0,0,.09), 0px 2px 3px 0px rgba(0,0,0,.12);
+  --md-sys-elevation-level5: 0px 8px 12px 6px rgba(0,0,0,.09), 0px 4px 4px 0px rgba(0,0,0,.12);
+}
+
+/* ============================================================
+   BASE RESET
+   ============================================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
-  background-color: var(--canvas);
-  color: var(--ink);
-  font-family: var(--font-geist-sans), Arial, sans-serif;
+  margin: 0;
+  background-color: var(--md-sys-color-background);
+  color: var(--md-sys-color-on-background);
+  font-family: 'Roboto', var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
 }
 
-button,
-input,
-select,
-textarea { font: inherit; }
+button, input, select, textarea {
+  font: inherit;
+}
 
-button,
-a { -webkit-tap-highlight-color: transparent; }
+button, a {
+  -webkit-tap-highlight-color: transparent;
+}
 
 :focus-visible {
-  outline: 2px solid var(--focus);
+  outline: 3px solid var(--md-sys-color-primary);
   outline-offset: 2px;
-}
-
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: #c7d0d8;
   border-radius: 4px;
 }
-::-webkit-scrollbar-thumb:hover {
-  background: #aeb9c3;
+
+/* ============================================================
+   MD3 TYPOGRAPHY SCALE
+   ============================================================ */
+.md-typescale-display-large   { font-size: 57px; line-height: 64px; font-weight: 400; letter-spacing: -0.25px; }
+.md-typescale-display-medium  { font-size: 45px; line-height: 52px; font-weight: 400; letter-spacing: 0; }
+.md-typescale-display-small   { font-size: 36px; line-height: 44px; font-weight: 400; letter-spacing: 0; }
+.md-typescale-headline-large  { font-size: 32px; line-height: 40px; font-weight: 400; letter-spacing: 0; }
+.md-typescale-headline-medium { font-size: 28px; line-height: 36px; font-weight: 400; letter-spacing: 0; }
+.md-typescale-headline-small  { font-size: 24px; line-height: 32px; font-weight: 400; letter-spacing: 0; }
+.md-typescale-title-large     { font-size: 22px; line-height: 28px; font-weight: 400; letter-spacing: 0; }
+.md-typescale-title-medium    { font-size: 16px; line-height: 24px; font-weight: 500; letter-spacing: 0.15px; }
+.md-typescale-title-small     { font-size: 14px; line-height: 20px; font-weight: 500; letter-spacing: 0.1px; }
+.md-typescale-body-large      { font-size: 16px; line-height: 24px; font-weight: 400; letter-spacing: 0.5px; }
+.md-typescale-body-medium     { font-size: 14px; line-height: 20px; font-weight: 400; letter-spacing: 0.25px; }
+.md-typescale-body-small      { font-size: 12px; line-height: 16px; font-weight: 400; letter-spacing: 0.4px; }
+.md-typescale-label-large     { font-size: 14px; line-height: 20px; font-weight: 500; letter-spacing: 0.1px; }
+.md-typescale-label-medium    { font-size: 12px; line-height: 16px; font-weight: 500; letter-spacing: 0.5px; }
+.md-typescale-label-small     { font-size: 11px; line-height: 16px; font-weight: 500; letter-spacing: 0.5px; }
+
+/* ============================================================
+   MD3 STATE LAYER (hover / focus / press tinting)
+   ============================================================ */
+.md-state-layer {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+.md-state-layer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: currentColor;
+  opacity: 0;
+  transition: opacity 150ms ease;
+  pointer-events: none;
+  z-index: 0;
+}
+.md-state-layer:hover::after  { opacity: 0.08; }
+.md-state-layer:focus-visible::after { opacity: 0.10; }
+.md-state-layer:active::after { opacity: 0.12; }
+
+/* ============================================================
+   MD3 SHORT-FORM UTILITIES
+   `elevation-*`, `type-*` and `state-layer` are the vocabulary the
+   tross-builder module is written against; they alias the `md-*` set
+   above so both spellings resolve to the same tokens.
+   ============================================================ */
+.elevation-0 { box-shadow: var(--md-sys-elevation-level0); }
+.elevation-1 { box-shadow: var(--md-sys-elevation-level1); }
+.elevation-2 { box-shadow: var(--md-sys-elevation-level2); }
+.elevation-3 { box-shadow: var(--md-sys-elevation-level3); }
+.elevation-4 { box-shadow: var(--md-sys-elevation-level4); }
+.elevation-5 { box-shadow: var(--md-sys-elevation-level5); }
+
+.type-display-s  { font-size: 36px; line-height: 44px; font-weight: 400; letter-spacing: 0; }
+.type-headline-s { font-size: 24px; line-height: 32px; font-weight: 400; letter-spacing: 0; }
+.type-title-m    { font-size: 16px; line-height: 24px; font-weight: 500; letter-spacing: 0.15px; }
+.type-title-s    { font-size: 14px; line-height: 20px; font-weight: 500; letter-spacing: 0.1px; }
+.type-body-m     { font-size: 14px; line-height: 20px; font-weight: 400; letter-spacing: 0.25px; }
+.type-body-s     { font-size: 12px; line-height: 16px; font-weight: 400; letter-spacing: 0.4px; }
+.type-label-l    { font-size: 14px; line-height: 20px; font-weight: 500; letter-spacing: 0.1px; }
+.type-label-m    { font-size: 12px; line-height: 16px; font-weight: 500; letter-spacing: 0.5px; }
+.type-label-s    { font-size: 11px; line-height: 16px; font-weight: 500; letter-spacing: 0.5px; }
+
+.state-layer { position: relative; isolation: isolate; }
+.state-layer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: currentColor;
+  opacity: 0;
+  transition: opacity 120ms ease;
+  pointer-events: none;
+  z-index: -1;
+}
+.state-layer:hover::after         { opacity: 0.08; }
+.state-layer:focus-visible::after { opacity: 0.10; }
+.state-layer:active::after        { opacity: 0.12; }
+
+@keyframes m3-dialog-in {
+  from { opacity: 0; transform: translateY(12px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.dialog-enter { animation: m3-dialog-in 220ms cubic-bezier(0.05, 0.7, 0.1, 1); }
+.scrim-enter  { animation: md-scrim-in 160ms ease-out; }
+
+/* ============================================================
+   MD3 SHAPE SCALE, SCOPED
+   Tailwind's default radius ramp is tighter than M3's. Rebinding the
+   variables on this scope lifts `rounded-*` inside the tross-builder
+   module to M3 values without shifting radii elsewhere in the app.
+   ============================================================ */
+.md3-scope {
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 28px;
 }
 
-/* Shared surfaces keep learning widgets in one material system. */
-.glass-panel {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  box-shadow: 0 1px 2px rgba(24, 33, 43, 0.05);
+/* Icon Button */
+.md-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--md-sys-shape-full);
+  background: transparent;
+  color: var(--md-sys-color-on-surface-variant);
+  border: none;
+  cursor: pointer;
+  transition: background 150ms;
 }
+.md-icon-btn:hover { background: color-mix(in srgb, var(--md-sys-color-on-surface-variant) 8%, transparent); }
+.md-icon-btn:active { background: color-mix(in srgb, var(--md-sys-color-on-surface-variant) 12%, transparent); }
 
-.glass-panel-hover:hover {
-  border-color: var(--line-strong);
-  box-shadow: 0 8px 24px rgba(24, 33, 43, 0.08);
-  transform: translateY(-1px);
-  transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
-}
-
-.neon-glow-blue {
-  box-shadow: none;
-}
-
-.neon-glow-emerald {
-  box-shadow: none;
-}
-
-.grid-bg {
-  background-image: none;
-}
-
-/* Range input overrides */
-input[type="range"] {
-  accent-color: var(--accent);
-  background: var(--surface-strong);
-  height: 6px;
-  border-radius: 3px;
-}
-
-/* ─── Glider Lab: Optimization Panel (WhiteBox Style) ─── */
-.opt-panel {
-  background: #e8e8e8;
-  border: 1px solid #c0c0c0;
-  padding: 12px 20px 8px;
-  flex-shrink: 0;
-}
-
-.opt-title {
-  font-size: 18px;
-  font-weight: 700;
-  text-align: center;
-  color: #1a1a1a;
-  margin-bottom: 8px;
-  letter-spacing: 0.02em;
-}
-
-.opt-bars-container {
+/* ============================================================
+   MD3 NAVIGATION DRAWER
+   ============================================================ */
+.md-nav-drawer {
+  width: 360px;
+  background-color: var(--md-sys-color-surface-container-low);
+  border-radius: 0 var(--md-sys-shape-extra-large) var(--md-sys-shape-extra-large) 0;
+  padding: 12px 0;
   display: flex;
   flex-direction: column;
-  gap: 4px;
 }
-
-.opt-row {
+.md-nav-drawer-item {
   display: flex;
   align-items: center;
   gap: 12px;
-}
-
-.opt-bar-track {
-  position: relative;
-  flex: 1;
-  height: 22px;
-  border-radius: 2px;
-  overflow: visible;
-}
-
-.opt-bar-gradient {
-  position: absolute;
-  inset: 0;
-  border-radius: 2px;
-  background: linear-gradient(
-    90deg,
-    #d32f2f 0%,
-    #e53935 20%,
-    #f44336 30%,
-    #4caf50 45%,
-    #43a047 55%,
-    #388e3c 70%,
-    #2e7d32 85%,
-    #1b5e20 100%
-  );
-}
-
-.opt-bar-tick {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 1px;
-  background: rgba(0, 0, 0, 0.15);
-  z-index: 1;
-}
-
-.opt-triangle {
-  position: absolute;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: 0;
-  height: 0;
-  border-left: 8px solid transparent;
-  border-right: 8px solid transparent;
-  border-bottom: 12px solid #f5a623;
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4));
-  transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  z-index: 3;
-}
-
-.opt-label {
-  font-size: 13px;
-  font-weight: 700;
-  white-space: nowrap;
-  min-width: 200px;
-  flex-shrink: 0;
-}
-
-.opt-legend {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  margin-top: 8px;
-  padding-top: 4px;
-}
-
-.opt-legend-unstable {
-  font-size: 13px;
-  font-weight: 700;
-  color: #2563eb;
-  font-style: italic;
-}
-
-.opt-legend-scale {
-  font-size: 13px;
-  font-weight: 700;
-  color: #2563eb;
-}
-
-/* ─── Glider Lab: Navbar (WhiteBox Style) ─── */
-.glider-nav-tab {
-  position: relative;
-  padding: 12px 22px;
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: #334155;
-  transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease;
-  border-bottom: 3px solid transparent;
+  height: 56px;
+  padding: 0 12px 0 16px;
+  border-radius: var(--md-sys-shape-full);
+  margin: 0 12px;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.1px;
+  color: var(--md-sys-color-on-surface-variant);
   cursor: pointer;
   text-decoration: none;
-  white-space: nowrap;
+  transition: background 150ms;
+}
+.md-nav-drawer-item:hover {
+  background: color-mix(in srgb, var(--md-sys-color-on-surface-variant) 8%, transparent);
+}
+.md-nav-drawer-item.active {
+  background: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+}
+.md-nav-drawer-label {
+  padding: 16px 28px 4px;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  color: var(--md-sys-color-on-surface-variant);
 }
 
-.glider-nav-tab:hover {
-  color: #0f172a;
-  background: rgba(0, 0, 0, 0.04);
-}
-
-.glider-nav-tab.active {
-  color: #0f172a;
-  font-weight: 800;
-  border-bottom-color: #2563eb;
-  background: rgba(37, 99, 235, 0.06);
-}
-
-/* ─── Glider Lab: Engineering Sidebar (WhiteBox Style) ─── */
-.eng-sidebar-item {
+/* ============================================================
+   MD3 TOP APP BAR
+   ============================================================ */
+.md-top-app-bar {
+  background-color: var(--md-sys-color-surface);
+  color: var(--md-sys-color-on-surface);
+  height: 64px;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 10px;
-  border-radius: 4px;
-  font-size: 13px;
-  font-weight: 600;
-  color: #1e293b;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  user-select: none;
+  padding: 0 4px 0 16px;
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
 }
 
-.eng-sidebar-item:hover {
-  background: rgba(37, 99, 235, 0.08);
-  color: #0f172a;
+/* ============================================================
+   MD3 SEGMENTED BUTTONS / TAB BAR
+   ============================================================ */
+.md-segmented-buttons {
+  display: inline-flex;
+  border-radius: var(--md-sys-shape-full);
+  border: 1px solid var(--md-sys-color-outline);
+  overflow: hidden;
 }
-
-.eng-sidebar-item.active {
-  background: rgba(37, 99, 235, 0.12);
-  color: #1d4ed8;
-  font-weight: 700;
-}
-
-.eng-sidebar-icon-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  border-radius: 4px;
-  color: #475569;
-  transition: all 0.15s ease;
-  cursor: pointer;
-  flex-shrink: 0;
-  border: none;
+.md-segmented-btn {
+  flex: 1;
+  height: 40px;
+  padding: 0 12px;
   background: transparent;
+  color: var(--md-sys-color-on-surface);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.1px;
+  border: none;
+  border-right: 1px solid var(--md-sys-color-outline);
+  cursor: pointer;
+  transition: background 150ms;
+}
+.md-segmented-btn:last-child { border-right: none; }
+.md-segmented-btn:hover { background: color-mix(in srgb, var(--md-sys-color-on-surface) 8%, transparent); }
+.md-segmented-btn.selected {
+  background: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
 }
 
-.eng-sidebar-icon-btn:hover {
-  background: rgba(0, 0, 0, 0.06);
-  color: #0f172a;
+/* ============================================================
+   SCROLLBAR
+   ============================================================ */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--md-sys-color-surface-container-low); }
+::-webkit-scrollbar-thumb { background: var(--md-sys-color-outline-variant); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--md-sys-color-outline); }
+
+/* ============================================================
+   RANGE INPUT (M3 style)
+   ============================================================ */
+input[type='range'] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  background: var(--md-sys-color-surface-container-highest);
+  border-radius: 2px;
+  outline: none;
+}
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--md-sys-color-primary);
+  cursor: pointer;
+  border: none;
+  box-shadow: var(--md-sys-elevation-level1);
+}
+input[type='range']::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--md-sys-color-primary);
+  cursor: pointer;
+  border: none;
 }
 
-/* ─── Docking Station (WhiteBox Style) ─── */
+/* ============================================================
+   ANIMATION HELPERS
+   ============================================================ */
+@keyframes md-enter-right {
+  from { opacity: 0; transform: translateX(-16px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.md-enter-right { animation: md-enter-right 220ms cubic-bezier(0.2, 0, 0, 1); }
+
+@keyframes md-scrim-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.md-scrim-in { animation: md-scrim-in 160ms ease-out; }
+
+/* ============================================================
+   LEGACY CLASSES — still consumed by modules not yet migrated
+   to the @/components/ui primitives. Delete each block as its
+   module is ported.
+   ============================================================ */
+/* ---- Docking panel (hardware / glider) ---- */
+.dock-panel {
+  width: 280px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--md-sys-color-surface-container-low);
+  border-left: 1px solid var(--md-sys-color-outline-variant);
+}
+.dock-body { flex: 1; min-height: 0; overflow-y: auto; }
 .dock-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #d4d4d4;
-  border-bottom: 1px solid #b0b0b0;
-  padding: 6px 12px;
+  background: var(--md-sys-color-surface-container-high);
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+  padding: 8px 16px;
   flex-shrink: 0;
 }
-
-.dock-header-nav {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #334155;
-}
-
-.dock-header-nav button {
-  background: none;
-  border: none;
-  color: #475569;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 700;
-  padding: 2px 4px;
-  transition: color 0.15s;
-}
-
-.dock-header-nav button:hover {
-  color: #0f172a;
-}
-
-.dock-component-name {
-  font-size: 13px;
-  font-weight: 700;
-  color: #1e293b;
-  text-align: center;
-  padding: 4px 0;
-  border-bottom: 1px solid #c0c0c0;
-  background: #e0e0e0;
-}
-
 .dock-field-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 5px 12px;
-  border-bottom: 1px solid #e5e5e5;
+  padding: 6px 16px;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+  font-size: 13px;
 }
-
 .dock-field-label {
-  font-size: 12px;
-  font-weight: 600;
-  color: #374151;
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface-variant);
   min-width: 110px;
 }
-
 .dock-field-input {
-  width: 70px;
-  padding: 3px 6px;
-  font-size: 12px;
-  font-family: var(--font-geist-mono), monospace;
-  border: 1px solid #b0b0b0;
-  border-radius: 3px;
-  background: #ffffff;
-  color: #1e293b;
+  width: 72px;
+  padding: 4px 8px;
+  font-size: 13px;
+  font-family: 'Roboto Mono', monospace;
+  border: 1px solid var(--md-sys-color-outline);
+  border-radius: var(--md-sys-shape-extra-small);
+  background: var(--md-sys-color-surface-container-lowest);
+  color: var(--md-sys-color-on-surface);
   text-align: right;
-}
-
-.dock-field-input:focus {
   outline: none;
-  border-color: #2563eb;
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
 }
-
+.dock-field-input:focus { border-color: var(--md-sys-color-primary); border-width: 2px; }
 .dock-field-unit {
-  font-size: 11px;
-  color: #6b7280;
+  font-size: 12px;
+  color: var(--md-sys-color-on-surface-variant);
   margin-left: 4px;
   min-width: 28px;
 }
-
 .dock-field-select {
-  padding: 3px 6px;
-  font-size: 12px;
-  border: 1px solid #b0b0b0;
-  border-radius: 3px;
-  background: #ffffff;
-  color: #1e293b;
+  padding: 4px 8px;
+  font-size: 13px;
+  border: 1px solid var(--md-sys-color-outline);
+  border-radius: var(--md-sys-shape-extra-small);
+  background: var(--md-sys-color-surface-container-lowest);
+  color: var(--md-sys-color-on-surface);
   min-width: 100px;
-}
-
-.dock-field-select:focus {
   outline: none;
-  border-color: #2563eb;
 }
-
+.dock-field-select:focus { border-color: var(--md-sys-color-primary); border-width: 2px; }
 .dock-actions {
   display: flex;
-  gap: 4px;
+  gap: 8px;
   padding: 8px 12px;
-  background: #e0e0e0;
-  border-top: 1px solid #c0c0c0;
+  background: var(--md-sys-color-surface-container-high);
+  border-top: 1px solid var(--md-sys-color-outline-variant);
 }
-
 .dock-btn {
   flex: 1;
-  padding: 5px 8px;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  border: 1px solid #999;
-  border-radius: 3px;
-  background: #d4d4d4;
-  color: #1e293b;
+  padding: 6px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid var(--md-sys-color-outline);
+  border-radius: var(--md-sys-shape-small);
+  background: var(--md-sys-color-surface-container-lowest);
+  color: var(--md-sys-color-on-surface);
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: background 150ms;
+  letter-spacing: 0.1px;
 }
-
-.dock-btn:hover {
-  background: #bbb;
-}
-
-.dock-btn:active {
-  background: #aaa;
-}
-
-.dock-btn:disabled {
-  opacity: 0.45;
-  cursor: default;
-}
-
-/* The panel shell, and the tab left behind when it is collapsed. */
-.dock-panel {
-  width: 274px;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  background: #f4f4f4;
-  border-left: 1px solid #b0b0b0;
-  box-shadow: -2px 0 6px rgba(0, 0, 0, 0.06);
-  z-index: 10;
-}
-
-.dock-body {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-}
-
-.dock-header-icon {
-  color: #ea580c;
-}
-
-.dock-header-close {
-  background: none;
-  border: none;
-  color: #475569;
-  cursor: pointer;
-  font-size: 16px;
-  line-height: 1;
-  padding: 0 2px;
-}
-
-.dock-header-close:hover {
-  color: #0f172a;
-}
-
-.dock-collapsed {
-  align-self: flex-start;
-  writing-mode: vertical-rl;
-  padding: 12px 6px;
-  margin: 8px 0 0;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  background: #d4d4d4;
-  color: #1e293b;
-  border: 1px solid #b0b0b0;
-  border-right: none;
-  border-radius: 4px 0 0 4px;
-  cursor: pointer;
-  flex-shrink: 0;
-}
-
-.dock-collapsed:hover {
-  background: #c0c0c0;
-}
-
-/* Section heading inside the panel. Without its own colour this inherited the
-   page's near-white text and vanished against the panel. */
+.dock-btn:hover { background: var(--md-sys-color-surface-container-high); }
+.dock-btn:disabled { opacity: 0.38; cursor: default; }
 .dock-category {
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.09em;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
   text-transform: uppercase;
-  color: #64748b;
-  background: #e8e8e8;
-  border-top: 1px solid #d4d4d4;
-  border-bottom: 1px solid #d4d4d4;
-  padding: 4px 12px;
+  color: var(--md-sys-color-on-surface-variant);
+  background: var(--md-sys-color-surface-container);
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+  padding: 6px 16px;
   margin-top: 8px;
 }
-
-/* Read-only label/value pair. These were `display: block` for want of a rule,
-   which ran the label straight into its value ("Empty Mass-275.00 g"). */
 .dock-info-row {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: 8px;
-  padding: 4px 12px;
-  border-bottom: 1px solid #ececec;
+  padding: 5px 16px;
+  border-bottom: 1px solid var(--md-sys-color-surface-container-high);
 }
-
-.dock-info-label {
-  font-size: 11.5px;
-  color: #64748b;
-}
-
+.dock-info-label { font-size: 12px; color: var(--md-sys-color-on-surface-variant); }
 .dock-info-value {
-  font-size: 11.5px;
-  font-family: 'JetBrains Mono', ui-monospace, monospace;
-  color: #1e293b;
+  font-size: 12px;
+  font-family: 'Roboto Mono', monospace;
+  color: var(--md-sys-color-on-surface);
   text-align: right;
 }
-
-/* ─── Fin profile editor ─── */
-.fin-editor {
-  padding: 8px 10px 10px;
-  background: #0b1b2e;
-  border-bottom: 1px solid #d4d4d4;
-}
-
-.fin-editor svg {
-  width: 100%;
-  height: auto;
-  display: block;
-}
-
-.fin-editor-legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 6px;
-  font-size: 10px;
-  font-family: 'JetBrains Mono', ui-monospace, monospace;
-  color: #94a3b8;
-}
-
-.fin-editor-legend b { color: #22d3ee; }
-
-/* Laid over the 3D viewport: the rocket shows through, and only the outline and
-   its handles take pointer events so the model can still be orbited around it. */
-.fin-editor-overlay {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: min(46vh, 340px);
-  padding: 0;
-  background: transparent;
-  border: none;
-  pointer-events: none;
-  z-index: 5;
-}
-
-.fin-editor-overlay svg {
-  overflow: visible;
-}
-
-.fin-editor-overlay circle,
-.fin-editor-overlay polygon {
-  pointer-events: all;
-}
-
-.fin-editor-overlay .fin-editor-legend {
-  justify-content: center;
-  margin-top: 4px;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
-}
-
-/* Small segmented choice, for stock that only comes in a few sizes. */
 .dock-chip {
-  min-width: 30px;
-  padding: 3px 8px;
-  font-size: 11px;
-  font-weight: 700;
-  border: 1px solid #b0b0b0;
-  border-radius: 3px;
-  background: #fff;
-  color: #475569;
+  min-width: 32px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid var(--md-sys-color-outline);
+  border-radius: var(--md-sys-shape-small);
+  background: var(--md-sys-color-surface-container-lowest);
+  color: var(--md-sys-color-on-surface-variant);
   cursor: pointer;
 }
-
-.dock-chip:hover { background: #ececec; }
-
-.dock-chip-on {
-  background: #ea580c;
-  border-color: #ea580c;
-  color: #fff;
+.dock-chip:hover { background: var(--md-sys-color-surface-container); }
+.dock-chip-on { background: var(--md-sys-color-primary-container); border-color: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); }
+.dock-slider { padding: 8px 16px; border-bottom: 1px solid var(--md-sys-color-outline-variant); }
+.dock-slider-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 4px; }
+.dock-slider-value { font-size: 12px; font-family: 'Roboto Mono', monospace; color: var(--md-sys-color-primary); font-weight: 500; }
+.dock-note { font-size: 12px; line-height: 1.5; color: var(--md-sys-color-on-surface-variant); padding: 8px 16px; }
+.dock-error { font-size: 12px; line-height: 1.4; color: var(--md-sys-color-error); font-weight: 500; }
+.dock-hint { font-size: 12px; line-height: 1.4; color: var(--md-sys-color-on-secondary-container); }
+.dock-messages { padding: 8px 16px; border-top: 1px solid var(--md-sys-color-outline-variant); }
+.dock-stab { padding: 12px 16px 6px; position: relative; }
+.dock-stab-body { height: 10px; border-radius: 5px; background: linear-gradient(90deg, var(--md-sys-color-surface-container-high), var(--md-sys-color-outline-variant)); }
+.dock-stab-mark { position: absolute; top: 8px; width: 3px; height: 18px; border-radius: 2px; transform: translateX(-1.5px); }
+.dock-stab-legend { display: flex; gap: 10px; align-items: center; margin-top: 10px; font-size: 11px; color: var(--md-sys-color-on-surface-variant); font-family: 'Roboto Mono', monospace; }
+.dock-stab-legend i { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 3px; }
+.dock-stab-nose { margin-left: auto; color: var(--md-sys-color-outline); }
+.dock-collapsed {
+  align-self: flex-start;
+  writing-mode: vertical-rl;
+  padding: 12px 6px;
+  margin: 8px 0 0;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  background: var(--md-sys-color-surface-container-high);
+  color: var(--md-sys-color-on-surface-variant);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-right: none;
+  border-radius: var(--md-sys-shape-small) 0 0 var(--md-sys-shape-small);
+  cursor: pointer;
+  flex-shrink: 0;
 }
-
-.dock-slider {
-  padding: 6px 12px;
-  border-bottom: 1px solid #e5e5e5;
-}
-
-.dock-slider-head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  margin-bottom: 3px;
-}
-
-.dock-slider-value {
-  font-size: 11.5px;
-  font-family: 'JetBrains Mono', ui-monospace, monospace;
-  color: #1d4ed8;
-  font-weight: 700;
-}
-
-.dock-slider input[type="range"] {
-  width: 100%;
-  accent-color: #ea580c;
-}
-
-.dock-note {
-  font-size: 11px;
-  line-height: 1.45;
-  color: #64748b;
-  padding: 8px 12px;
-}
-
-.dock-messages {
-  padding: 8px 12px;
-  border-top: 1px solid #d4d4d4;
-  background: #fafafa;
-}
-
-.dock-error,
-.dock-hint {
-  font-size: 11px;
-  line-height: 1.4;
-  margin-bottom: 5px;
-}
-
-.dock-error { color: #b91c1c; font-weight: 600; }
-.dock-hint { color: #92400e; }
-
-/* CG / CP picture in the stability panel. */
-.dock-stab {
-  padding: 12px 12px 6px;
-  position: relative;
-}
-
-.dock-stab-body {
-  height: 10px;
-  border-radius: 5px;
-  background: linear-gradient(90deg, #cbd5e1, #94a3b8);
-}
-
-.dock-stab-mark {
-  position: absolute;
-  top: 8px;
-  width: 3px;
-  height: 18px;
-  border-radius: 2px;
-  transform: translateX(-1.5px);
-}
-
-.dock-stab-legend {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  margin-top: 10px;
-  font-size: 10.5px;
-  color: #475569;
-  font-family: 'JetBrains Mono', ui-monospace, monospace;
-}
-
-.dock-stab-legend i {
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  border-radius: 2px;
-  margin-right: 3px;
-}
-
-.dock-stab-nose {
-  margin-left: auto;
-  color: #94a3b8;
-}
-
-/* ─── Scrollbar used by the docking station and report pages ─── */
-.custom-scrollbar::-webkit-scrollbar {
-  width: 8px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: #ececec;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #b8b8b8;
-  border-radius: 4px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #9a9a9a;
-}
-
-/* ─── 1:1 printable build templates ───
-   Sizes inside .pt-sheet are given in real mm so a 100%-scale print comes out
-   life size; nothing here may use relative units. */
-.pt-toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 12px 16px;
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  margin-bottom: 12px;
-}
-
-.pt-print-btn {
-  padding: 8px 16px;
-  border-radius: 6px;
+.dock-collapsed:hover { background: var(--md-sys-color-surface-container-highest); }
+.dock-header-icon { color: var(--md-sys-color-primary); }
+.dock-header-close {
+  background: none;
   border: none;
-  background: #1f2937;
-  color: #fff;
-  font-size: 12px;
-  font-weight: 700;
+  color: var(--md-sys-color-on-surface-variant);
   cursor: pointer;
-  white-space: nowrap;
+  padding: 4px;
+  border-radius: var(--md-sys-shape-full);
+  transition: background 150ms;
 }
-
-.pt-print-btn:hover { background: #111827; }
-
-.pt-sheet {
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 16px;
-}
-
-.pt-sheet-head {
+.dock-header-close:hover { background: color-mix(in srgb, var(--md-sys-color-on-surface-variant) 8%, transparent); }
+.dock-header-nav {
   display: flex;
-  justify-content: space-between;
-  font-size: 11px;
-  color: #6b7280;
-  border-bottom: 1px solid #e5e7eb;
-  padding-bottom: 8px;
-  margin-bottom: 12px;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface-variant);
+}
+.dock-component-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface);
+  text-align: center;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+  background: var(--md-sys-color-surface-container);
 }
 
+/* ---- Fin editor ---- */
+.fin-editor { padding: 8px 10px 10px; background: var(--md-sys-color-surface-container); border-bottom: 1px solid var(--md-sys-color-outline-variant); }
+.fin-editor svg { width: 100%; height: auto; display: block; }
+.fin-editor-legend { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; font-size: 11px; font-family: 'Roboto Mono', monospace; color: var(--md-sys-color-on-surface-variant); }
+.fin-editor-legend b { color: var(--md-sys-color-primary); }
+.fin-editor-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: min(46vh,340px); padding: 0; background: transparent; border: none; pointer-events: none; z-index: 5; }
+.fin-editor-overlay svg { overflow: visible; }
+.fin-editor-overlay circle, .fin-editor-overlay polygon { pointer-events: all; }
+.fin-editor-overlay .fin-editor-legend { justify-content: center; margin-top: 4px; text-shadow: 0 1px 3px rgba(0,0,0,.8); }
+
+/* ---- Print templates ---- */
+.pt-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; background: var(--md-sys-color-surface-container-lowest); border: 1px solid var(--md-sys-color-outline-variant); border-radius: var(--md-sys-shape-medium); margin-bottom: 12px; }
+.pt-print-btn { padding: 8px 24px; border-radius: var(--md-sys-shape-full); border: none; background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); font-size: 14px; font-weight: 500; cursor: pointer; }
+.pt-print-btn:hover { box-shadow: var(--md-sys-elevation-level1); }
+.pt-sheet { background: var(--md-sys-color-surface-container-lowest); border: 1px solid var(--md-sys-color-outline-variant); border-radius: var(--md-sys-shape-medium); padding: 16px; }
+.pt-sheet-head { display: flex; justify-content: space-between; font-size: 12px; color: var(--md-sys-color-on-surface-variant); border-bottom: 1px solid var(--md-sys-color-outline-variant); padding-bottom: 8px; margin-bottom: 12px; }
 .pt-block { margin-bottom: 22px; }
-
-.pt-title {
-  font-size: 12px;
-  font-weight: 700;
-  color: #111827;
-  margin-bottom: 6px;
-}
-
-.pt-meta {
-  display: block;
-  font-size: 10.5px;
-  font-weight: 400;
-  color: #6b7280;
-  font-family: 'JetBrains Mono', ui-monospace, monospace;
-  margin-top: 2px;
-}
+.pt-title { font-size: 13px; font-weight: 500; color: var(--md-sys-color-on-surface); margin-bottom: 6px; }
+.pt-meta { display: block; font-size: 11px; color: var(--md-sys-color-on-surface-variant); font-family: 'Roboto Mono', monospace; margin-top: 2px; }
 
 @media print {
-  /* Only the templates go on paper. */
   body * { visibility: hidden; }
   .print-templates, .print-templates * { visibility: visible; }
-  .print-templates {
-    position: absolute;
-    inset: 0;
-    background: #fff;
-  }
+  .print-templates { position: absolute; inset: 0; background: white; }
   .no-print { display: none !important; }
   .pt-sheet { border: none; padding: 0; }
   .pt-break { break-before: page; }
 }
 
-/* ─── Fade-in animation ─── */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+/* ---- Gauge / animations ---- */
+@keyframes gaugeNeedleWobble { 0%,100% { transform: rotate(-2deg); } 50% { transform: rotate(2deg); } }
+.gauge-needle-live { animation: gaugeNeedleWobble .3s ease-in-out infinite; transform-origin: left center; }
 
-.animate-fadeIn {
-  animation: fadeIn 0.4s ease-out forwards;
-}
+@keyframes fadeSlideIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
 
-/* ─── Live load gauge needle (Structures Competition) ─── */
-@keyframes gaugeNeedleWobble {
-  0%, 100% { transform: rotate(-2deg); }
-  50% { transform: rotate(2deg); }
-}
-
-.gauge-needle-live {
-  animation: gaugeNeedleWobble 0.3s ease-in-out infinite;
-  transform-origin: left center;
-}
-
-/* Smooth expand animation for member detail cards */
-@keyframes fadeSlideIn {
-  from { opacity: 0; transform: translateY(-6px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* ─── Electronics: wire tie-points ───
-   The component artwork already prints its own pin holes and labels, so a
-   terminal stays invisible until you reach for it and then rings itself. */
+/* ---- Electronics wire terminals ---- */
 .elec-terminal {
   border-radius: 50%;
   background: transparent;
-  transition: background 90ms ease-out, box-shadow 90ms ease-out;
+  transition: box-shadow 120ms;
+}
+.elec-terminal:hover, .elec-terminal:focus-within {
+  box-shadow: 0 0 0 6px color-mix(in srgb, var(--md-sys-color-primary) 20%, transparent);
 }
 
-.elec-terminal:hover {
-  background: rgba(34, 197, 94, 0.45);
-  box-shadow: 0 0 0 2px rgba(21, 128, 61, 0.9);
-}
+/* ---- Custom scrollbar for older panels ---- */
+.custom-scrollbar::-webkit-scrollbar { width: 8px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: var(--md-sys-color-surface-container-low); }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: var(--md-sys-color-outline-variant); border-radius: 4px; }
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: var(--md-sys-color-outline); }
 
-/* Running DC motor: the artwork is a side view, so the shaft gets a spinner. */
-@keyframes elecSpin {
-  to { transform: rotate(360deg); }
-}
-
-.elec-spin {
-  animation: elecSpin 1s linear infinite;
-  transform-origin: 0 0;
-}
-
-/* touch to force a CSS rebuild */
-
-/* Glider workspace final cascade overrides. */
-.dock-header { min-height: 46px; padding: 8px 10px; border-bottom-color: var(--line); background: var(--surface); }
-.dock-header-nav { width: 100%; justify-content: space-between; gap: 6px; color: var(--ink); font-size: 11px; letter-spacing: 0; text-transform: none; }
-.dock-header-nav button { display: inline-flex; width: 30px; height: 30px; align-items: center; justify-content: center; border-radius: 8px; color: var(--ink-muted); }
-.dock-header-nav button:hover:not(:disabled) { color: var(--accent); background: var(--accent-soft); }
-.dock-header-nav button:disabled { cursor: default; opacity: .3; }
-.dock-component-name { padding: 9px 12px; border-bottom-color: var(--line); background: var(--surface-muted); color: var(--ink); text-align: left; }
-.dock-field-row { gap: 7px; padding: 8px 12px; border-bottom-color: var(--line); }
-.dock-field-label { min-width: 92px; color: var(--ink-muted); font-weight: 550; }
-.dock-field-input, .dock-field-select { min-height: 32px; border-color: var(--line-strong); border-radius: 8px; background: var(--surface); color: var(--ink); }
-.dock-field-input:focus, .dock-field-select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
-.dock-actions { gap: 6px; padding: 10px; border-top-color: var(--line); background: var(--surface); }
-.dock-btn { display: inline-flex; min-width: 0; align-items: center; justify-content: center; gap: 4px; padding: 8px 6px; border-color: var(--line-strong); border-radius: 8px; background: var(--surface); color: var(--ink-muted); font-size: 10px; letter-spacing: 0; text-transform: none; }
-.dock-btn:hover { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
-.dock-btn-primary, .dock-btn-primary:hover { border-color: var(--accent); background: var(--accent); color: white; }
-.dock-category { margin-top: 4px; border-color: var(--line); background: var(--surface-muted); color: var(--ink-muted); }
+/* Konva */
+.konvajs-content { position: absolute !important; inset: 0; }

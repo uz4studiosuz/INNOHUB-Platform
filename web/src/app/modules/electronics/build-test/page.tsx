@@ -1,6 +1,9 @@
-import { IconTools } from "@tabler/icons-react";
-import { EmptyModuleState } from "@/components/module-shell/EmptyModuleState";
+import CircuitBuilder from "@/components/electronics-lab/CircuitBuilder";
 
 export default function ElectronicsBuildTestPage() {
-  return <EmptyModuleState icon={IconTools} title="Build & Test" description="Haqiqiy breadboard'da zanjir yig'ish va multimetr bilan o'lchash bo'yicha qo'llanma tez orada qo'shiladi." />;
+  return (
+    <div className="h-[calc(100vh-130px)] min-h-[550px] w-full bg-[#080b11]">
+      <CircuitBuilder />
+    </div>
+  );
 }

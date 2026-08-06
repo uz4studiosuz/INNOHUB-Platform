@@ -5,18 +5,16 @@ import { ModuleNavbar, ModuleTab } from "./ModuleNavbar";
 export function ModuleWorkspace({
   basePath,
   tabs,
-  accent,
   children,
 }: {
   basePath: string;
   tabs?: ModuleTab[];
-  accent?: string;
   children: React.ReactNode;
 }) {
   return (
-    <div className="fixed inset-0 z-[60] flex flex-col bg-[var(--canvas)] text-[var(--ink)]">
-      <ModuleNavbar basePath={basePath} tabs={tabs} accent={accent} />
-      <div className="flex-1 flex flex-col min-w-0 min-h-0 overflow-y-auto">
+    <div className="flex min-h-0 flex-1 flex-col bg-background text-on-background">
+      <ModuleNavbar basePath={basePath} tabs={tabs} />
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto">
         {children}
       </div>
     </div>

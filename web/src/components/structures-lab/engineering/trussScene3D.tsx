@@ -1,8 +1,9 @@
 "use client";
-
-import { useMemo } from "react";
+import React, { useMemo } from "react";
 import type { ThreeEvent } from "@react-three/fiber";
+import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
+import { RigidBody, RapierRigidBody, useSphericalJoint, interactionGroups } from "@react-three/rapier";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { TrussNode, TrussMemberDraft, SolvedMember, BuilderMode } from "./types";
 import { GRID_SIZE, UNIT_METERS } from "./trussApiParams";
@@ -271,6 +272,41 @@ function GussetPlate({ radius, side, materialLabel }: { radius: number; side: "f
   );
 }
 
+function SphericalJoint({ a, b, anchorA, anchorB }: any) {
+  useSphericalJoint(a, b, [anchorA, anchorB]);
+  return null;
+}
+
+import { useState } from "react";
+
+function BeamJoints({ memberRef, nodeARef, nodeBRef, length, breakingStrain = 0.05 }: any) {
+  const [broken, setBroken] = useState(false);
+  
+  useFrame(() => {
+    if (broken) return;
+    if (nodeARef.current && nodeBRef.current) {
+       const pA = nodeARef.current.translation();
+       const pB = nodeBRef.current.translation();
+       const dist = Math.hypot(pA.x - pB.x, pA.y - pB.y, pA.z - pB.z);
+       const strain = Math.abs(dist - length) / length;
+       if (strain > breakingStrain) {
+         setBroken(true);
+       }
+    }
+  });
+
+  if (broken) return null;
+
+  return (
+    <>
+      <SphericalJoint a={nodeARef as any} b={memberRef as any} anchorA={[0, 0, 0]} anchorB={[0, -length / 2, 0]} />
+      <SphericalJoint a={nodeBRef as any} b={memberRef as any} anchorA={[0, 0, 0]} anchorB={[0, length / 2, 0]} />
+    </>
+  );
+}
+
+import { useRef } from "react";
+
 export function MemberBeam({
   a,
   b,
@@ -283,6 +319,10 @@ export function MemberBeam({
   highlight,
   onPointerOver,
   onPointerOut,
+  physics,
+  dynamic,
+  nodeARef,
+  nodeBRef,
 }: {
   a: THREE.Vector3;
   b: THREE.Vector3;
@@ -305,7 +345,12 @@ export function MemberBeam({
   highlight?: boolean;
   onPointerOver?: (e: ThreeEvent<PointerEvent>) => void;
   onPointerOut?: (e: ThreeEvent<PointerEvent>) => void;
+  physics?: boolean;
+  dynamic?: boolean;
+  nodeARef?: any;
+  nodeBRef?: any;
 }) {
+  const memberRef = useRef<RapierRigidBody>(null);
   const { position, quaternion, length } = useMemo(() => {
     const dir = new THREE.Vector3().subVectors(b, a);
     const len = dir.length();
@@ -318,10 +363,10 @@ export function MemberBeam({
   const profile = materialProfileFor(materialLabel);
   const woodTexture = isWood && profile.wood ? getWoodTexture() : null;
 
-  return (
+  const mesh = (
     <mesh
-      position={position}
-      quaternion={quaternion}
+      position={physics ? undefined : position}
+      quaternion={physics ? undefined : quaternion}
       castShadow
       receiveShadow
       onClick={onClick}
@@ -342,6 +387,19 @@ export function MemberBeam({
       />
     </mesh>
   );
+  
+  if (physics) {
+    return (
+      <RigidBody ref={memberRef} type={dynamic ? "dynamic" : "fixed"} position={position} quaternion={quaternion} colliders="cuboid" collisionGroups={interactionGroups(1, [0, 2])}>
+        {mesh}
+        {dynamic && nodeARef && nodeBRef && (
+          <BeamJoints memberRef={memberRef} nodeARef={nodeARef} nodeBRef={nodeBRef} length={length} />
+        )}
+      </RigidBody>
+    );
+  }
+  
+  return mesh;
 }
 
 export function SupportGlyph3D({
@@ -411,6 +469,13 @@ function useDeckGeometry(nodes: TrussNode[], centerX: number, centerY: number, r
 
 type DeckStyle = "timber" | "asphalt";
 
+function OptionalRigidBody({ physics, dynamic, children, ...props }: any) {
+  if (physics) {
+    return <RigidBody type={dynamic ? "dynamic" : "fixed"} colliders="cuboid" collisionGroups={interactionGroups(1, [0, 2])} {...props}>{children}</RigidBody>;
+  }
+  return <group {...props}>{children}</group>;
+}
+
 /** The carriageway: a running surface between two raised kerbs, carried on
  * transverse floor beams. Timber decks get individual planks (the balsa
  * competition bridges); metal decks get an asphalt wearing course with lane
@@ -422,6 +487,8 @@ function BridgeDeck({
   radius,
   depthUnits,
   style,
+  physics,
+  dynamic,
 }: {
   nodes: TrussNode[];
   centerX: number;
@@ -429,6 +496,8 @@ function BridgeDeck({
   radius: number;
   depthUnits: number;
   style: DeckStyle;
+  physics?: boolean;
+  dynamic?: boolean;
 }) {
   const deck = useDeckGeometry(nodes, centerX, centerY, radius);
   const asphalt = useMemo(() => (style === "asphalt" ? getAsphaltTexture() : null), [style]);
@@ -457,48 +526,54 @@ function BridgeDeck({
           return (
             <group position={[midX, surfaceY, 0]}>
               {Array.from({ length: plankCount }, (_, index) => (
-                <mesh key={index} position={[-span / 2 + plankWidth * (index + 0.5), 0, 0]} castShadow receiveShadow>
-                  <boxGeometry args={[plankWidth * 0.9, slabThickness, roadWidth]} />
-                  <meshStandardMaterial color="#a77a4d" map={wood} roughness={0.88} metalness={0.01} />
-                </mesh>
+                <OptionalRigidBody key={index} physics={physics} dynamic={dynamic} position={[-span / 2 + plankWidth * (index + 0.5), 0, 0]}>
+                  <mesh castShadow receiveShadow>
+                    <boxGeometry args={[plankWidth * 0.9, slabThickness, roadWidth]} />
+                    <meshStandardMaterial color="#a77a4d" map={wood} roughness={0.88} metalness={0.01} />
+                  </mesh>
+                </OptionalRigidBody>
               ))}
             </group>
           );
         })()
       ) : (
         <>
-          <mesh position={[midX, surfaceY, 0]} castShadow receiveShadow>
-            <boxGeometry args={[span, slabThickness, roadWidth]} />
-            <meshStandardMaterial color="#5c6367" map={asphalt} roughness={0.95} metalness={0.03} />
-          </mesh>
-          {/* dashed centre line */}
-          {Array.from({ length: dashCount }, (_, index) => (
-            <mesh key={`dash-${index}`} position={[minX + (span / dashCount) * (index + 0.5), markingY, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-              <planeGeometry args={[dashLength, roadWidth * 0.035]} />
-              <meshStandardMaterial color="#e8e2cf" roughness={0.8} metalness={0} />
+          <OptionalRigidBody physics={physics} dynamic={dynamic} position={[midX, surfaceY, 0]}>
+            <mesh castShadow receiveShadow>
+              <boxGeometry args={[span, slabThickness, roadWidth]} />
+              <meshStandardMaterial color="#5c6367" map={asphalt} roughness={0.95} metalness={0.03} />
             </mesh>
-          ))}
-          {/* edge lines */}
-          {[roadWidth * 0.38, -roadWidth * 0.38].map((z) => (
-            <mesh key={`edge-${z}`} position={[midX, markingY, z]} rotation={[-Math.PI / 2, 0, 0]}>
-              <planeGeometry args={[span, roadWidth * 0.03]} />
-              <meshStandardMaterial color="#dcd6c4" roughness={0.85} metalness={0} />
-            </mesh>
-          ))}
+            {/* dashed centre line */}
+            {Array.from({ length: dashCount }, (_, index) => (
+              <mesh key={`dash-${index}`} position={[minX - midX + (span / dashCount) * (index + 0.5), slabThickness / 2 + 0.004, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+                <planeGeometry args={[dashLength, roadWidth * 0.035]} />
+                <meshStandardMaterial color="#e8e2cf" roughness={0.8} metalness={0} />
+              </mesh>
+            ))}
+            {/* edge lines */}
+            {[roadWidth * 0.38, -roadWidth * 0.38].map((z) => (
+              <mesh key={`edge-${z}`} position={[0, slabThickness / 2 + 0.004, z]} rotation={[-Math.PI / 2, 0, 0]}>
+                <planeGeometry args={[span, roadWidth * 0.03]} />
+                <meshStandardMaterial color="#dcd6c4" roughness={0.85} metalness={0} />
+              </mesh>
+            ))}
+          </OptionalRigidBody>
         </>
       )}
 
       {/* kerbs / safety curbs down both edges */}
       {[roadWidth / 2 - kerbWidth / 2, -roadWidth / 2 + kerbWidth / 2].map((z) => (
-        <mesh key={`kerb-${z}`} position={[midX, surfaceY + slabThickness / 2 + kerbHeight / 2, z]} castShadow receiveShadow>
-          <boxGeometry args={[span, kerbHeight, kerbWidth]} />
-          <meshStandardMaterial
-            color={style === "timber" ? "#8f6a41" : "#9aa0a4"}
-            map={style === "timber" ? wood : concrete}
-            roughness={0.9}
-            metalness={0.02}
-          />
-        </mesh>
+        <OptionalRigidBody key={`kerb-${z}`} physics={physics} dynamic={dynamic} position={[midX, surfaceY + slabThickness / 2 + kerbHeight / 2, z]}>
+          <mesh castShadow receiveShadow>
+            <boxGeometry args={[span, kerbHeight, kerbWidth]} />
+            <meshStandardMaterial
+              color={style === "timber" ? "#8f6a41" : "#9aa0a4"}
+              map={style === "timber" ? wood : concrete}
+              roughness={0.9}
+              metalness={0.02}
+            />
+          </mesh>
+        </OptionalRigidBody>
       ))}
     </group>
   );
@@ -506,7 +581,7 @@ function BridgeDeck({
 
 /** Pedestrian parapet down both sides of the deck: a post at every panel point
  * with a top rail and a mid rail threaded through them. */
-function BridgeRailings({ nodes, centerX, centerY, radius, depthUnits }: { nodes: TrussNode[]; centerX: number; centerY: number; radius: number; depthUnits: number }) {
+function BridgeRailings({ nodes, centerX, centerY, radius, depthUnits, physics, dynamic }: { nodes: TrussNode[]; centerX: number; centerY: number; radius: number; depthUnits: number; physics?: boolean; dynamic?: boolean; }) {
   const deck = useDeckGeometry(nodes, centerX, centerY, radius);
   if (!deck) return null;
 
@@ -525,16 +600,20 @@ function BridgeRailings({ nodes, centerX, centerY, radius, depthUnits }: { nodes
       {[railZ, -railZ].map((z) => (
         <group key={`rail-side-${z}`}>
           {Array.from({ length: postCount + 1 }, (_, index) => (
-            <mesh key={`post-${index}`} position={[minX + (span / postCount) * index, baseY + postHeight / 2, z]} castShadow>
-              <boxGeometry args={[postSide, postHeight, postSide]} />
-              <meshStandardMaterial color="#8d979e" roughness={0.4} metalness={0.8} />
-            </mesh>
+            <OptionalRigidBody key={`post-${index}`} physics={physics} dynamic={dynamic} position={[minX + (span / postCount) * index, baseY + postHeight / 2, z]}>
+              <mesh castShadow>
+                <boxGeometry args={[postSide, postHeight, postSide]} />
+                <meshStandardMaterial color="#8d979e" roughness={0.4} metalness={0.8} />
+              </mesh>
+            </OptionalRigidBody>
           ))}
           {[postHeight * 0.98, postHeight * 0.55].map((h) => (
-            <mesh key={`rail-${h}`} position={[midX, baseY + h, z]} rotation={[0, 0, Math.PI / 2]} castShadow>
-              <cylinderGeometry args={[railSide, railSide, span, 10]} />
-              <meshStandardMaterial color="#a3adb4" roughness={0.32} metalness={0.88} />
-            </mesh>
+            <OptionalRigidBody key={`rail-${h}`} physics={physics} dynamic={dynamic} position={[midX, baseY + h, z]} rotation={[0, 0, Math.PI / 2]}>
+              <mesh castShadow>
+                <cylinderGeometry args={[railSide, railSide, span, 10]} />
+                <meshStandardMaterial color="#a3adb4" roughness={0.32} metalness={0.88} />
+              </mesh>
+            </OptionalRigidBody>
           ))}
         </group>
       ))}
@@ -647,6 +726,10 @@ interface TrussSceneContentsProps {
   highlightMemberId?: string | null;
   /** Fires when the pointer enters/leaves a beam in the 3D scene. */
   onMemberHover?: (id: string | null) => void;
+  /** Enable Rapier physics for members */
+  physicsMode?: boolean;
+  /** Trigger dynamic collapse (break) for physics bodies */
+  physicsCollapse?: boolean;
 }
 
 export function TrussSceneContents({
@@ -662,6 +745,8 @@ export function TrussSceneContents({
   keepWood,
   highlightMemberId,
   onMemberHover,
+  physicsMode,
+  physicsCollapse,
 }: TrussSceneContentsProps) {
   const { center, radius, depthUnits, halfDepth } = useTrussBounds(nodes);
   // The design (nodes/members) is drawn as one 2D truss; rendered as the two
@@ -680,6 +765,18 @@ export function TrussSceneContents({
   // asphalt carriageway. keepWood (the Truck Rally arena) forces the timber
   // deck regardless, because there the bridge is always a balsa model.
   const deckStyle: DeckStyle = keepWood || materialProfileFor(members[0]?.materialLabel).wood ? "timber" : "asphalt";
+
+  const nodeRefs = useRef(new Map<string, any>());
+  useMemo(() => {
+    for (const side of ["front", "back"]) {
+      for (const n of nodes) {
+        const key = `${side}-${n.id}`;
+        if (!nodeRefs.current.has(key)) {
+          nodeRefs.current.set(key, React.createRef());
+        }
+      }
+    }
+  }, [nodes]);
 
   const renderMembers = (nodeMap: Map<string, THREE.Vector3>, side: "front" | "back") =>
     members.map((m) => {
@@ -709,6 +806,10 @@ export function TrussSceneContents({
           materialLabel={m.materialLabel}
           sceneRadius={radius}
           highlight={isHighlighted}
+          physics={physicsMode}
+          dynamic={physicsCollapse || (physicsMode && failing)}
+          nodeARef={nodeRefs.current.get(`${side}-${m.nodeA}`)}
+          nodeBRef={nodeRefs.current.get(`${side}-${m.nodeB}`)}
           onClick={
             side === "front"
               ? (e) => {
@@ -735,10 +836,10 @@ export function TrussSceneContents({
     nodes.map((n) => {
       const pos = nodeMap.get(n.id);
       if (!pos) return null;
-      return (
-        <group key={`${side}-${n.id}`}>
+      const ref = nodeRefs.current.get(`${side}-${n.id}`);
+      const content = (
+        <group>
           <group
-            position={pos}
             onClick={
               side === "front" && onNodeClick
                 ? (e) => {
@@ -751,12 +852,27 @@ export function TrussSceneContents({
             <GussetPlate radius={radius} side={side} materialLabel={members[0]?.materialLabel} />
           </group>
           {side === "front" && memberFirstNode === n.id && (
-            <mesh position={pos} rotation={[Math.PI / 2, 0, 0]}>
+            <mesh rotation={[Math.PI / 2, 0, 0]}>
               <ringGeometry args={[radius * 0.07, radius * 0.09, 24]} />
               <meshBasicMaterial color="#facc15" side={THREE.DoubleSide} />
             </mesh>
           )}
-          <SupportGlyph3D pos={pos} type={n.support} sceneRadius={radius} />
+          {/* Note: SupportGlyph is a visual marker, so we place it relative to the node. */}
+          <SupportGlyph3D pos={new THREE.Vector3(0,0,0)} type={n.support} sceneRadius={radius} />
+        </group>
+      );
+
+      if (physicsMode) {
+        return (
+          <RigidBody key={`${side}-${n.id}`} ref={ref} type={n.support === "none" && physicsCollapse ? "dynamic" : "fixed"} position={pos} colliders="ball" collisionGroups={interactionGroups(1, [0, 2])}>
+            {content}
+          </RigidBody>
+        );
+      }
+
+      return (
+        <group key={`${side}-${n.id}`} position={pos}>
+          {content}
         </group>
       );
     });
@@ -767,7 +883,7 @@ export function TrussSceneContents({
     const a = frontNodeMap.get(n.id);
     const b = backNodeMap.get(n.id);
     if (!a || !b) return null;
-    return <MemberBeam key={`brace-${n.id}`} a={a} b={b} color={materialProfileFor(members[0]?.materialLabel).color} thick={false} isWood materialLabel={members[0]?.materialLabel} sceneRadius={radius} />;
+    return <MemberBeam key={`brace-${n.id}`} a={a} b={b} color={materialProfileFor(members[0]?.materialLabel).color} thick={false} isWood materialLabel={members[0]?.materialLabel} sceneRadius={radius} physics={physicsMode} dynamic={physicsCollapse} nodeARef={nodeRefs.current.get(`front-${n.id}`)} nodeBRef={nodeRefs.current.get(`back-${n.id}`)} />;
   });
 
   // Diagonal (X) bracing across the deck and across the top: real truss
@@ -787,8 +903,8 @@ export function TrussSceneContents({
     const fb = frontNodeMap.get(m.nodeB);
     if (!fa || !bb || !ba || !fb) return [];
     return [
-      <MemberBeam key={`xbrace-a-${m.id}`} a={fa} b={bb} color={materialProfileFor(m.materialLabel).color} thick={false} isWood materialLabel={m.materialLabel} sceneRadius={radius} />,
-      <MemberBeam key={`xbrace-b-${m.id}`} a={ba} b={fb} color={materialProfileFor(m.materialLabel).color} thick={false} isWood materialLabel={m.materialLabel} sceneRadius={radius} />,
+      <MemberBeam key={`xbrace-a-${m.id}`} a={fa} b={bb} color={materialProfileFor(m.materialLabel).color} thick={false} isWood materialLabel={m.materialLabel} sceneRadius={radius} physics={physicsMode} dynamic={physicsCollapse} nodeARef={nodeRefs.current.get(`front-${m.nodeA}`)} nodeBRef={nodeRefs.current.get(`back-${m.nodeB}`)} />,
+      <MemberBeam key={`xbrace-b-${m.id}`} a={ba} b={fb} color={materialProfileFor(m.materialLabel).color} thick={false} isWood materialLabel={m.materialLabel} sceneRadius={radius} physics={physicsMode} dynamic={physicsCollapse} nodeARef={nodeRefs.current.get(`back-${m.nodeA}`)} nodeBRef={nodeRefs.current.get(`front-${m.nodeB}`)} />,
     ];
   });
 
@@ -810,8 +926,8 @@ export function TrussSceneContents({
         </mesh>
       )}
 
-      <BridgeDeck nodes={nodes} centerX={center.x} centerY={center.y} radius={radius} depthUnits={depthUnits} style={deckStyle} />
-      <BridgeRailings nodes={nodes} centerX={center.x} centerY={center.y} radius={radius} depthUnits={depthUnits} />
+      <BridgeDeck nodes={nodes} centerX={center.x} centerY={center.y} radius={radius} depthUnits={depthUnits} style={deckStyle} physics={physicsMode} dynamic={physicsCollapse} />
+      <BridgeRailings nodes={nodes} centerX={center.x} centerY={center.y} radius={radius} depthUnits={depthUnits} physics={physicsMode} dynamic={physicsCollapse} />
       <BridgeInfrastructure nodes={nodes} centerX={center.x} centerY={center.y} radius={radius} depthUnits={depthUnits} />
       {renderMembers(frontNodeMap, "front")}
       {renderMembers(backNodeMap, "back")}

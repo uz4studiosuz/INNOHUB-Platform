@@ -1,45 +1,46 @@
+import type { ResearchKey } from "./i18n";
+
 export type SectionGroupId = "design-process" | "background" | "knowledge";
 
 export interface ResearchSectionMeta {
   id: string;
-  title: string;
+  /** Key into the research dictionary — resolved at render time, not here. */
+  titleKey: ResearchKey;
   isWorksheet: boolean;
 }
 
 export interface ResearchGroup {
   id: SectionGroupId;
-  label: string;
+  labelKey: ResearchKey;
   items: ResearchSectionMeta[];
 }
 
 export const RESEARCH_GROUPS: ResearchGroup[] = [
   {
     id: "design-process",
-    label: "Engineering Design Process",
+    labelKey: "group.designProcess",
     items: [
-      { id: "design-process", title: "The Engineering Design Process", isWorksheet: false },
-      { id: "design-challenge", title: "Design Challenge", isWorksheet: false },
+      { id: "design-process", titleKey: "sec.designProcess", isWorksheet: false },
+      { id: "design-challenge", titleKey: "sec.designChallenge", isWorksheet: false },
     ],
   },
   {
     id: "background",
-    label: "Background",
-    items: [
-      { id: "background", title: "Background", isWorksheet: false },
-    ],
+    labelKey: "group.background",
+    items: [{ id: "background", titleKey: "sec.background", isWorksheet: false }],
   },
   {
     id: "knowledge",
-    label: "Knowledge At Work",
+    labelKey: "group.knowledge",
     items: [
-      { id: "truss-systems", title: "Truss Systems", isWorksheet: false },
-      { id: "worksheet-truss-stability", title: "Worksheet: Truss Stability", isWorksheet: true },
-      { id: "forces-on-truss", title: "Forces on a Truss", isWorksheet: false },
-      { id: "worksheet-linear-forces", title: "Worksheet: Linear Forces", isWorksheet: true },
-      { id: "external-forces", title: "External Forces", isWorksheet: false },
-      { id: "worksheet-external-forces", title: "Worksheet: External Forces", isWorksheet: true },
-      { id: "internal-forces", title: "Internal Forces", isWorksheet: false },
-      { id: "stress-yield", title: "Stress and Yield Strength", isWorksheet: false },
+      { id: "truss-systems", titleKey: "sec.trussSystems", isWorksheet: false },
+      { id: "worksheet-truss-stability", titleKey: "sec.wsTrussStability", isWorksheet: true },
+      { id: "forces-on-truss", titleKey: "sec.forcesOnTruss", isWorksheet: false },
+      { id: "worksheet-linear-forces", titleKey: "sec.wsLinearForces", isWorksheet: true },
+      { id: "external-forces", titleKey: "sec.externalForces", isWorksheet: false },
+      { id: "worksheet-external-forces", titleKey: "sec.wsExternalForces", isWorksheet: true },
+      { id: "internal-forces", titleKey: "sec.internalForces", isWorksheet: false },
+      { id: "stress-yield", titleKey: "sec.stressYield", isWorksheet: false },
     ],
   },
 ];

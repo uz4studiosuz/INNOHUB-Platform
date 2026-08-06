@@ -15,83 +15,303 @@ import { useI18n } from "@/i18n";
 
 const ICON_PROPS = { size: 24, stroke: 1.8 } as const;
 
+/* Module accent colours — one per module (used for the icon container tint) */
+const MODULE_ACCENT: Record<string, { bg: string; icon: string }> = {
+  glider:      { bg: "#E8F1FF", icon: "#0061a4" },
+  rockets:     { bg: "#FCEEED", icon: "#B3261E" },
+  electronics: { bg: "#E8F5E9", icon: "#1B6B27" },
+  structures:  { bg: "#FFF8E1", icon: "#7E5700" },
+  hardware:    { bg: "#F3E8FD", icon: "#6750A4" },
+};
+
 const MODULES = [
-  { id: "glider", link: "/modules/glider", icon: IconPlaneTilt },
-  { id: "rockets", link: "/modules/rockets", icon: IconRocket },
-  { id: "electronics", link: "/modules/electronics", icon: IconCircuitResistor },
-  { id: "structures", link: "/modules/structures", icon: IconBuildingBridge },
-  { id: "hardware", link: "/modules/hardware", icon: IconCpu },
+  { id: "glider",       link: "/modules/glider",       icon: IconPlaneTilt       },
+  { id: "rockets",      link: "/modules/rockets",       icon: IconRocket           },
+  { id: "electronics",  link: "/modules/electronics",   icon: IconCircuitResistor  },
+  { id: "structures",   link: "/modules/structures",    icon: IconBuildingBridge   },
+  { id: "hardware",     link: "/modules/hardware",      icon: IconCpu              },
 ] as const;
 
 export default function Home() {
   const { t } = useI18n();
 
   return (
-    <div className="mx-auto flex w-full max-w-[1240px] flex-col gap-10 px-1 py-4 md:py-8">
-      <section className="grid overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--surface)] lg:grid-cols-[minmax(0,1fr)_340px]">
-        <div className="flex min-h-[300px] flex-col justify-center px-7 py-10 md:px-12">
-          <div className="mb-5 flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--accent-soft)] text-[var(--accent)]">
-            <IconBolt size={22} stroke={1.8} />
+    <div
+      style={{
+        maxWidth: 1200,
+        margin: "0 auto",
+        display: "flex",
+        flexDirection: "column",
+        gap: 32,
+        padding: "8px 0",
+      }}
+    >
+      {/* ── Hero banner card ──────────────────────────────────────────── */}
+      <section
+        style={{
+          display: "grid",
+          gridTemplateColumns: "minmax(0,1fr) 320px",
+          borderRadius: 16,
+          overflow: "hidden",
+          border: "1px solid var(--md-sys-color-outline-variant)",
+          background: "var(--md-sys-color-surface-container-lowest)",
+          boxShadow: "var(--md-sys-elevation-level1)",
+        }}
+        className="hero-grid"
+      >
+        {/* Left: hero text */}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            padding: "48px 48px 48px",
+            minHeight: 280,
+          }}
+        >
+          {/* Badge */}
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              width: "fit-content",
+              marginBottom: 20,
+              padding: "6px 14px",
+              borderRadius: 8,
+              background: "var(--md-sys-color-primary-container)",
+              color: "var(--md-sys-color-on-primary-container)",
+            }}
+          >
+            <IconBolt size={16} stroke={2} />
+            <span className="md-typescale-label-medium">INNOHUB Platform</span>
           </div>
-          <h1 className="max-w-2xl text-3xl font-semibold tracking-[-0.035em] text-[var(--ink)] md:text-5xl">
+
+          <h1
+            className="md-typescale-headline-large"
+            style={{
+              margin: 0,
+              color: "var(--md-sys-color-on-surface)",
+              fontWeight: 700,
+              lineHeight: 1.2,
+            }}
+          >
             {t("dash.title")}
           </h1>
-          <p className="mt-4 max-w-[62ch] text-sm leading-6 text-[var(--ink-muted)] md:text-base">
+          <p
+            className="md-typescale-body-large"
+            style={{
+              marginTop: 16,
+              color: "var(--md-sys-color-on-surface-variant)",
+              maxWidth: "60ch",
+            }}
+          >
             {t("dash.intro")}
           </p>
         </div>
 
-        <div className="flex flex-col justify-between border-t border-[var(--line)] bg-[var(--surface-muted)] p-7 lg:border-l lg:border-t-0">
-          <div className="flex items-start justify-between gap-6">
+        {/* Right: status panel */}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+            padding: 32,
+            background: "var(--md-sys-color-surface-container-high)",
+            borderLeft: "1px solid var(--md-sys-color-outline-variant)",
+          }}
+        >
+          {/* Engine info */}
+          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
             <div>
-              <p className="text-xs font-medium text-[var(--ink-muted)]">{t("dash.engineLabel")}</p>
-              <p className="mt-2 text-lg font-semibold text-[var(--ink)]">{t("dash.engineName")}</p>
+              <p
+                className="md-typescale-label-medium"
+                style={{ margin: 0, color: "var(--md-sys-color-on-surface-variant)", textTransform: "uppercase", letterSpacing: "0.08em" }}
+              >
+                {t("dash.engineLabel")}
+              </p>
+              <p
+                className="md-typescale-title-medium"
+                style={{ margin: "8px 0 0", color: "var(--md-sys-color-on-surface)" }}
+              >
+                {t("dash.engineName")}
+              </p>
             </div>
-            <IconRobot size={28} stroke={1.6} className="text-[var(--accent)]" />
+            <div
+              style={{
+                width: 48,
+                height: 48,
+                borderRadius: 12,
+                background: "var(--md-sys-color-tertiary-container)",
+                color: "var(--md-sys-color-on-tertiary-container)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+              }}
+            >
+              <IconRobot size={26} stroke={1.8} />
+            </div>
           </div>
-          <div className="mt-12 border-t border-[var(--line-strong)] pt-5">
-            <div className="flex items-center justify-between gap-4 text-sm">
-              <span className="text-[var(--ink-muted)]">{t("dash.platformStatus")}</span>
-              <span className="font-medium text-[var(--accent)]">{t("dash.active")}</span>
+
+          {/* Status row */}
+          <div style={{ borderTop: "1px solid var(--md-sys-color-outline-variant)", paddingTop: 20, marginTop: 32 }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+              <span className="md-typescale-body-medium" style={{ color: "var(--md-sys-color-on-surface-variant)" }}>
+                {t("dash.platformStatus")}
+              </span>
+              <span
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                  padding: "4px 12px",
+                  borderRadius: 999,
+                  background: "var(--md-sys-color-primary-container)",
+                  color: "var(--md-sys-color-on-primary-container)",
+                }}
+                className="md-typescale-label-medium"
+              >
+                <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--md-sys-color-primary)" }} />
+                {t("dash.active")}
+              </span>
             </div>
-            <p className="mt-2 text-xs leading-5 text-[var(--ink-muted)]">
+            <p className="md-typescale-body-small" style={{ margin: 0, color: "var(--md-sys-color-on-surface-variant)" }}>
               {t("dash.engineStatus", { n: MODULES.length })}
             </p>
           </div>
         </div>
       </section>
 
+      {/* ── Module grid ──────────────────────────────────────────────── */}
       <section>
-        <div className="mb-5">
-          <h2 className="text-xl font-semibold tracking-tight text-[var(--ink)]">{t("dash.modulesHeading")}</h2>
-          <p className="mt-1 text-sm text-[var(--ink-muted)]">{t("dash.modulesHint")}</p>
+        <div style={{ marginBottom: 20 }}>
+          <h2
+            className="md-typescale-headline-small"
+            style={{ margin: 0, color: "var(--md-sys-color-on-surface)", fontWeight: 600 }}
+          >
+            {t("dash.modulesHeading")}
+          </h2>
+          <p
+            className="md-typescale-body-medium"
+            style={{ margin: "6px 0 0", color: "var(--md-sys-color-on-surface-variant)" }}
+          >
+            {t("dash.modulesHint")}
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-6">
-          {MODULES.map((module, index) => {
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
+            gap: 16,
+          }}
+        >
+          {MODULES.map((module) => {
             const ModuleIcon = module.icon;
+            const accent = MODULE_ACCENT[module.id] ?? { bg: "var(--md-sys-color-primary-container)", icon: "var(--md-sys-color-primary)" };
             return (
               <Link
                 key={module.id}
                 href={module.link}
-                className={`group flex min-h-[210px] flex-col rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-5 transition-[border-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:border-[var(--line-strong)] hover:shadow-[0_10px_30px_rgba(24,33,43,0.07)] active:translate-y-0 ${index < 2 ? "lg:col-span-3" : "lg:col-span-2"}`}
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  borderRadius: 16,
+                  border: "1px solid var(--md-sys-color-outline-variant)",
+                  background: "var(--md-sys-color-surface-container-lowest)",
+                  padding: 24,
+                  minHeight: 200,
+                  textDecoration: "none",
+                  color: "inherit",
+                  transition: "box-shadow 200ms ease, transform 200ms ease",
+                }}
+                className="module-card"
               >
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--surface-muted)] text-[var(--accent)]">
+                {/* Icon + tag row */}
+                <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
+                  <div
+                    style={{
+                      width: 48,
+                      height: 48,
+                      borderRadius: 12,
+                      background: accent.bg,
+                      color: accent.icon,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      flexShrink: 0,
+                    }}
+                  >
                     <ModuleIcon {...ICON_PROPS} />
                   </div>
-                  <span className="rounded-lg border border-[var(--line)] px-2 py-1 text-[10px] font-medium text-[var(--ink-muted)]">
+                  <span
+                    className="md-typescale-label-small"
+                    style={{
+                      padding: "4px 10px",
+                      borderRadius: 6,
+                      border: "1px solid var(--md-sys-color-outline-variant)",
+                      color: "var(--md-sys-color-on-surface-variant)",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
                     {t(`mod.${module.id}.tag`)}
                   </span>
                 </div>
-                <div className="mt-auto pt-8">
-                  <h3 className="text-lg font-semibold text-[var(--ink)]">{t(`mod.${module.id}.title`)}</h3>
-                  <p className="mt-2 line-clamp-2 text-xs leading-5 text-[var(--ink-muted)]">
+
+                {/* Text */}
+                <div style={{ marginTop: "auto", paddingTop: 28 }}>
+                  <h3
+                    className="md-typescale-title-medium"
+                    style={{ margin: 0, color: "var(--md-sys-color-on-surface)" }}
+                  >
+                    {t(`mod.${module.id}.title`)}
+                  </h3>
+                  <p
+                    className="md-typescale-body-small"
+                    style={{
+                      margin: "8px 0 0",
+                      color: "var(--md-sys-color-on-surface-variant)",
+                      display: "-webkit-box",
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: "vertical",
+                      overflow: "hidden",
+                    }}
+                  >
                     {t(`mod.${module.id}.desc`)}
                   </p>
-                  <div className="mt-5 flex items-center justify-between border-t border-[var(--line)] pt-4 text-xs font-semibold text-[var(--accent)]">
-                    <span>{t("dash.start")}</span>
-                    <IconArrowUpRight size={17} stroke={1.8} className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+
+                  {/* Footer */}
+                  <div
+                    style={{
+                      marginTop: 20,
+                      paddingTop: 16,
+                      borderTop: "1px solid var(--md-sys-color-outline-variant)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <span
+                      className="md-typescale-label-large"
+                      style={{ color: "var(--md-sys-color-primary)" }}
+                    >
+                      {t("dash.start")}
+                    </span>
+                    <div
+                      style={{
+                        width: 32,
+                        height: 32,
+                        borderRadius: "50%",
+                        background: "var(--md-sys-color-primary-container)",
+                        color: "var(--md-sys-color-on-primary-container)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <IconArrowUpRight size={16} stroke={2} />
+                    </div>
                   </div>
                 </div>
               </Link>
@@ -99,6 +319,21 @@ export default function Home() {
           })}
         </div>
       </section>
+
+      {/* Card hover style */}
+      <style>{`
+        .module-card:hover {
+          box-shadow: var(--md-sys-elevation-level2);
+          transform: translateY(-2px);
+        }
+        .module-card:active {
+          transform: translateY(0);
+          box-shadow: var(--md-sys-elevation-level0);
+        }
+        @media (max-width: 700px) {
+          .hero-grid { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
     </div>
   );
 }

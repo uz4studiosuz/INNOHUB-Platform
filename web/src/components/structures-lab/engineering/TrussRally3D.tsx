@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { Physics, RigidBody, interactionGroups } from "@react-three/rapier";
 import { OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 import { TrussNode, TrussMemberDraft, SolvedMember } from "./types";
@@ -101,10 +102,12 @@ function VehicleModel({ position, vehicle, drawnLengthUnits, deckWidthUnits }: {
  * somewhere rather than materialising in mid-air. */
 function ApproachRamp({ x, y, depth, width }: { x: number; y: number; depth: number; width: number }) {
   return (
-    <mesh position={[x, y - 0.5, 0]} receiveShadow castShadow>
-      <boxGeometry args={[width, 1, depth]} />
-      <meshStandardMaterial color="#3a444b" roughness={0.95} metalness={0.03} />
-    </mesh>
+    <RigidBody type="fixed" position={[x, y - 0.5, 0]}>
+      <mesh receiveShadow castShadow>
+        <boxGeometry args={[width, 1, depth]} />
+        <meshStandardMaterial color="#3a444b" roughness={0.95} metalness={0.03} />
+      </mesh>
+    </RigidBody>
   );
 }
 
@@ -120,6 +123,48 @@ function ManualDriveController({
     const dir = (keysRef.current.right ? 1 : 0) - (keysRef.current.left ? 1 : 0);
     if (dir !== 0) onStep(dir * delta * DRIVE_SPEED);
   });
+  return null;
+}
+
+function VehiclePhysicsDriver({
+  showVehicle,
+  truckRef,
+  vehicle,
+  manualMode,
+  keysRef,
+  truckProgress,
+  vehiclePos,
+}: {
+  showVehicle: boolean;
+  truckRef: React.RefObject<import("@react-three/rapier").RapierRigidBody | null>;
+  vehicle: VehiclePreset;
+  manualMode: boolean;
+  keysRef: React.MutableRefObject<{ left: boolean; right: boolean }>;
+  truckProgress: number | null;
+  vehiclePos: THREE.Vector3;
+}) {
+  useFrame((_, delta) => {
+    if (showVehicle && truckRef.current) {
+      const body = truckRef.current;
+      const force = vehicle.massKg * 1.5; // Enough force to move the mass
+      
+      if (manualMode) {
+        const dir = (keysRef.current.right ? 1 : 0) - (keysRef.current.left ? 1 : 0);
+        body.applyImpulse({ x: dir * force * delta, y: 0, z: 0 }, true);
+      } else if (truckProgress !== null) {
+        // Auto-drive
+        const currentVel = body.linvel();
+        if (currentVel.x < 5) {
+           body.applyImpulse({ x: force * delta, y: 0, z: 0 }, true);
+        }
+      }
+      
+      // Update camera target dynamically
+      const pos = body.translation();
+      vehiclePos.set(pos.x, pos.y, pos.z);
+    }
+  });
+
   return null;
 }
 
@@ -230,7 +275,9 @@ export default function TrussRally3D({ nodes, members, solved, truckProgress, ve
   const [manualMode, setManualMode] = useState(false);
   const [manualX, setManualX] = useState(0);
   const [camPreset, setCamPreset] = useState<CamPreset>("orbit");
+  const [physicsKey, setPhysicsKey] = useState(0);
   const keysRef = useRef({ left: false, right: false });
+  const truckRef = useRef<import("@react-three/rapier").RapierRigidBody | null>(null);
 
   useEffect(() => {
     if (!manualMode) return;
@@ -257,7 +304,7 @@ export default function TrussRally3D({ nodes, members, solved, truckProgress, ve
   }, [manualMode]);
 
   const handleStep = useCallback((delta: number) => {
-    setManualX((prev) => Math.max(0, Math.min(1, prev + delta)));
+    // legacy kinematic handleStep is no longer used for position, but we keep the interface.
   }, []);
 
   const toggleManual = () => {
@@ -269,10 +316,18 @@ export default function TrussRally3D({ nodes, members, solved, truckProgress, ve
   const effectiveT = manualMode ? manualX : Math.max(0, Math.min(1, truckProgress ?? 0));
   const effectivePreset: CamPreset = (camPreset === "chase" || camPreset === "cockpit") && !showVehicle ? "side" : camPreset;
 
-  const vehiclePos = useMemo(
-    () => new THREE.Vector3(minX + (maxX - minX) * effectiveT, deckY, 0),
-    [effectiveT, minX, maxX, deckY]
-  );
+  // vehiclePos is mutated inside VehiclePhysicsDriver to update the camera target
+  const vehiclePos = useMemo(() => new THREE.Vector3(minX, deckY, 0), [minX, deckY]);
+
+  const isFailing = useMemo(() => {
+    if (!solved) return false;
+    for (const res of solved.values()) {
+      if (res.safetyFactor < 1) return true;
+    }
+    return false;
+  }, [solved]);
+
+  const hasCollapsed = true; // Always dynamic in Rally!
 
   const bankWidth = Math.max(spanUnits * 0.5, 4);
 
@@ -286,26 +341,49 @@ export default function TrussRally3D({ nodes, members, solved, truckProgress, ve
       >
         <StudioStage radius={radius} />
 
-        {/* Identical to the Engineering viewport: same materials, same deck,
-            same joints. keepWood used to force every rally bridge to timber,
-            which meant a steel design looked like balsa the moment you tested
-            it. */}
-        <TrussSceneContents
-          nodes={nodes}
-          members={members}
-          solved={solved}
-          colorByForce
-          highlightMemberId={highlightMemberId}
-          onMemberHover={onMemberHover}
-          onMemberClick={onMemberClick}
+        <Physics key={`physics-${physicsKey}`} gravity={[0, -9.81, 0]}>
+          {/* Identical to the Engineering viewport: same materials, same deck,
+              same joints. keepWood used to force every rally bridge to timber,
+              which meant a steel design looked like balsa the moment you tested
+              it. */}
+          <RigidBody type="fixed" position={[0, deckY - radius * 1.5, 0]} colliders="cuboid" collisionGroups={interactionGroups(2, [0, 1])}>
+            <mesh receiveShadow>
+              <boxGeometry args={[radius * 20, 1, radius * 20]} />
+              <meshStandardMaterial transparent opacity={0} depthWrite={false} />
+            </mesh>
+          </RigidBody>
+
+          <TrussSceneContents
+            nodes={nodes}
+            members={members}
+            solved={solved}
+            colorByForce
+            highlightMemberId={highlightMemberId}
+            onMemberHover={onMemberHover}
+            onMemberClick={onMemberClick}
+            physicsMode={true}
+            physicsCollapse={hasCollapsed}
+          />
+
+          <ApproachRamp x={minX - bankWidth / 2 - 0.4} y={deckY} width={bankWidth} depth={radius * 1.6} />
+          <ApproachRamp x={maxX + bankWidth / 2 + 0.4} y={deckY} width={bankWidth} depth={radius * 1.6} />
+
+          {showVehicle && (
+            <RigidBody ref={truckRef} type="dynamic" mass={vehicle.massKg || 5000} position={[minX, deckY + 1, 0]} colliders="hull" friction={0.5} enabledRotations={[false, false, true]} collisionGroups={interactionGroups(0, [1, 2])}>
+              <VehicleModel position={new THREE.Vector3(0, 0, 0)} vehicle={vehicle} drawnLengthUnits={drawnLengthUnits} deckWidthUnits={depthUnits} />
+            </RigidBody>
+          )}
+        </Physics>
+        
+        <VehiclePhysicsDriver
+          showVehicle={showVehicle}
+          truckRef={truckRef}
+          vehicle={vehicle}
+          manualMode={manualMode}
+          keysRef={keysRef}
+          truckProgress={truckProgress}
+          vehiclePos={vehiclePos}
         />
-
-        <ApproachRamp x={minX - bankWidth / 2 - 0.4} y={deckY} width={bankWidth} depth={radius * 1.6} />
-        <ApproachRamp x={maxX + bankWidth / 2 + 0.4} y={deckY} width={bankWidth} depth={radius * 1.6} />
-
-        {showVehicle && (
-          <VehicleModel position={vehiclePos} vehicle={vehicle} drawnLengthUnits={drawnLengthUnits} deckWidthUnits={depthUnits} />
-        )}
         {manualMode && <ManualDriveController keysRef={keysRef} onStep={handleStep} />}
 
         {effectivePreset !== "orbit" && (
@@ -353,6 +431,12 @@ export default function TrussRally3D({ nodes, members, solved, truckProgress, ve
         >
           <IconDeviceGamepad2 size={14} stroke={1.8} />
           {manualMode ? "Qo'lda: yoniq" : "Qo'lda haydash"}
+        </button>
+        <button
+          onClick={() => setPhysicsKey(k => k + 1)}
+          className="inline-flex items-center justify-center gap-1.5 mt-1 px-2 py-1.5 rounded-md text-[11px] font-bold cursor-pointer bg-red-600/20 text-red-400 hover:bg-red-600/30 border border-red-500/30 transition-colors"
+        >
+          Qayta tiklash
         </button>
       </div>
 

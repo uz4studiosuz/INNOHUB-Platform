@@ -19,7 +19,7 @@ export default function RocketLayout({ children }: { children: React.ReactNode }
   const isDesign = pathname === "/modules/rockets";
 
   return (
-    <ModuleWorkspace basePath={MODULES.rockets.basePath} accent={MODULES.rockets.accent}>
+    <ModuleWorkspace basePath={MODULES.rockets.basePath}>
       <div className="flex flex-1 min-h-0">
         {isDesign && <RocketSidebar />}
         <main className="flex-1 relative overflow-hidden min-w-0">{children}</main>

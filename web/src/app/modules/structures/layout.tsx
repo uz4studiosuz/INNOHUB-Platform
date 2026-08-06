@@ -9,7 +9,7 @@ export default function StructuresLayout({
   children: React.ReactNode;
 }) {
   return (
-    <ModuleWorkspace basePath={MODULES.structures.basePath} accent={MODULES.structures.accent}>
+    <ModuleWorkspace basePath={MODULES.structures.basePath}>
       {children}
     </ModuleWorkspace>
   );

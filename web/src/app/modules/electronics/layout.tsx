@@ -6,7 +6,7 @@ import { MODULES } from "../../../components/module-shell/moduleConfig";
 export default function ElectronicsLayout({ children }: { children: React.ReactNode }) {
   const cfg = MODULES.electronics;
   return (
-    <ModuleWorkspace basePath={cfg.basePath} accent={cfg.accent}>
+    <ModuleWorkspace basePath={cfg.basePath}>
       {children}
     </ModuleWorkspace>
   );

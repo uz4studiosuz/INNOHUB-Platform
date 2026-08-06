@@ -7,7 +7,7 @@ const HARDWARE_TABS = [{ labelKey: "nav.hardware", segment: "" }];
 
 export default function HardwareLayout({ children }: { children: React.ReactNode }) {
   return (
-    <ModuleWorkspace basePath={MODULES.hardware.basePath} accent={MODULES.hardware.accent} tabs={HARDWARE_TABS}>
+    <ModuleWorkspace basePath={MODULES.hardware.basePath} tabs={HARDWARE_TABS}>
       {children}
     </ModuleWorkspace>
   );
